@@ -13,7 +13,7 @@ The write-ups are organized logically by platform or topic:
 *   📂 `/PortSwigger-Web-Security` — Lab walkthroughs focusing on API security and web vulnerabilities.
 *   📂 `/TryHackMe` — Room solutions covering penetration testing, network analysis, and Linux fundamentals.
 *   📂 `/Projects` — Step-by-step documentation for personal homelabs and security engineering builds.
-
+*   📂 `/hack the box` — ctf and room solutions.  
 ---
 
 ## 🛠️ Skills & Concepts Highlighted

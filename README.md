@@ -1,6 +1,6 @@
 # 🛡️ Technical Write-Ups & Portfolio
 
-Welcome to my central documentation repository! This repository acts as a public portfolio of my technical write-ups, security room analyses, and engineering walkthroughs. 
+Welcome to my central documentation repository. This repository acts as a public portfolio of my technical write-ups, security room analyses, and engineering walkthroughs. 
 
 My goal here is to document my problem-solving methodology, explain complex technical configurations, and archive my hands-on experience cleanly using structured Markdown.
 

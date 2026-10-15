@@ -18,7 +18,7 @@ The write-ups are organized logically by platform or topic:
 *   📂 `/kc7` - most peoples are not familiar with this if you are familiar good other wise its good to learn blue teaming and KQL.and i will do writeups for the challenges.
 ---
 
-## Documentation
+### note
 
 i will try to make it Clear, actionable technical logging with clean syntax highlighting and code preservation.
 

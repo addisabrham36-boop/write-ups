@@ -1,4 +1,4 @@
-# 🛡️ Technical Write-Ups 
+# Technical Write-Ups 
 
 Welcome to my central documentation repository. This repository acts as a public portfolio of my technical write-ups, security room analyses, and engineering walkthroughs. 
 

@@ -1,8 +1,8 @@
-# 🛡️ Technical Write-Ups & Portfolio
+# 🛡️ Technical Write-Ups 
 
 Welcome to my central documentation repository. This repository acts as a public portfolio of my technical write-ups, security room analyses, and engineering walkthroughs. 
 
-My goal here is to document my problem-solving methodology, explain complex technical configurations, and archive my hands-on experience cleanly using structured Markdown.
+My goal here is to document my problem solving methodology, explain complex technical configurations, and archive my hands-on experience cleanly.
 
 ---
 
@@ -13,20 +13,17 @@ The write-ups are organized logically by platform or topic:
 *   📂 `/PortSwigger-Web-Security` — Lab walkthroughs focusing on API security and web vulnerabilities.
 *   📂 `/TryHackMe` — Room solutions covering penetration testing, network analysis, and Linux fundamentals.
 *   📂 `/Projects` — Step-by-step documentation for personal homelabs and security engineering builds.
-*   📂 `/hack the box` — ctf and room solutions.  
+*   📂 `/hack the box` — ctf and room solutions and walkthroughs.
+*   📂 `/overthewire` - i will do all of them from bandit to formula one and write the walkthrough here.
+*   📂 `/kc7` - most peoples are not familiar with this if you are familiar good other wise its good to learn blue teaming and KQL.and i will do writeups for the challenges.
 ---
 
-## 🛠️ Skills & Concepts Highlighted
+## Documentation
 
-*   **Vulnerability Analysis:** API Security testing, OWASP Top 10 web vulnerabilities.
-*   **Linux System Administration:** Command-line configurations, user permissions, and network setup (`nmcli`, `ip`).
-*   **Documentation:** Clear, actionable technical logging with clean syntax highlighting and code preservation.
+i will try to make it Clear, actionable technical logging with clean syntax highlighting and code preservation.
 
----
+and also feel free to ask a questions if anything is unclear.
 
-## 📈 Current Milestones
-- [x] Migrate existing blog articles from Hashnode & Medium to GitHub.
-- [ ] Add deep-dive walkthroughs for advanced API security exploitation labs.
-- [ ] Document network defense topologies built in local environments.
 
 ---
+

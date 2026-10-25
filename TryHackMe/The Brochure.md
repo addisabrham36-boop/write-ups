@@ -74,3 +74,42 @@ A single match can be a coincidence, so connect each step to the preceding clue.
 ## Key takeaways
 
 The Brochure is solved through clue correlation rather than exploitation. Read the image, search the exact brand name, inspect the suspicious follower, and decode the value indicated by the task. Preserve the original evidence and redact the flag in public notes.
+
+## Expanded enumeration and web assessment
+
+### 1. Reconnaissance
+
+Start the target and record its IP. Scan exposed services, then inspect the web application:
+
+    nmap -sC -sV -oN brochure-scan.txt TARGET_IP
+    curl -i http://TARGET_HOST/
+
+The Nmap command runs default scripts, attempts service/version detection, and saves readable output. curl displays response headers and body. Replace placeholders with the values shown by the active lab.
+
+### 2. Inspect public content
+
+Review page source, linked scripts, robots.txt, public documents, and CMS routes indicated by the application. Record only evidence relevant to the task. An exposed file or technology banner is a lead, not proof of a vulnerability.
+
+### 3. Validate the access path
+
+If the room points to a CMS, API, or file-access issue, capture the normal request first and compare it with the prescribed test. Confirm impact on the lab target and avoid collecting unrelated files or private data.
+
+### 4. Confirm privilege boundaries
+
+If the walkthrough yields a shell, verify the current user, groups, hostname, and privilege escalation options:
+
+    whoami
+    id
+    hostname
+    pwd
+    sudo -l
+
+The sudo listing reports commands allowed for the current account. Results vary by target; never assume a user has a permission without checking.
+
+### 5. Report and fix
+
+Explain how the exposed service or application flaw enables the observed result. Remediation may include patching the CMS, restricting public files, fixing authorization, removing secrets from web content, and tightening host permissions.
+
+### 6. Questions and flags
+
+Use the active room to verify exact paths, credentials, and flags. Record the command or request supporting each answer. Redact secrets and flags in public notes as flag{hidden}.

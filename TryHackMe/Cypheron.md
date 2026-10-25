@@ -1,152 +1,132 @@
-# Cypheron: TryHackMe Walkthrough
+# Cypheron: Complete TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/cypheron
+Official room: https://tryhackme.com/room/cypheron
 
-Cypheron is an Insane-difficulty room from TryHackMe's 2026 AI Odyssey event. It contains two separate challenges: an AI supply-chain scenario involving a trojaned model and an unsafe update pipeline, and a red-team scenario involving a public file-processing intake. Treat them as separate investigations and keep all testing inside the active lab.
+## Room Overview & Information
 
-## Challenge 1: Trojaned Model — Neural C2 Beacon
+**Difficulty:** Insane  
+**Category:** AI security, software supply-chain compromise, web exploitation, Linux privilege escalation  
+**Scope:** Two independent investigations:
+1. **Trojaned Model — Neural C2 Beacon**, involving a model artifact, a vendor update mechanism, and suspicious outbound activity.
+2. **AI Security and Red Team Nightmare**, beginning at the public intake endpoint /form/file-processor and progressing through an application workflow to user and root flags.
 
-### 1. Start the machine and enumerate the service
+Start each deployment separately and record its current IP. Do not assume that the two tasks share the same target address or state. The five flag values are revealed inside the active room, so this public note identifies the evidence chain without inventing them.
 
-Start the Task 1 lab machine and record the current IP. Run a service scan and save the results:
+## Phase 1: Reconnaissance & Enumeration
 
-    nmap -sC -sV -oN cypheron-task1-nmap.txt TARGET_IP
+### Challenge 1: Trojaned Model — Neural C2 Beacon
 
-If needed, scan all TCP ports:
+Start the Task 1 machine and record its IP. Scan the active target:
 
-    nmap -p- --min-rate 1000 -oN cypheron-task1-allports.txt TARGET_IP
+```bash
+nmap -sC -sV -oN cypheron-task1-nmap.txt TARGET_IP
+```
 
-Replace TARGET_IP with the live room address. Inspect the exposed service and follow the room's instructions for its vendor update interface. Do not assume a port or endpoint from another machine.
+- **-sC** runs Nmap's default scripts.
+- **-sV** probes open services for version details.
+- **-oN** saves a readable report.
+- Replace TARGET_IP with the live address.
 
-### 2. Preserve and inspect the model artifact
+If the room hints that the service is not in the common port range and authorizes a full scan, use:
 
-The room supplies a model file named signal_classifier.pt. Download it from the task's provided file link and preserve an unchanged copy. Record its size and hash:
+```bash
+nmap -p- --min-rate 1000 -oN cypheron-task1-allports.txt TARGET_IP
+```
 
-    file signal_classifier.pt
-    sha256sum signal_classifier.pt
+- **-p-** scans TCP ports 1 through 65535.
+- **--min-rate 1000** requests a high minimum packet rate. This can miss results on slow or filtered networks, so use it only when appropriate for the lab.
+- **-oN** saves the scan.
 
-A PyTorch .pt file may contain tensor data, model state, or a serialised Python object. Do not load an untrusted artifact with ordinary unrestricted deserialisation on your everyday machine. PyTorch pickle-based loading can execute code during deserialisation. Use the isolated lab environment and the safe inspection method appropriate to the task.
+Follow the task's service and vendor-update interface. Do not assume ports or endpoints from another deployment.
 
-The strings command can reveal some readable content, but its output is only a starting point:
+### Challenge 2: AI Security and Red Team Nightmare
 
-    strings -n 6 signal_classifier.pt | head -n 60
+Start the Task 3 machine independently and scan it:
 
-A lack of readable strings does not prove that the model is clean. Binary tensor data, compressed content, and embedded structures may not be visible this way.
+```bash
+nmap -sC -sV -oN cypheron-task3-nmap.txt TARGET_IP
+```
 
-### 3. Investigate the suspected neural trigger
+Open the exposed web service and inspect the application. The briefing identifies the intake route as **/form/file-processor**. Record its method, accepted file types, request fields, response behaviour, and the application state before testing.
 
-The scenario reports anomalous outbound communications from several inference nodes and asks whether the model contains a hidden trigger. Compare the intended classifier behaviour with the evidence provided by the room. Look for a trigger condition, an unexpected output or side effect, and any link between that condition and the anomalous communication.
+## Phase 2: Vulnerability Analysis & Initial Access
 
-Keep separate notes for three kinds of evidence:
-- Static evidence found in the artifact or supporting code.
-- Behaviour observed when the model is exercised in the lab.
-- Network evidence showing a real outbound connection.
+### 1. Preserve and inspect the model artifact
 
-A suspicious string or unusual model behaviour is not, by itself, proof that a network beacon occurred. Correlate the evidence and record what the lab actually demonstrates.
+The first challenge supplies a model file named **signal_classifier.pt**. Keep an unchanged copy and record its size and hash:
 
-### 4. Examine the vendor update mechanism
+```bash
+file signal_classifier.pt
+sha256sum signal_classifier.pt
+strings -n 6 signal_classifier.pt | head -n 60
+```
 
-The task describes a remote vendor update mechanism and a possible unsafe model-deserialisation path. Inspect the service and its update workflow. Determine how the artifact is selected, transferred, verified, and loaded. Look for missing authentication, absent integrity verification, trust in an unverified source, and unsafe loading of a serialised object.
+The commands identify the likely file type, calculate the SHA-256 hash, and extract a bounded sample of readable strings. A PyTorch file may contain tensor data, model state, or serialized Python objects. Do not load an untrusted pickle-based artifact with unrestricted deserialization on a personal machine. Use the isolated lab and a safe inspection method.
 
-The key distinction is between a backdoored model and an unsafe loader. A model backdoor affects predictions when a trigger condition is met. Unsafe deserialisation may allow code execution while the model is being loaded. These risks can coexist but require different evidence and mitigations.
+The absence of readable strings does not prove that the artifact is clean. Binary tensor data and embedded structures may not be visible through strings.
 
-### 5. Verify the task answers
+### 2. Investigate the suspected neural trigger
 
-The first challenge has three flags. Obtain each from the live lab by following the task's evidence chain. Record which finding supports each flag, but replace actual values with flag{hidden} in the public write-up. Do not copy a value from another player's instance or claim a flag was recovered unless the active room confirms it.
+The scenario describes anomalous outbound communications from inference nodes and asks whether the model contains a hidden trigger. Compare normal classifier behaviour with the evidence supplied by the room. Look for a trigger condition, an unexpected output or side effect, and a relationship between the condition and the suspected network behaviour.
 
-## Challenge 2: AI Security and Red Team Nightmare
+Keep three classes of evidence separate:
+- Static evidence in the model artifact or supporting code.
+- Behaviour observed when the model is exercised inside the lab.
+- Network evidence that demonstrates an actual outbound connection or beacon attempt.
 
-The second challenge describes a public intake endpoint at /form/file-processor. The objective is to start at the exposed form and trace the workflow that should not be accessible, eventually finding user and root flags.
+A suspicious string or unusual prediction is not, by itself, proof that a C2 beacon occurred.
 
-### 1. Enumerate the target
+### 3. Examine the vendor update mechanism
 
-Start the Task 3 machine separately and record its assigned IP. Do not reuse the Task 1 address unless the room explicitly provides the same target.
+Trace how the model artifact is selected, transferred, verified, and loaded. Identify missing authentication, absent integrity verification, reliance on an untrusted source, or unsafe deserialization. Distinguish a model backdoor from an unsafe loader:
+- A **backdoor** causes unexpected behaviour when a specific trigger condition is met.
+- **Unsafe deserialization** may cause code execution while loading a serialized object.
 
-    nmap -sC -sV -oN cypheron-task3-nmap.txt TARGET_IP
+Both weaknesses can coexist but require distinct evidence and mitigations.
 
-Open the web service and inspect the application's form. The path named in the briefing is /form/file-processor. Inspect the form fields, accepted file types, request method, and response behaviour. Use the room's own interface and sample data.
+### 4. Trace the file-processing workflow in Challenge 2
 
-### 2. Understand the file-processing workflow
+A file-processing endpoint typically receives input, validates or stores it, then passes it to another component. The security question is whether user-controlled metadata or content can influence a privileged action. Map each transition and identify the account under which the processor runs.
 
-A file-processing endpoint often accepts input, stores or transforms it, and passes it to another component. The security question is whether the application trusts user-controlled metadata or content and whether the processing pipeline can be influenced to perform an unintended action.
+A successful upload is not proof of command execution. Verify the actual processing result and its effect. Use only the provided lab's request and proof steps; do not run payloads against an unrelated service.
 
-Map the workflow from request to processing step. Identify where the upload is validated, where it is stored, which component processes it, and what permissions that component has. Do not assume that a file upload automatically gives command execution; the exploit path must be demonstrated by the lab.
+## Phase 3: Privilege Escalation & Post-Exploitation
 
-### 3. Follow the workflow evidence
+If the second challenge grants a shell or exposes job output, verify the current identity and environment:
 
-The mission briefing hints at a workflow that should not exist. Inspect responses, status messages, and any exposed job or processing state. Determine whether the application reveals a route to an internal workflow or an action that should be restricted. Change one input at a time and keep the request and response for each meaningful observation.
+```bash
+whoami
+id
+hostname
+pwd
+ls -la
+```
 
-If the task gives access to a shell or job output, verify the identity and host before continuing. A successful file submission is not proof of server-side execution, and a low-privilege execution context is not the same as root.
+These commands identify the current user, group membership, host, working directory, and accessible entries. A shell running as a web application user is not root. Record the first privilege boundary crossed, then use evidence from the room to investigate the next one. Do not assume a specific SUID, sudo, container, or internal-service path without seeing it on the active target.
 
-### 4. Enumerate privileges and verify the chain
+If a flag is requested, identify the exact location and read it only after the corresponding privilege level is verified. Do not claim root access based solely on a tool's “success” message.
 
-If the lab's intended path grants user access, inspect the current account and system context:
+## Phase 4: Room Questions & Flags Walkthrough
 
-    whoami
-    id
-    hostname
-    pwd
-    ls -la
+The official task asks for five flags.
 
-Use the task's evidence to identify the next privilege boundary. Check only the permissions and services relevant to the assigned machine. Verify root access with whoami and id before locating the root flag.
-
-### 5. Report the findings
-
-For each stage, document the endpoint, the weakness, the evidence, the privileges obtained, and the fix. Possible controls include strict upload validation, storing files outside executable web paths, sandboxing the processor, using least-privilege service identities, authenticating internal workflow endpoints, and verifying integrity before processing files.
-
-The second challenge has user and root flags. Obtain both from the live target and redact them in the public version. Do not publish credentials, private artifacts, or an unverified exploit result.
-
-## Overall lessons
-
-Cypheron combines AI supply-chain security with a conventional application-to-host attack path. Model provenance, safe deserialisation, authenticated update mechanisms, strict file-processing boundaries, and least privilege are all essential. The investigation should connect each conclusion to observed evidence rather than treating the mission story as proof.
-
-## Phase 4: Exact question mapping and evidence requirements
-
-The official room lists five flags across the two deployable challenges. It does not expose their values on the public task page; they are generated or revealed by the active labs. Do not insert guessed flag strings into a public write-up.
-
-### Task 1: Trojaned Model — Neural C2 Beacon
-
-The official questions are:
+### Challenge 1: Trojaned Model — Neural C2 Beacon
 
 1. “What's the first flag?”
 2. “What's the second flag?”
 3. “What's the third flag?”
 
-For each flag, record the exact artefact, request, or runtime behaviour that reveals it. Keep the three flags mapped to separate observations rather than assuming they come from one output. The intended analysis combines the supplied model artifact, the vendor update mechanism, evidence of a trigger-based model backdoor, and the risk of unsafe deserialization.
+Map each flag to the exact artifact, request, model behaviour, or runtime evidence that reveals it. Do not assume all three are printed by one command.
 
-### Task 3: AI Security and Red Team Nightmare
-
-The official questions are:
+### Challenge 2: AI Security and Red Team Nightmare
 
 1. “Whats the user flag?”
 2. “Whats the root flag?”
 
-Start at the public intake endpoint specified by the task, `/form/file-processor`. Trace the request through file validation and the processing workflow. Identify the first trust boundary that can be crossed, verify the execution context, and then investigate the separate privilege boundary. A successful upload is not proof of code execution, and a shell as the application account is not proof of root.
+Start at **/form/file-processor**, trace the workflow, verify the user context, then validate the separate privilege boundary before reading the root flag. The flag values are intentionally redacted as **flag{hidden}** because they must be retrieved from the active instance.
 
-### Verify the artifact safely
+## Phase 5: Key Takeaways & Remediation
 
-For the PyTorch artifact, preserve the original and record a hash before analysis:
+For AI model supply-chain risk, use signed artifacts, trusted registries, version pinning, secure build provenance, and approvals for updates. Avoid unsafe deserialization and use safer weights-only formats where supported.
 
-```bash
-file signal_classifier.pt
-sha256sum signal_classifier.pt
-unzip -l signal_classifier.pt
-strings -n 6 signal_classifier.pt | head -n 80
-```
-
-Some PyTorch checkpoints are ZIP containers, while other serialized formats differ. If archive listing fails, do not assume the file is corrupt; identify its format first. Never use unrestricted pickle-based loading of an untrusted checkpoint on a personal workstation. Use the isolated room environment and a safe inspection method.
-
-The evidence log should separate:
-- Static artifacts such as configuration, strings, model metadata, and source code.
-- Behaviour observed when the model is loaded or queried in the lab.
-- Network evidence that proves a real connection or beacon attempt.
-- Privilege evidence that proves which account executed a process.
-
-A model that outputs a strange label is not proof of a C2 beacon. Likewise, a deserialization weakness is distinct from a trigger-based backdoor, even if both appear in the same scenario.
-
-### Remediation by root cause
-
-For model supply-chain risk, use signed artifacts, trusted registries, version pinning, secure build provenance, and approval controls for updates. Avoid unsafe object deserialization and use safer weights-only formats where supported. For the file processor, validate content and metadata, store uploads outside executable web paths, sandbox the converter, restrict egress, use a least-privilege service account, and authenticate internal workflow endpoints.
-
-Record tool versions, exact requests, model hashes, observed identities, and task output. Redact the flags as `flag{hidden}` in public notes, and do not claim a flag was recovered unless the live task shows it.
-
+For the file processor, validate both content and metadata, store uploads outside executable web paths, sandbox the converter, restrict egress, use a least-privilege service identity, and authenticate internal workflow endpoints. Preserve hashes, exact requests, observed identities, and relevant outputs. Treat model provenance, execution permissions, file-processing boundaries, and network access as separate controls that must all be secured.

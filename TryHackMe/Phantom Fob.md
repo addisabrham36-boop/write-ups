@@ -46,3 +46,40 @@ A vehicle network should not trust an unauthenticated command merely because it 
 ## What I took from this room
 
 The key is observation, not guesswork. Capture the known actions, compare the frame structure, account for changing values, and validate the constructed message in the simulated vehicle. The final flag should be obtained from the active room and redacted as flag{hidden} in public notes.
+
+## Phase 1: Capture baseline CAN activity
+
+Start the room's simulated vehicle and follow its instructions for attaching to the virtual CAN interface. Do not connect test equipment to a real vehicle. First capture the known working actions, such as Lock and Horn, and record the CAN identifier, payload bytes, timestamp, and observed effect.
+
+If the lab uses SocketCAN, common interface-inspection commands include:
+
+```bash
+ip link
+ip -details link show
+```
+
+Use only the interface and capture command explicitly provided by the room; interface names and utilities can differ. Keep a log that associates every button press with its resulting frame sequence.
+
+## Phase 2: Compare frames, not just individual bytes
+
+CAN frames include an identifier and a data payload. The identifier helps recipients determine which message a frame belongs to, while the payload is interpreted according to the vehicle's own message format. A single identifier may be repeated with changing bytes.
+
+Capture more than one sample of the same action. Compare which fields remain constant and which vary over time. Avoid assuming the entire payload represents a fixed command; it may include a counter, rolling code, state value, or checksum.
+
+## Phase 3: Understand the anti-replay behaviour
+
+The room notes that codes change every second. That makes simple replay of an old frame unreliable. A rolling-code system generally validates changing state at the receiver; a captured value may expire or be rejected if it is out of sequence.
+
+The task is to understand the simulated protocol from the observed examples and the room hints, not to replay frames against a real car. Keep tests in the virtual environment.
+
+## Phase 4: Construct and validate the intended message
+
+Follow the room's command syntax for building the unlock frame. Confirm the identifier, data length, byte ordering, and time-sensitive value against the examples. Test the message in the simulator and record whether the Unlock operation succeeds. If it fails, compare the current frame with the captured samples rather than changing every field arbitrarily.
+
+Do not infer success from the tool accepting a command; validate the simulated car's response.
+
+## Phase 5: Report and remediation
+
+For each question, include the captured frame or simulator output that supports the answer. Obtain the final flag from the active room; do not fabricate a CAN payload or flag.
+
+Vehicle security should add authenticated messages, replay protection, robust key management, diagnostic access controls, and monitoring. CAN was not designed with cryptographic authentication by default, so the wider vehicle architecture must provide the necessary protections.

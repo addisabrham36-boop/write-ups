@@ -2,82 +2,79 @@
 
 Room: https://tryhackme.com/room/aiforensics
 
-AI forensics applies digital-investigation methods to incidents involving AI tools and systems. The investigation may involve prompts, model outputs, retrieved documents, API requests, tool calls, model versions, and ordinary endpoint or cloud logs. The important part is to preserve the evidence and reconstruct what happened without treating the model's own explanation as proof.
+## Room Overview & Information
 
-## 1. Define the incident and preserve evidence
+This note covers the practical workflow, evidence to collect, common interpretation errors, and defensive lessons for AI Forensics. Use the live room as the authority for task wording and machine-specific values. The repository does not include fabricated terminal output, credentials, or flags.
 
-Before analysing an event, record the reported time window, affected application, account, system, and suspected behaviour. Preserve original logs and files where possible. Record where each item came from, when it was collected, who handled it, and whether any transformation was applied.
+## 1. Lab setup and evidence handling
 
-Useful evidence may include:
+Start the room's virtual environment and read the task brief before touching the artefacts. Record the supplied filenames, hashes if provided, timestamps, and any stated constraints. In a forensic investigation, preserving the original matters because opening, converting, or re-saving a file can change metadata.
 
-- User prompts and model responses.
-- Conversation IDs and timestamps.
-- Retrieval results and document identifiers.
-- Tool names, arguments, permission checks, and tool results.
-- API gateway and application logs.
-- Authentication events and account activity.
-- Model, prompt-template, and application versions.
-- Network events, uploaded files, and endpoint telemetry.
+Create a working directory and record evidence hashes:
 
-Not every system stores every item. A missing prompt log does not prove that no prompt was sent, and a generated statement such as “I deleted the file” does not prove the file was deleted. Verify consequential actions in the system that performed them.
+```bash
+mkdir -p ai-forensics/{evidence,working,notes}
+cd ai-forensics
+sha256sum /path/to/ROOM_ARTIFACT
+file /path/to/ROOM_ARTIFACT
+stat /path/to/ROOM_ARTIFACT
+```
 
-## 2. Build a timeline
+Replace the placeholder path with the actual room artifact. `sha256sum` fingerprints the bytes, `file` identifies likely file formats, and `stat` records filesystem metadata. A hash proves whether a copy changed; it does not prove the artifact is benign or authentic.
 
-Normalise timestamps carefully. Logs may use UTC, local time, or different clocks. Keep the original timestamp and document any conversion.
+Copy the artifact into the evidence folder and work on a separate copy. Preserve the original file read-only where the lab permits it. Write down the tool, version, command, and relevant output for every transformation.
 
-A useful timeline links the user request to what the application did:
+## 2. Establish what the artifact is
 
-1. An identity authenticated or an existing session was used.
-2. A prompt or file was submitted.
-3. The application retrieved data or called an external service.
-4. The model produced a response or requested a tool action.
-5. The application authorised or rejected that action.
-6. The tool returned a result.
-7. The system displayed a response or changed state.
+Use the filename only as a hint. An extension can be wrong or intentionally misleading. Start with `file`, then inspect the first bytes where appropriate:
 
-Compare events across systems. For example, if the model output claims a database record changed, check the database audit log. If a tool call is absent, distinguish between the model suggesting an action and the application actually executing it.
+```bash
+xxd -l 64 /path/to/ROOM_ARTIFACT
+strings -n 6 /path/to/ROOM_ARTIFACT | head -n 80
+```
 
-## 3. Investigate prompt injection
+`xxd` shows a small hexadecimal header; `strings` extracts readable sequences from binary data. Neither command completely understands the format. A lack of readable strings is not evidence that a file is safe.
 
-Prompt injection may be direct, from the user, or indirect, inside a document, webpage, email, or retrieved record. To investigate it, preserve the exact input and identify which content was trusted versus untrusted.
+If the room provides a model, dataset, prompt log, image, or serialized object, identify the expected format before choosing a parser. Do not load untrusted Python pickle or PyTorch artifacts with unrestricted deserialization on a personal machine. Use the isolated lab or a safe inspection approach specified by the room.
 
-Then ask:
+## 3. Build an evidence timeline
 
-- Did the model's behaviour change after it encountered the content?
-- Did it reveal information from a protected source?
-- Did it request or execute a tool call?
-- Did the application check the user's authority before allowing the action?
-- Did the tool independently validate the request?
-- Is there evidence of a real state change, or only generated text?
+For each artefact, note its source, creation or modification time when available, hash, and what was learned. Compare timestamps cautiously: file metadata can be copied or altered, and system clocks may differ.
 
-A suspicious instruction in a document is evidence of an attempted injection, not automatically evidence that the attack succeeded. The actual impact depends on the model behaviour and the surrounding controls.
+| Evidence | What to record | Why it matters |
+|---|---|---|
+| Original file | Name, size, SHA-256 | Identifies the exact bytes examined |
+| Metadata | Timestamps, owner, format | Provides context, not proof by itself |
+| Tool output | Tool/version and relevant lines | Makes findings reproducible |
+| Behaviour | Input, action, observed result | Connects a hypothesis to a test |
+| Network or logs | Timestamp, endpoint, event | Helps corroborate suspicious activity |
 
-## 4. Handle evidence safely
+Do not treat a single anomaly as conclusive. A suspicious string, an unexpected model output, or an unusual timestamp is a lead. Correlate it with a second source where possible.
 
-AI logs can contain personal data, confidential documents, access tokens, and user secrets. Restrict access to the case material, redact sensitive content in reports, and follow retention policy. Do not upload confidential artefacts to a public AI service merely to get a summary.
+## 4. Investigate AI-specific artefacts
 
-If an artifact must be processed with an AI tool, document which service received it, what data was sent, and what output was produced. Preserve the original file and keep the AI-generated summary separate from analyst findings.
+AI systems add evidence types that ordinary file forensics may not cover: model weights, tokenizer/configuration files, training data, prompts, tool calls, inference logs, and model-serving telemetry. Ask what each artefact is supposed to contain and what would be unexpected.
 
-## 5. Practical investigation checklist
+For a model bundle, compare configuration and weight filenames, check the source and checksum if the room provides them, and look for unexplained extra files. For prompt or inference logs, preserve timestamps and session identifiers, then determine whether suspicious behaviour is tied to a particular input, model version, or tool invocation.
 
-For a suspected AI-related incident, I would:
+A model that produces a malicious or inaccurate answer is not automatically proof of compromise. Distinguish between a prompt that steers normal behaviour, a poisoned or backdoored model, an unsafe tool integration, and a compromised host. The evidence needed for each conclusion is different.
 
-1. Preserve relevant logs and configuration versions.
-2. Record the incident window and affected identities.
-3. Build a timeline across authentication, application, model, and tool logs.
-4. Identify all retrieved data and actions requested by the model.
-5. Verify actual actions against authoritative system logs.
-6. Determine whether access controls were bypassed or merely prompted to be bypassed.
-7. Assess data exposure, integrity changes, service disruption, and scope.
-8. Recommend containment, credential rotation, permission reduction, and additional logging where justified.
-9. Document uncertainties and gaps in evidence.
+## 5. Answering the room questions
 
-## 6. Working through the room
+Read each question literally and identify the artefact that can answer it. Search for the relevant metadata, string, log entry, model configuration, or behavioural observation; then verify the answer against the source. If the room asks for a hash, preserve its exact character case and length. If it asks for a filename or value, do not add punctuation copied from a terminal prompt.
 
-Read the scenario and identify which artefact is being examined. If a question asks what happened, use the evidence and timeline. If it asks for a forensic principle, choose the answer that preserves original evidence, records provenance, or separates observation from interpretation.
+The actual room answers can depend on the provided files, so retrieve them from the active lab. In this public write-up, record the method and redact any flag as `flag{hidden}` rather than publishing it.
 
-For interactive tasks, follow the current room UI and compare the agent's or system's statements with the available records. The exact artefacts can change with the lab. I do not invent incident logs, outcomes, or flags that I have not observed.
+## 6. Reporting and remediation
+
+A useful forensic note states the observation, the evidence supporting it, the conclusion, and the confidence level. Keep facts separate from hypotheses. Include the exact command used and a small, truthful output excerpt from your own run. Never fabricate terminal output to make a write-up look complete.
+
+For AI pipelines, maintain model provenance, sign or hash release artefacts, validate data sources, isolate untrusted deserialization, preserve relevant inference and tool-use logs, and restrict model-serving identities. Keep a clean baseline so unexpected changes can be detected.
 
 ## What I took from this room
 
-AI incident response still depends on ordinary forensic discipline: preserve evidence, build a timeline, verify actions in the systems that performed them, and record uncertainty. Prompts and model outputs are important evidence, but the surrounding application, identity, retrieval, and tool logs often establish the real impact.
+AI forensics still depends on disciplined evidence handling. The AI-specific part changes which artefacts need inspection, but the core method remains the same: preserve, identify, correlate, verify, and document.
+
+## Phase 5: Key Takeaways & Remediation
+
+The main goal is to connect every conclusion to observable evidence and enforce security controls at the correct trust boundary. Keep the original artefacts, record the exact commands and outputs from your own run, and redact any flag in public notes as `flag{hidden}`.

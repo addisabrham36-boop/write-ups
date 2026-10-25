@@ -217,3 +217,45 @@ to do that i install a tool called `freerdp` after installing it .
 ![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/d7e1c4a0-3689-4207-90a5-d014e1cfce8c.png align="center")
 
 ***Thank you for reading!***
+
+## Expanded technical workflow
+
+### 1. Target and service discovery
+
+Start the assigned Blue machine, obtain its current IP address, and verify that the lab is reachable. Run an initial scan and save the result:
+
+```bash
+nmap -sC -sV -oN blue-initial.txt TARGET_IP
+```
+
+`-sC` runs Nmap's default scripts, `-sV` probes discovered ports for service/version information, and `-oN` writes a readable report. A Windows SMB service may be exposed on TCP 445 or NetBIOS-related ports, but use the scan output from the current instance rather than assuming a fixed port state.
+
+### 2. Enumerate SMB safely
+
+If SMB is exposed, identify the SMB dialect and whether the host appears to be vulnerable to the issue described in the room. A targeted Nmap script scan may be appropriate in the authorized lab:
+
+```bash
+nmap -p 139,445 --script smb-protocols,smb-os-discovery TARGET_IP
+```
+
+The `-p` option limits the scan to the listed ports; the scripts report protocol and operating-system hints. Script results are evidence to investigate, not a guarantee of exploitability.
+
+### 3. Map the vulnerability to the evidence
+
+The classic Blue room focuses on the Windows SMB vulnerability associated with MS17-010. Confirm that the room's target and service match the vulnerable configuration before selecting a proof of concept. Search only trusted advisories and module documentation. Do not use an exploit just because a version string looks old.
+
+### 4. Validate initial access in the lab
+
+Follow the room's documented exploitation task and verify the result from the session itself. Record the module or tool used, required target options, session result, and effective identity. If a session is not established, do not claim successful exploitation; review reachability, target configuration, architecture, and options.
+
+### 5. Post-exploitation and flags
+
+After access, use the lab's intended steps to identify the requested user or administrator flag locations. Verify the current user and privilege level before assuming that administrator access has been obtained. Avoid searching or copying unrelated files, and redact actual flags as `flag{hidden}` in public notes.
+
+### 6. Remediation
+
+Apply the relevant Microsoft security update, disable SMBv1 where it is not needed, restrict SMB at network boundaries, remove unnecessary exposure of TCP 445, and monitor suspicious SMB activity. Legacy systems require a documented risk decision and compensating controls if they cannot be patched.
+
+### 7. Reproducibility
+
+Record Nmap output, tool versions, the vulnerability check, the exact authorized lab procedure, and the observed session identity. Room IP addresses and service states can change between deployments, so the active lab is the source of truth.

@@ -1,20 +1,23 @@
-# AI Models and Data: TryHackMe Walkthrough
+# AI Models and Data: Complete TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/aimodelsanddata
+Official room: https://tryhackme.com/room/aimodelsanddata
 
 ## Room Overview & Information
 
-This note covers the practical workflow, evidence to collect, common interpretation errors, and defensive lessons for AI Models and Data. Use the live room as the authority for task wording and machine-specific values. The repository does not include fabricated terminal output, credentials, or flags.
+**Category:** AI security, machine learning, and data integrity  
+**Objective:** Understand the relationship between model artifacts, training and evaluation data, inference behaviour, provenance, and security controls.
 
-## 1. Start with the task and data flow
+This is a conceptual and artifact-analysis room rather than a traditional boot-to-root host. Port scanning, shell access, and privilege escalation are not applicable unless the active task explicitly introduces them. Use the room's data and interface as the authority for exact task-specific values.
 
-Start the room environment and identify what it asks you to inspect: a model, training dataset, prompt, inference result, or configuration file. Write down the expected input and output before testing. This baseline helps distinguish a normal model limitation from a security problem.
+## Phase 1: Reconnaissance & Artifact Enumeration
 
-AI data flows often include collection, cleaning, labelling, training, evaluation, packaging, deployment, and monitoring. A weakness at one stage can propagate to later stages. For example, poisoned training examples may affect a model long after the original dataset is gone, while a changed model file may indicate supply-chain tampering rather than data poisoning.
+### 1. Map the model lifecycle
 
-## 2. Inspect supplied files safely
+An AI system can involve data collection, cleaning, labelling, training, evaluation, packaging, deployment, inference, and monitoring. A weakness at one stage can affect later stages. Poisoned training examples may influence behaviour long after the raw dataset is removed; a tampered model file may indicate a release-process compromise.
 
-Identify files by content, not just by extension:
+Record which artifacts the room provides: datasets, model weights, tokenizer files, configuration, prompts, output examples, and logs. Identify what each should contain and how its source is documented.
+
+### 2. Inspect files safely
 
 ```bash
 file ARTIFACT
@@ -23,63 +26,54 @@ stat ARTIFACT
 strings -n 6 ARTIFACT | head -n 80
 ```
 
-Replace `ARTIFACT` with a real filename from the room. Record the exact hash before analysis. Do not load unknown pickle-based models or datasets with unrestricted deserialization on a personal computer; use the lab environment and safe methods recommended by the task.
+Replace ARTIFACT with a file from the room. The commands identify format, calculate a hash, record metadata, and extract a bounded sample of strings. Use the isolated lab for untrusted serialized models. Do not load unknown pickle-based model artifacts with unrestricted deserialization.
 
-For tabular datasets, inspect column names, row counts, missing values, duplicates, label distribution, and suspiciously repeated examples. For text datasets, look for duplicated phrases, unexpected instructions, strange label associations, and data that does not match the stated collection source. Avoid printing sensitive records unnecessarily.
+## Phase 2: Model and Data Vulnerability Analysis
 
-## 3. Understand model behaviour
+### 3. Check data quality
 
-A model maps inputs to outputs according to learned parameters and its surrounding code. The same model can behave differently depending on preprocessing, prompt templates, decoding settings, tool access, and post-processing. Therefore, record the full inference context where the lab makes it available.
+For tabular datasets, inspect column names, record counts, missing values, duplicates, and label distribution. For text datasets, investigate repeated phrases, unusual instructions, suspicious label associations, or records inconsistent with the described source. Avoid printing sensitive records into public notes.
 
-For a simple repeatable test, preserve the input and output exactly and compare results across the baseline and the suspicious case. Change one variable at a time. If the model's output changes, ask whether the change follows from the input, configuration, data, or an external tool call.
+A suspicious example is a lead, not proof of poisoning. Stronger evidence is a repeatable relationship between a data pattern and model behaviour, supported by provenance or a trusted comparison dataset.
 
-A model error is not automatically a security vulnerability. Identify the security property at risk, such as confidentiality, integrity, availability, provenance, or control of tools.
+### 4. Understand model behaviour
 
-## 4. Data quality and poisoning
+A model maps input to output through learned parameters and a surrounding application. Results can change with preprocessing, prompt templates, retrieval context, tool access, decoding settings, and model version. Record those variables if they are available.
 
-Training data can be incomplete, biased, duplicated, mislabeled, or deliberately poisoned. Poisoning aims to influence the model's learned behaviour, often for a trigger or target class. Evidence can include unusual clusters, repeated trigger patterns, label inconsistencies, or a reliable difference between clean and suspicious examples.
+A surprising output does not automatically prove compromise. It may reflect missing context, an ordinary model limitation, prompt injection, unsafe retrieval, or a malicious artifact. Define the security property at risk, such as confidentiality, integrity, availability, provenance, or control over a tool.
 
-Use the room's provided analysis method and compare the suspected records with normal records. Do not claim poisoning from a single odd example. Stronger evidence comes from a repeatable relationship between a suspicious data pattern and model behaviour, plus an explanation of why that pattern is not expected.
+### 5. Verify model provenance
 
-Mitigations include provenance tracking, dataset versioning, duplicate and outlier analysis, label review, access control over data pipelines, and evaluation on a trusted holdout set. These controls reduce risk but do not guarantee that every hidden trigger will be found.
+Compare artifact hashes with a trusted manifest when the room supplies one. A hash identifies exact bytes, but without a trusted reference it cannot establish that a file is legitimate. Signed manifests, authenticated registries, controlled build pipelines, and release approvals provide stronger provenance.
 
-## 5. Model provenance and integrity
+Record the model or dataset version at inference time so a suspicious result can be linked to a particular release.
 
-A model artifact should be traceable to a known source, build process, version, and approval. Compare the artifact hash with a trusted manifest when the room supplies one. If no trusted baseline exists, a hash only identifies the file you currently have; it cannot independently establish that the file is legitimate.
+## Phase 3: Validate Findings & Post-Investigation Handling
 
-Secure model delivery with authenticated sources, signed manifests, controlled registries, and a review process for model updates. Restrict who can publish models and who can deploy them. Log model versions at inference time so suspicious behaviour can be linked to a specific release.
+Use repeatable comparisons to test suspected data poisoning or model backdoors. Save the baseline input/output pair, apply one controlled change, and compare results. Keep training, evaluation, and production data separate. Do not use a production model or real private data for exploratory tests without authorization.
 
-## 6. Work through the room questions
+This room does not inherently involve gaining host privileges. If a task provides shell access, verify the identity and context before claiming access. Otherwise, document the model and data finding without inventing a system compromise.
 
-For every question, locate the specific evidence requested. A question about a data property should be answered from the dataset; a question about model behaviour should be supported by an inference test; and a question about integrity should be answered from the version or hash evidence. Preserve exact spelling and formatting for submitted values.
+## Phase 4: Room Questions & Evidence Walkthrough
 
-Where the lab uses a model or dataset that is only available inside the running environment, obtain the answer there. Do not invent row counts, hashes, output labels, or flags. Redact public flags as `flag{hidden}`.
+For each question, determine which evidence class it asks about:
+- A data-property question should be answered from the actual dataset.
+- A model-behaviour question should be supported by a reproducible inference test.
+- An integrity question should be answered using an artifact version, hash, or authenticated manifest.
+- A provenance question should identify the source and release process.
+- A security-impact question should explain the affected property and the evidence for impact.
 
-## 7. Defensive checklist
+Preserve exact names and hash characters. Obtain machine-specific values from the active room; do not invent row counts, labels, hashes, or flags.
 
-- Track data sources, licences, owners, and versions.
-- Review data quality and labels before training.
-- Separate training, evaluation, and production data.
-- Protect model registries and build credentials.
+## Phase 5: Key Takeaways & Remediation
+
+- Track dataset provenance, licensing, versions, and owners.
+- Review labels, duplicates, outliers, and suspicious patterns before training.
+- Keep evaluation data separate from training data.
+- Protect model registries, build credentials, and release approvals.
 - Verify artifact integrity before deployment.
-- Test for unexpected behaviour using representative and adversarial inputs.
-- Log the model version and relevant inference metadata.
-- Have a rollback process for a suspicious release.
+- Test unexpected behaviour using representative and adversarial inputs.
+- Log model versions and relevant inference metadata.
+- Maintain a rollback path for a suspicious release.
 
-## What I took from this room
-
-Model security is not only about the model architecture. Data provenance, labels, preprocessing, packaging, deployment, and monitoring all affect the final behaviour. A good investigation connects the observed result to the stage that could have caused it.
-## Phase 5: Task-by-Task Verification Checklist
-
-Use the exact artifact supplied by the room. Do not substitute a public model or dataset with a similar name. For each result, record the input, expected output, actual output, model/data version, and the reason that result answers the question.
-
-| Investigation area | How to verify | What the evidence does not prove by itself |
-|---|---|---|
-| Dataset quality | Inspect schema, counts, duplicates, labels, and provenance | A single outlier does not prove poisoning |
-| Training-data poisoning | Correlate a data pattern with a repeatable model effect | Correlation alone may have another explanation |
-| Model behaviour | Re-run a controlled input and compare with baseline | One surprising response does not prove a backdoor |
-| Artifact integrity | Compare with a trusted hash or signed manifest | A hash without a trusted reference proves only identity |
-| Model provenance | Trace source, build, version, and approval | A familiar filename does not prove authenticity |
-| Inference context | Record preprocessing, prompt, settings, and tools | The model file alone may not explain the result |
-
-Remediate through dataset versioning, provenance controls, trusted evaluation sets, artifact signing, least-privilege model registries, and inference monitoring. Preserve original data and redact flags rather than filling gaps with guessed values.
+Model security is not only about architecture. Data provenance, preprocessing, packaging, deployment, and monitoring all affect the final behaviour.

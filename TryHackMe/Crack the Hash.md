@@ -131,3 +131,55 @@ Use a file containing only the relevant hash if you want to avoid mixing results
 ## Key takeaways
 
 Hash cracking is a process of classification and candidate testing. Identify the format, handle salts correctly, choose the right mode, and verify which candidate matches each hash. The room demonstrates why fast hashes and common passwords are weak choices for protecting user credentials.
+
+## Exact command structure and interpretation
+
+Before cracking, identify the hash format and retain a mapping between each hash and its room question. A 32-character hexadecimal value is compatible with MD5 but can be ambiguous; length alone is not a reliable identifier. Salted password formats may include a prefix, salt, and cost parameters that must be preserved.
+
+Check that a candidate wordlist exists:
+
+```bash
+ls -lh /usr/share/wordlists/rockyou.txt
+wc -l /usr/share/wordlists/rockyou.txt
+```
+
+If the AttackBox stores it compressed, follow the environment's instructions to decompress it. The exact file path differs between machines.
+
+### Hashcat options
+
+A generic wordlist attack looks like this:
+
+```bash
+hashcat -m MODE -a 0 hashes.txt /path/to/wordlist.txt
+```
+
+- `-m MODE` chooses the hash algorithm.
+- `-a 0` means a straight wordlist attack.
+- `hashes.txt` contains the hash values in the input format expected by the selected mode.
+- The last argument is the candidate list.
+
+Use a separate input file when hashes use different formats. For a common unsalted MD5 hash, mode 0 is typical:
+
+```bash
+hashcat -m 0 -a 0 md5.txt /path/to/wordlist.txt
+```
+
+For SHA-1, mode 100 is typical:
+
+```bash
+hashcat -m 100 -a 0 sha1.txt /path/to/wordlist.txt
+```
+
+These are command examples; the hash file must contain the matching format. For HMAC, salted, bcrypt, or Unix crypt formats, follow Hashcat's exact input requirements.
+
+### Troubleshooting
+
+If Hashcat reports a token-length or separator error, check the input format and whether required salt fields were omitted. If the run completes with no result, that can mean the wordlist does not contain the password, the mode is wrong, or the input has been formatted incorrectly. A candidate match should be mapped back to the correct task before submitting.
+
+### Room result reference
+
+The existing result tables above show the documented recovered password values. Treat them as reference values, not proof your local command succeeded. Keep the exact source hash beside each answer. The point of the exercise is to use the right mode and candidate method, not to assume every hash will fall to the same wordlist.
+
+### Security lessons
+
+MD5, MD4, NTLM, SHA-1, and fast SHA-256 are not suitable as direct password-storage schemes. Modern systems should use Argon2id, scrypt, or bcrypt with unique salts and appropriate work factors. Password hashing should be deliberately expensive enough to raise the cost of guessing.

@@ -112,3 +112,39 @@ Internet-wide search can reveal services that were not intended to be public. Di
 ## Key takeaways
 
 Good security research is a repeatable process: define the question, choose the right source, use precise search terms, verify the result, and document uncertainty. Shodan helps investigate observed public services, while official documentation and vendor advisories are better sources for tool behaviour and vulnerability impact.
+
+## Expanded search and verification workflow
+
+### 1. Translate the question into search terms
+
+Identify the entity, time range, source type, and exact field requested. Start with a narrow search and add one qualifier at a time. Quoted phrases search for exact wording; a minus sign excludes a term; site restrictions can focus results on an official domain.
+
+### 2. Search operators
+
+Examples:
+
+```text
+"exact phrase"
+site:example.com keyword
+filetype:pdf topic
+intitle:report topic
+keyword -irrelevant
+```
+
+Replace examples with terms relevant to the task. Operators are search aids, not proof that a result is accurate or current.
+
+### 3. Verify the original source
+
+Open the original page or document and check the publication date, author, context, and whether the requested detail actually appears. Search snippets can be truncated, cached, or misleading. For technical questions, prefer official documentation, primary advisories, and vendor references over copied summaries.
+
+### 4. Evaluate source quality
+
+Check who published the information, the evidence supporting it, the date, the intended audience, and whether other reliable sources corroborate it. An opinion post, vendor marketing page, archived page, and official advisory serve different purposes. Use the source type appropriate to the claim.
+
+### 5. Preserve reproducibility
+
+Record the search terms, source URL, publication date, and exact evidence supporting the answer. If the page may change, capture a relevant excerpt in the lab notes where permitted. Do not copy copyrighted articles wholesale or expose credentials found during research.
+
+### 6. Answer the room
+
+For each task, identify the expected entity or value and verify it from the source the exercise expects. Be careful with dates, names, domains, and similar-looking terms. If two sources conflict, explain the conflict instead of choosing the answer that merely looks familiar. Redact any flag as `flag{hidden}`.

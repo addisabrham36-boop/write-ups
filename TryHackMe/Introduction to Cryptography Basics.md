@@ -82,38 +82,21 @@ Do not treat an unreadable string as proof of encryption. Base64, hex, and binar
 
 Cryptography is not one operation. Encoding changes representation, encryption protects confidentiality, hashing supports integrity checks, and signatures support authenticity and integrity. Use established algorithms, protect keys separately, and verify the entire implementation rather than judging security by the algorithm name alone.
 
-## Expanded cryptography workflow
+## Phase 8: Room question checklist
 
-### 1. Start with the purpose of the operation
+Use the task's wording to decide what output is required:
 
-When a task presents a string, determine whether it is encoded, hashed, encrypted, or signed. These operations solve different problems. Encoding changes representation; hashing produces a digest; encryption uses a key to recover plaintext; and signatures help verify integrity and origin.
+| Task asks for | Correct method |
+|---|---|
+| Recover readable text from a known encoding | Identify the encoding and decode the exact input |
+| Recover plaintext from ciphertext | Determine the algorithm, mode, key, and any nonce/IV required by the lab |
+| Identify a hash | Use context and format clues; do not assume hashes are reversible |
+| Verify file integrity | Hash the exact file and compare with a trusted reference |
+| Check a public key or certificate | Verify the identity binding and trust chain, not just the key's existence |
+| Obtain a signature's meaning | Verify with the relevant public key and signature scheme |
 
-### 2. Classical ciphers
+For every result, preserve the input, operation, key or parameter if applicable, tool version, and output. If the room asks for a specific value or flag, copy it from the active practical. A plausible-looking output is not enough; make sure it answers the exact question.
 
-A Caesar cipher shifts letters by a fixed number. Atbash reverses the alphabet mapping. These are useful learning examples but are not secure encryption. For a Caesar cipher, try the shifts indicated by the room's clue and inspect whether the output forms meaningful text. Do not assume every unreadable string is a Caesar cipher.
+## Final security checklist
 
-### 3. Modern symmetric and asymmetric cryptography
-
-Symmetric encryption uses a shared secret key. Asymmetric cryptography uses a public/private key pair. Public-key systems can support key agreement or signatures, but they do not automatically solve key distribution, identity validation, or secure storage.
-
-### 4. Hashes and password storage
-
-A hash is not normally decrypted. Password recovery tools compare candidate inputs against the stored hash. Password storage should use a purpose-built, salted password-hashing algorithm with appropriate work factors rather than a fast general-purpose hash.
-
-### 5. Safe command-line inspection
-
-For an encoded string, preserve the exact input and use a decoder suited to the format. For example, Base64 can be decoded with:
-
-```bash
-printf '%s' 'ENCODED_VALUE' | base64 --decode
-```
-
-For a hash, identify the algorithm and context instead of attempting to decode it. Never publish recovered real passwords or keys.
-
-### 6. Common implementation failures
-
-Weak randomness, reused keys, hard-coded secrets, missing authentication, and encryption without integrity protection can undermine otherwise strong algorithms. Use established libraries, authenticated encryption, secure key storage, and reviewed protocols. Avoid inventing custom cryptographic schemes.
-
-### 7. Answering the room
-
-Use the specific clues and values supplied by the active room. Explain the transformation and verify the result, especially if the output is another encoded string. Do not copy a demonstration ciphertext as a room answer; redact flags as `flag{hidden}` in public notes.
+Use a well-maintained cryptographic library, generate keys from secure randomness, separate keys from protected data, rotate exposed secrets, and use authenticated encryption where appropriate. Use password-hashing algorithms rather than encryption for password storage. Avoid custom ciphers and never rely on Base64, hexadecimal, or obfuscation to hide confidential information.

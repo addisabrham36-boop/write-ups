@@ -5,10 +5,22 @@ Official room: https://tryhackme.com/room/adventofcyberpreptrack
 ## Room Overview & Information
 
 **Platform:** TryHackMe  
-**Difficulty:** Beginner  
-**Category:** Security fundamentals, malware triage, Linux and Windows CLI, credential hygiene, wireless security, OAuth-style permissions, AI data disclosure, and web log analysis.
+**Event:** Advent of Cyber 2025 preparation  
+**Format:** Ten short, interactive beginner challenges  
+**Topics:** Password hygiene, malware triage, Linux and Windows command-line basics, breach checking, wireless-router security, third-party app permissions, AI data disclosure, and web-log investigation.
 
-The Prep Track contains ten short interactive challenges. Each challenge opens through **View Site**, and each interactive page is separate. Reopen View Site when moving to another task. These are simulated exercises; do not use the techniques against real accounts, networks, files, or applications.
+The official room says each challenge opens with **View Site** and each challenge has its own interactive page. Click View Site again when changing tasks. The tasks are simulated learning exercises, not permission to test real accounts, networks, or applications.
+
+The flag value for each challenge is displayed by its own interactive site after the objective is completed. This write-up records the exact task, the detailed solving steps, and the verification method. It does not invent flag strings that have not been captured from the live challenge.
+
+## Before you start
+
+1. Open the official room and read the current task instructions.
+2. Click View Site for the current challenge.
+3. Use the task's simulated inputs and dummy data only.
+4. Follow the completion feedback, then copy the flag exactly as displayed.
+5. Reopen View Site when moving to another challenge; the page changes between tasks.
+6. Keep a note of the input, result, and lesson. Do not reuse any challenge password outside the lab.
 
 ## Challenge 1: Password Pandemonium
 
@@ -16,22 +28,23 @@ The Prep Track contains ten short interactive challenges. Each challenge opens t
 
 ### Objective
 
-Create a new password that satisfies the application's requirements and is not present in its simulated breach list.
+Create a password that passes the application's policy and is not found in its simulated leaked-password database.
 
 ### Steps
 
-1. Open the Challenge 1 task and click **View Site**.
-2. The task describes weak passwords on TBFC accounts. The example password `P@ssw0rd123` is already flagged, so do not reuse it.
-3. Enter a unique practice password at least 12 characters long.
-4. Include uppercase and lowercase letters, numbers, and symbols.
-5. Submit it and read the validation feedback. If it fails, correct the failed requirement rather than randomly trying short variations.
-6. Once all checks pass, the site displays the flag.
+1. Open Challenge 1 and click View Site.
+2. Read the checks shown by the password validator.
+3. Enter a password with at least 12 characters.
+4. Include uppercase letters, lowercase letters, numbers, and symbols as required.
+5. Make the password unique and avoid known examples such as the weak password shown in the scenario.
+6. Submit it. If a check fails, read the message and correct that requirement rather than changing random characters.
+7. Once the application accepts the password and indicates it is not on the simulated breach list, copy the flag it displays.
 
-### Why it works
+### Why it matters
 
-Length, uniqueness, and resistance to known-password lists are more important than merely changing one character in a common password. In real use, generate unique passwords with a password manager and never reuse a CTF password for personal accounts.
+A strong password should be long, unique, and not present in common or breached-password lists. A single substitution in a familiar pattern is not a reliable substitute for uniqueness. Use a password manager for real accounts, and never reuse a challenge password.
 
-**Answer:** `THM{StrongStart}`
+**Flag:** Retrieve the value from the active challenge after all checks pass.
 
 ## Challenge 2: The Suspicious Chocolate.exe
 
@@ -39,22 +52,23 @@ Length, uniqueness, and resistance to known-password lists are more important th
 
 ### Objective
 
-Use the simulated malware-scanning page to determine whether `chocolate.exe` should be trusted.
+Use the simulated malware-scanning interface to classify the supplied file.
 
 ### Steps
 
-1. Open Challenge 2 and click **View Site**.
-2. Select **Scan** for `chocolate.exe`.
-3. Wait for the scan report and inspect the result counts.
-4. The report shows **49 clean results and 1 malicious result**.
-5. Read the detection details. The malicious result is associated with **Malhare Labs**, detection name **MalhareTrojan**, reference **ML-2025-011**.
-6. Select the answer that classifies the file as **malicious/dangerous**, then submit.
+1. Open Challenge 2 and click View Site.
+2. Select the scan action for the supplied file, chocolate.exe.
+3. Wait for the scanner's report.
+4. Inspect the counts, verdicts, detection name, vendor, and reference shown by the interface.
+5. Read the entire result instead of deciding from the filename alone.
+6. Choose the classification supported by the room's report and submit it.
+7. Copy the flag after the challenge confirms success.
 
-### Why it works
+### How to interpret the scan
 
-The room is testing basic security triage. One detection among many clean results is not automatically conclusive in a real investigation, because false positives exist, but the simulated task explicitly provides a malicious detection and expects that classification. Real analysts should also verify the file hash, source, behaviour, and sandbox results.
+One malicious detection among many clean results can be a false positive in real investigations. In this simulated challenge, follow the supplied evidence and expected task flow. In a real malware triage, also record the SHA-256 hash, source, file type, sandbox behaviour, network indicators, and vendor-report context. A filename or icon is not proof that a file is safe.
 
-**Answer:** `THM{NotSoSweet}`
+**Flag:** Retrieve the value shown by the active simulator after the correct classification.
 
 ## Challenge 3: Welcome to the AttackBox!
 
@@ -62,46 +76,37 @@ The room is testing basic security triage. One detection among many clean result
 
 ### Objective
 
-Use basic Linux commands to locate and read a text file.
+Locate and read the welcome message in the Linux challenge workspace.
 
 ### Steps
 
-1. Open Challenge 3 and click **View Site**.
-2. Open the provided AttackBox terminal.
-3. List the current directory:
+Open the AttackBox terminal supplied by the exercise. Begin by checking the current directory and its entries:
 
-   ```bash
-   ls
-   ```
+    pwd
+    ls -la
 
-   `ls` lists entries in the working directory.
-4. Move to the challenge directory:
+- pwd prints the current working directory.
+- ls -la lists normal and hidden entries with details.
 
-   ```bash
-   cd challenges/
-   ```
+Move into the challenge directory:
 
-   `cd` changes the working directory. The trailing slash is optional.
-5. Confirm the file is present:
+    cd challenges/
+    ls -la
 
-   ```bash
-   ls -la
-   ```
+Read the file:
 
-   `-l` provides a detailed listing; `-a` also includes hidden entries.
-6. Read the welcome file:
+    cat welcome.txt
 
-   ```bash
-   cat welcome.txt
-   ```
+- cd changes directories.
+- cat writes the file's contents to the terminal.
 
-7. Submit the flag printed by the file.
+Submit the flag that the file prints.
 
 ### Troubleshooting
 
-If the directory is not found, run `pwd` and `ls -la` to see where the terminal started. Linux paths are case-sensitive; `welcome.txt` and `Welcome.txt` are different names.
+If challenges/ is not found, use pwd and ls -la to establish where the terminal started. Linux paths are case-sensitive. Do not assume that the same directory is present outside the provided exercise environment.
 
-**Answer:** `THM{Ready2Hack}`
+**Flag:** Copy the exact value from welcome.txt.
 
 ## Challenge 4: The CMD Conundrum
 
@@ -113,52 +118,32 @@ Use Windows Command Prompt to find and read a hidden file.
 
 ### Steps
 
-1. Open Challenge 4 and click **View Site**.
-2. Use the provided Windows command-line environment.
-3. List ordinary entries:
+Open Challenge 4 and use the supplied Windows terminal.
 
-   ```bat
-   dir
-   ```
+List ordinary entries:
 
-4. Include files with hidden/system attributes:
+    dir
 
-   ```bat
-   dir /a
-   ```
+Then include entries with hidden or system attributes:
 
-   The `/a` switch lists entries regardless of their attributes, including hidden files.
-5. Enter the directory:
+    dir /a
 
-   ```bat
-   cd mystery_data
-   ```
+Move into the folder named by the challenge:
 
-6. List it again to confirm the target filename:
+    cd mystery_data
+    dir /a
 
-   ```bat
-   dir /a
-   ```
+Read the file:
 
-7. Read the flag file:
+    type hidden_flag.txt
 
-   ```bat
-   type hidden_flag.txt
-   ```
+If you are still in the parent directory, use the relative path:
 
-   If the working directory is still the parent directory, use the fully qualified relative path:
+    type mystery_data\hidden_flag.txt
 
-   ```bat
-   type mystery_data\hidden_flag.txt
-   ```
+The /a switch includes entries regardless of their attributes. The type command prints a text file. A hidden file is not encrypted; its attribute only affects how it is listed by default.
 
-8. Copy the exact flag shown by the challenge.
-
-### Why it works
-
-`dir` lists directory contents, `dir /a` includes hidden entries, and `type` writes a text file to the terminal. The hidden attribute changes how the file is displayed; it does not encrypt the contents.
-
-**Answer:** `THM{WhereIsMcSkidy}`
+**Flag:** Copy the exact value printed by the file.
 
 ## Challenge 5: Linux Lore
 
@@ -166,37 +151,32 @@ Use Windows Command Prompt to find and read a hidden file.
 
 ### Objective
 
-Locate McSkidy's hidden message in a Linux home directory.
+Locate McSkidy's hidden message in the Linux home directory.
 
 ### Steps
 
-1. Open Challenge 5 and click **View Site**.
-2. In the provided Linux terminal, change to McSkidy's home directory:
+Open Challenge 5 and use the provided terminal.
 
-   ```bash
-   cd /home/mcskidy/
-   ```
+Change into the specified home directory:
 
-3. List all entries with details:
+    cd /home/mcskidy/
 
-   ```bash
-   ls -la
-   ```
+List all files, including dotfiles:
 
-   A normal `ls` omits dotfiles by default. The `-a` option reveals filenames beginning with a dot, while `-l` displays details such as permissions, owner, group, size, and timestamp.
-4. Read the hidden message:
+    ls -la
 
-   ```bash
-   cat .secret_message
-   ```
+Read the hidden message:
 
-5. Submit the exact flag printed in the terminal.
+    cat .secret_message
 
-### Troubleshooting
+Linux filenames beginning with a dot are usually omitted by a basic ls listing. The -a option reveals them. Keep the leading dot in .secret_message when entering the path.
 
-If the file is missing, confirm the current directory with `pwd`, then list the intended directory directly with `ls -la /home/mcskidy/`. Keep the leading dot in `.secret_message`.
+If the file is not shown, check pwd and inspect the intended path directly:
 
-**Answer:** `THM{TrustNoBunny}`
+    pwd
+    ls -la /home/mcskidy/
+
+**Flag:** Copy the exact value from the hidden message file.
 
 ## Challenge 6: The Leak in the List
 
@@ -204,26 +184,22 @@ If the file is missing, confirm the current directory with `pwd`, then list the 
 
 ### Objective
 
-Use the simulated breach checker to determine whether McSkidy's email address appears in a breach and finish the exercise.
+Use the room's simulated breach checker to determine the status of the supplied account address.
 
 ### Steps
 
-1. Open Challenge 6 and click **View Site**.
-2. Enter the exact address:
+1. Open Challenge 6 and click View Site.
+2. Enter the exact address specified by the room, shown in the current exercise as mcskidy@tbfc.com.
+3. Submit the lookup and wait for the result.
+4. Review the returned domains and their status.
+5. Identify the entry marked as compromised, then follow the simulator's confirmation flow.
+6. Copy the flag after the task reports success.
 
-   ```text
-   mcskidy@tbfc.com
-   ```
+### Security lesson
 
-3. Submit the lookup and wait for the domain results.
-4. Review each listed domain and its status. Identify the entry explicitly marked **Compromised**.
-5. Follow the challenge's selection/confirmation flow. The flag appears after the result is correctly handled.
+A breach lookup can show that an address appears in known leaked data, but it does not by itself prove the current account is compromised. In a real incident, change affected passwords, eliminate reuse, enable MFA, review authentication activity, and revoke suspicious sessions. Do not submit someone else's private address to a third-party service without a legitimate reason.
 
-### Why it matters
-
-A breach lookup can indicate that an address appears in known leaked data, but a match does not necessarily prove the account is currently compromised. In a real incident, change any affected password, eliminate password reuse, enable MFA, review login history, and revoke suspicious sessions. Do not submit someone else's private address to an external service without a legitimate reason.
-
-**Answer:** `THM{LeakedAndFound}`
+**Flag:** Obtain the value from the active challenge after completing the lookup.
 
 ## Challenge 7: WiFi Woes in Wareville
 
@@ -231,28 +207,23 @@ A breach lookup can indicate that an address appears in known leaked data, but a
 
 ### Objective
 
-Log in to the simulated router using its default credentials and replace them with a strong password.
+Secure the simulated router by replacing its default administrator credentials.
 
 ### Steps
 
-1. Open Challenge 7 and click **View Site**.
-2. On the simulated router login page, use the default credentials specified by the task:
-   - Username: `admin`
-   - Password: `admin`
-3. After login, open **Security Settings**.
-4. Find the router administrator password setting.
-5. Choose a unique password that satisfies the interface's validation checks, then save it.
-6. Confirm the simulator accepts the change and submit/finish the task as directed.
+1. Open Challenge 7 and click View Site.
+2. Use the default login details provided in the simulation. The documented scenario starts with username admin and password admin.
+3. After login, navigate to Security Settings.
+4. Locate the router administrator-password field.
+5. Choose a strong, unique password that satisfies the interface's checks.
+6. Save the change and verify the simulator confirms it.
+7. Complete the task flow and copy the flag.
 
-### Why it works
+### Security lesson
 
-Default credentials are publicly known and are routinely tried by attackers. Changing the router administrator password prevents simple default-login access. This is separate from changing the Wi-Fi network's SSID or wireless passphrase.
+Default credentials are publicly known and commonly tried by attackers. Change the administrator password, update the firmware, disable remote administration when unnecessary, enable WPA3 or properly configured WPA2-AES, and isolate guest devices. The router administrator password is distinct from the wireless network's passphrase.
 
-### Defensive checklist
-
-Change default administrator credentials, use a long unique password, update router firmware, disable remote administration when unnecessary, configure WPA3 or properly configured WPA2-AES, and isolate guest devices.
-
-**Answer:** `THM{NoMoreDefault}`
+**Flag:** Copy it from the simulator after the password change is confirmed.
 
 ## Challenge 8: The App Trap
 
@@ -264,19 +235,19 @@ Review connected third-party applications and revoke access for the app with sus
 
 ### Steps
 
-1. Open Challenge 8 and click **View Site**.
-2. Inspect the simulated account's list of connected apps.
-3. Open the details of suspicious-looking apps and review each permission. Do not choose by name alone.
-4. Look for permissions unrelated to an application's purpose, especially access to highly sensitive information such as a **password vault**.
-5. Select the app whose permission scope matches the scenario's suspicious behaviour.
-6. Click **Revoke Access** and confirm the action if prompted.
-7. Submit or finish the task as directed; the simulator displays the flag.
+1. Open Challenge 8 and click View Site.
+2. Inspect the list of connected apps.
+3. Open each relevant app's details and review the permissions it has been granted.
+4. Compare the permission scope with the app's purpose. Pay particular attention to access to sensitive data such as a password vault.
+5. Select the app whose granted permissions match the suspicious scenario.
+6. Choose Revoke Access and confirm the action if prompted.
+7. Verify that the simulator reports the permission was revoked, then copy the flag.
 
-### Why it works
+### Security lesson
 
-Third-party integrations can receive ongoing delegated access. Revoking the grant blocks future access through that connection, but it may not remove data the app already copied. In real environments, investigate the grant, review access logs, rotate potentially exposed secrets, and revoke the app's sessions/tokens.
+Revoking a grant blocks future access through that connection, but it may not erase data the third-party app copied earlier. In a real incident, investigate the grant, review access logs, rotate possibly exposed secrets, and revoke sessions or tokens as needed.
 
-**Answer:** `THM{AppTrapped}`
+**Flag:** Copy the exact value after the simulator confirms success.
 
 ## Challenge 9: The Chatbot Confession
 
@@ -284,24 +255,23 @@ Third-party integrations can receive ongoing delegated access. Revoking the gran
 
 ### Objective
 
-Identify messages from FestiveBot that disclose sensitive information.
+Identify messages from FestiveBot that disclose information which should remain private.
 
 ### Steps
 
-1. Open Challenge 9 and click **View Site**.
-2. Read the entire conversation before selecting messages.
-3. Identify messages that expose private or internal data, such as:
-   - Passwords, tokens, or authentication secrets.
-   - Internal-only URLs or service locations.
-   - Company information that should not be disclosed to the current user.
-4. Select each message containing sensitive information; leave ordinary, non-sensitive messages unselected.
-5. Submit the selection. If it is rejected, review each message again and ensure no secret-bearing message was missed or a harmless message included.
+1. Open Challenge 9 and click View Site.
+2. Read the full conversation before selecting messages.
+3. Select messages that reveal sensitive material, such as authentication secrets, internal-only URLs, or company information that should not be disclosed to the current user.
+4. Do not select ordinary messages simply because they sound technical.
+5. Submit the selection and inspect the feedback.
+6. If the selection is rejected, review each message again and identify what information it reveals.
+7. Copy the flag after the exercise confirms that the disclosure messages were identified correctly.
 
-### Why it matters
+### Security lesson
 
-An AI assistant should only receive the data it needs. Prompt instructions alone cannot guarantee confidentiality. Applications should enforce data permissions before retrieval, avoid placing secrets in prompts, restrict tools, validate outputs, and log risky actions without recording unnecessary sensitive content.
+An AI assistant should receive only the data it needs. Prompt instructions alone cannot guarantee confidentiality. Enforce permissions before retrieving private data, restrict tools, validate responses, and avoid placing secrets in prompts or logs. Validate whether a backend action occurred instead of trusting the chatbot's statement.
 
-**Answer:** `THM{DontFeedTheBot}`
+**Flag:** Obtain the value shown after the message-selection task is passed.
 
 ## Challenge 10: The Bunny's Browser Trail
 
@@ -309,55 +279,48 @@ An AI assistant should only receive the data it needs. Prompt instructions alone
 
 ### Objective
 
-Inspect HTTP log entries and identify the unusual user-agent string.
+Inspect HTTP logs and identify the unusual User-Agent value.
 
 ### Steps
 
-1. Open Challenge 10 and click **View Site**.
-2. Read the HTTP log entries in the simulator.
-3. Find the **User-Agent** field for each request and compare the values with ordinary browser identifiers such as Chrome, Firefox, and Edge.
-4. The unusual string called out by the scenario is:
+1. Open Challenge 10 and click View Site.
+2. Read the HTTP log entries.
+3. Locate the User-Agent field for each request.
+4. Compare the values with expected browser identifiers and identify the outlier.
+5. In the documented scenario, the unusual value is BunnyOS/1.0 (HopSecBot).
+6. Select the entry containing that value and submit.
+7. Copy the flag after the simulator confirms success.
 
-   ```text
-   BunnyOS/1.0 (HopSecBot)
-   ```
+### Security lesson
 
-5. Select the matching suspicious log entry and submit.
+A User-Agent string is supplied by the client and can be forged. Correlate it with request frequency, paths, status codes, source IP, authentication events, and other telemetry before deciding that a request is malicious.
 
-### Why it works
+**Flag:** Copy the value displayed by the current challenge.
 
-A user-agent string describes the client software but is supplied by the client and can be forged. In a real investigation, correlate it with request frequency, paths, status codes, source IP, authentication events, and other telemetry rather than treating the string alone as definitive proof of malicious activity.
+## Complete task checklist
 
-**Answer:** `THM{EastmasIsComing}`
-
-## Complete answer list
-
-| Challenge | Exact question | Answer |
+| Challenge | Exact question | Verification method |
 |---|---|---|
-| 1. Password Pandemonium | What's the flag? | `THM{StrongStart}` |
-| 2. The Suspicious Chocolate.exe | What's the flag? | `THM{NotSoSweet}` |
-| 3. Welcome to the AttackBox! | What's the flag? | `THM{Ready2Hack}` |
-| 4. The CMD Conundrum | What's the flag? | `THM{WhereIsMcSkidy}` |
-| 5. Linux Lore | What's the flag? | `THM{TrustNoBunny}` |
-| 6. The Leak in the List | What's the flag? | `THM{LeakedAndFound}` |
-| 7. WiFi Woes in Wareville | What's the flag? | `THM{NoMoreDefault}` |
-| 8. The App Trap | What's the flag? | `THM{AppTrapped}` |
-| 9. The Chatbot Confession | What's the flag? | `THM{DontFeedTheBot}` |
-| 10. The Bunny's Browser Trail | What's the flag? | `THM{EastmasIsComing}` |
+| Password Pandemonium | What's the flag? | Satisfy all password-policy and breach checks |
+| The Suspicious Chocolate.exe | What's the flag? | Read the scan report and choose the supported verdict |
+| Welcome to the AttackBox! | What's the flag? | Read the file under the challenges directory |
+| The CMD Conundrum | What's the flag? | Reveal and read the hidden Windows file |
+| Linux Lore | What's the flag? | Read the dotfile in McSkidy's home directory |
+| The Leak in the List | What's the flag? | Complete the simulated breach lookup and status confirmation |
+| WiFi Woes in Wareville | What's the flag? | Change the default router administrator password |
+| The App Trap | What's the flag? | Revoke the connection with suspiciously broad permissions |
+| The Chatbot Confession | What's the flag? | Select the messages disclosing sensitive information |
+| The Bunny's Browser Trail | What's the flag? | Select the HTTP log entry with the suspicious User-Agent |
 
-## Phase 5: Key Takeaways & Remediation
+## Final remediation checklist
 
-- Use unique passwords and check for exposure to known breaches.
-- Treat suspicious executable files as untrusted and base triage on evidence, not filenames.
-- Learn basic Linux and Windows commands for inspecting files and directories.
-- Hidden files are not access control; use correct permissions and protect sensitive data.
-- Replace default router credentials and maintain firmware.
-- Review third-party application permissions and revoke unneeded grants.
-- Prevent AI applications from revealing secrets through permission checks, data minimization, and constrained tools.
-- Investigate logs using multiple fields; a user-agent string alone can be spoofed.
+- Use unique passwords and block common or breached passwords.
+- Treat executable files as untrusted until evidence supports a verdict.
+- Learn both Linux and Windows file-discovery commands.
+- Remember that hidden files are not access control.
+- Replace router defaults and keep firmware current.
+- Review third-party application grants and revoke unneeded access.
+- Prevent AI applications from retrieving or disclosing data beyond the user's permissions.
+- Investigate logs using multiple fields because user-agent strings can be forged.
 
-## Reference
-
-Official room: https://tryhackme.com/room/adventofcyberpreptrack
-
-The interactive room remains authoritative if the task UI or generated values change.
+The official room's interactive pages remain the source of truth for each flag. These steps explain how to reach and verify each answer without publishing guessed flag values.

@@ -182,3 +182,39 @@ The **-R** option forces reverse DNS resolution for target addresses. This may a
 ## Key takeaways
 
 Host discovery is about choosing the right probe for the network. ARP is useful on a local Ethernet segment, ICMP probes test IP-level reachability, TCP probes can work when ICMP is filtered, and reverse DNS can add hostnames. Interpret the result in context rather than treating silence as proof that a host is offline.
+
+## Expanded discovery workflow
+
+### 1. Define the authorized range
+
+Use only the lab's assigned subnet or addresses. Confirm the network prefix before scanning; a typo in a CIDR range can expand the scan beyond the intended target. Record the target range, time, and scan options.
+
+### 2. Understand discovery methods
+
+Nmap chooses different host-discovery probes depending on privilege and network context. On a local Ethernet network, ARP discovery can be effective because a host must resolve local link-layer addresses to communicate. Across routed networks, ARP is not forwarded, so ICMP or TCP probes may be more appropriate. Firewalls can filter probes, meaning a machine that is online may not respond.
+
+### 3. Use a small first scan
+
+For an explicitly authorized lab subnet, use the room's stated range. A typical command is:
+
+```bash
+nmap -sn -oN discovery.txt TARGET_RANGE
+```
+
+`-sn` performs host discovery without a port scan, and `-oN` saves readable output. On a local Ethernet segment, privileged Nmap may use ARP discovery automatically. Exact probe selection depends on the operating system, privileges, and network.
+
+For a target that filters ICMP, the lab may call for TCP discovery probes. Choose the probe based on the room task rather than sending every probe indiscriminately.
+
+### 4. Understand the output
+
+A line such as "Host is up" means Nmap received a response consistent with its discovery method. It does not prove that every port is open. "Host seems down" may mean the target is offline, filtered, or unreachable using the chosen probes.
+
+Reverse DNS can reveal a name associated with an address, but names may be missing or stale. Treat the IP as the primary observed value unless the task specifically asks for a hostname.
+
+### 5. Validate the list
+
+Compare the result with the lab's expected address range. If a host is missing, verify the subnet, interface, privileges, and discovery method. Do not immediately increase scan intensity; first identify the reason the first method may have failed.
+
+### 6. Room answers
+
+For questions asking how many hosts responded, which address was live, or which hostname appeared, derive the answer from the actual saved output. Do not copy a result from a different subnet or session. Redact flags as `flag{hidden}`.

@@ -73,3 +73,33 @@ Random IDs and encoded IDs may reduce guessing but do not replace authorisation 
 ## Key takeaways
 
 Broken access control is a server-side decision failure. The practical demonstrates horizontal privilege escalation: a normal user can see another user's data by manipulating an object reference. The correct fix is to check the current user's permission for every requested object and action.
+
+## Expanded authorization testing workflow
+
+### 1. Build an access-control matrix
+
+List the user roles, objects, and actions in the application. For each role, state which actions should be allowed and denied. Include read, create, update, delete, export, and administrative operations where they exist. The expected policy should come from the room scenario, not from assumptions.
+
+### 2. Establish a baseline
+
+Log in with the supplied lab account and capture one legitimate request. Record the endpoint, HTTP method, object identifier, session context, and response. Then determine whether changing the object identifier or invoking an alternate endpoint changes which record is returned.
+
+Only test the room's accounts and data. Never manipulate identifiers on a real service without authorization.
+
+### 3. Test horizontal and vertical authorization
+
+Horizontal access-control failures occur when one user can access another user's resource at the same privilege level. Vertical failures occur when a lower-privileged user can perform an action reserved for a higher-privileged role. Missing function-level checks may allow a normal user to call an admin endpoint directly.
+
+A client-side hidden button is not an authorization control. Repeat the request directly and verify whether the server checks the current identity and permission for that exact object and action.
+
+### 4. Validate the result
+
+Compare the baseline and modified request. A changed identifier that returns a successful status is not automatically proof of unauthorized access. Inspect whether protected data was disclosed or a restricted action actually occurred. Record the minimum necessary evidence.
+
+### 5. Fix the root cause
+
+Perform authorization checks server-side on every request. Use deny-by-default policy, derive ownership from the authenticated session rather than trusting client-supplied user IDs, enforce role and object permissions, and test direct API calls. Avoid relying on unpredictable identifiers as the only control; random IDs do not replace authorization.
+
+### 6. Complete the room questions
+
+Map each question to the affected route, object, role, and missing permission check. Use the live lab to retrieve exact values and outcomes. Do not copy another instance's response; redact flags in public notes as `flag{hidden}`.

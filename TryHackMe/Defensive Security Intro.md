@@ -88,3 +88,30 @@ Not every alert is a confirmed incident. Validate evidence, record uncertainty, 
 ## Phase 5: Key Takeaways & Remediation
 
 The Blue Team provides defensive security; the SOC monitors and triages events; DFIR investigates and coordinates response; and malware analysts help determine what suspicious software does. Organisations should centralise useful logs, protect evidence, maintain tested backups, restrict privileges, patch exposed services, and rehearse incident response. Clear communication and evidence-based decisions are as important as the tools.
+
+## Phase 6: A practical defensive investigation
+
+Even when the room is a conceptual exercise, the roles correspond to a real workflow:
+
+1. A detection system produces an alert.
+2. A SOC analyst checks the raw event and related context.
+3. DFIR gathers evidence and reconstructs a timeline when an incident is suspected.
+4. Malware analysis investigates a suspicious file or its behaviour.
+5. Incident responders contain the activity, remove the cause, and restore trusted operation.
+6. The organisation updates detections, controls, and playbooks using the findings.
+
+A signal alone does not prove compromise. Analysts need to correlate logs, host context, timestamps, user activity, and network events. If a flag or answer depends on an interactive site, follow the room's own feedback rather than inferring a hidden value.
+
+## Defensive concepts at a glance
+
+| Concept | Main purpose | Example evidence |
+|---|---|---|
+| Blue Team | Protect and defend systems | Controls, monitoring, incident response |
+| SOC | Monitor, triage, and escalate events | SIEM alerts, endpoint and network telemetry |
+| DFIR | Investigate, preserve evidence, and respond | Logs, memory, disk, packet capture |
+| Malware analysis | Understand suspicious software | Hashes, code, process/network behaviour |
+| Ransomware response | Contain data-encryption/extortion activity | File changes, ransom note, endpoint alerts |
+
+## Final remediation checklist
+
+Maintain centralised, time-synchronised logs; keep endpoint and network telemetry enabled; use least privilege; patch exposed systems; test offline or immutable backups; practise incident response; and document escalation authority. Defensive security is a continuous process, not a one-time tool installation.

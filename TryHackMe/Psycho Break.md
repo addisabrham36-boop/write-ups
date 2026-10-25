@@ -1,191 +1,222 @@
-# Psycho Break: TryHackMe Walkthrough
+# Psycho Break: Complete TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/psychobreak
+Official room: https://tryhackme.com/room/psychobreak
 
-Psycho Break is a themed boot-to-root challenge based on *The Evil Within*. It combines service enumeration, web-source inspection, ciphers, OSINT, archive analysis, audio decoding, password cracking, and Linux privilege escalation. I solve it as a chain: each room on the map gives a clue needed for the next one.
+## Room Overview & Information
 
-## Task 1: Recon
+**Category:** Linux boot-to-root / themed CTF  
+**Difficulty:** Medium  
+**Themes:** Nmap enumeration, web-source inspection, Atbash cipher, OSINT image research, directory discovery, restricted command execution, nested archives, Morse audio, multi-tap keypad encoding, password recovery, and privilege escalation.
 
-### 1. Start the machine and scan it
+Psycho Break is inspired by *The Evil Within*. The machine presents a chain of clues: each room on the map provides information needed to unlock the next one. Start the machine, record its assigned IP, and use only the active TryHackMe instance. Room keys, target addresses, user/root flags, and some results may vary; this write-up gives the reasoning and exact transformation where it can be verified, while keeping unverified values out of the public copy.
 
-Start the target and record the assigned IP. Run:
+## Phase 1: Reconnaissance & Web Enumeration
 
-    nmap -sC -sV -O -oN psychobreak-nmap.txt TARGET_IP
+### Task 1: Recon
 
-Replace TARGET_IP with the live room address. The scan identifies open ports, service versions, and operating-system clues. The room's intended machine exposes three ports and runs Ubuntu, but confirm the result from your own instance because target configuration can change.
-
-The scan identifies FTP, SSH, and a web service. Keep the output because it guides the next steps. Do not assume an exposed service is vulnerable just because it is present.
-
-## Task 2: Web
-
-### 2. Inspect the homepage source
-
-Open the target's web page and inspect its source, not just the visible text. The source contains a comment pointing to the Sadist room path:
-
-    /sadistRoom
-
-Visit that path and inspect the links and messages. A hidden path in a source comment is a clue, not a security boundary.
-
-### 3. Obtain the locker-room key
-
-The Sadist room contains a link or interaction that reveals the locker-room key. Record the key from the active page and submit it to the room. After dismissing the pop-up, the page changes and presents the next step.
-
-Use the key shown by the current instance. Do not confuse this key with the later map key or the Keeper key; they unlock different stages.
-
-### 4. Decode the map message
-
-The locker-room page shows this text:
-
-    Tizmg_nv_zxxvhh_gl_gsv_nzk_kovzhv
-
-This is an Atbash substitution. Each letter maps to the opposite end of the alphabet: A becomes Z, B becomes Y, and so on. Decoding the string gives the phrase used to access the map. Submit that phrase in the room's requested field and follow the map links to the Safe Heaven and Abandoned Room areas.
-
-The lesson is to identify the cipher from the text structure and clue context, then verify the decoded phrase by using it in the intended lab workflow.
-
-### 5. Find the Keeper key in Safe Heaven
-
-Open Safe Heaven from the map and inspect its page source for additional comments or clues. The task points toward a directory-discovery step. Run a directory scan against that path only:
-
-    gobuster dir -u http://TARGET_IP/SafeHeaven/ -w /path/to/wordlist.txt
-
-Replace the wordlist path with one available in the AttackBox. Inspect discovered directories manually. The intended path leads to the Keeper page.
-
-The Keeper page includes a timed challenge asking where an image was taken. Use reverse-image search on the supplied image and verify that the location matches the image itself. Submit the location in the lab to obtain the Keeper key. Record the key for the next room; do not substitute a key from another machine instance.
-
-## Task 3: Help Mee
-
-### 6. Enter the Abandoned Room
-
-Use the Keeper key to access the Abandoned Room from the map. The page includes a timed escape section and a source-code comment that mentions something called shell. This is a clue to inspect how the page handles a request parameter.
-
-Inspect the page source and requests in the browser. The challenge's input handling is vulnerable to a restricted command-execution path. Use only the lab's assigned target and the smallest harmless commands needed to discover the provided files.
-
-### 7. Discover the hidden directory and archive
-
-The room's hint points toward using a parent-directory listing. The important reasoning is that the page's command parameter does not accept every command equally, so a command that lists a parent path can reveal a directory not visible in the current location.
-
-Once the hidden path is identified, access the files provided there and download the archive for local inspection inside the lab environment. Do not assume the archive's visible extension matches its actual format.
-
-### 8. Extract the nested files
-
-The archive includes a text note and a file named Table.jpg. Use file to identify the actual file type before opening it:
-
-    file helpme.zip
-    file Table.jpg
-
-The supposed image is another ZIP archive. Extract it and inspect its contents. The nested archive contains an image and a WAV audio file. Read the text note to identify the person locked in the cell, then examine the audio clue.
-
-### 9. Decode the WAV clue
-
-The audio contains a Morse-code message. Use a Morse audio decoder or inspect the waveform and timing with an appropriate tool. The decoded word is the answer to the room's audio question. Verify the result by listening to the audio and comparing the decoded characters; do not guess from the story.
-
-The archive chain matters: the file named Table.jpg is not an ordinary JPEG, and recognising its real type reveals the next artefacts.
-
-### 10. Recover the FTP credentials
-
-Use the credentials revealed by the previous clues to authenticate to the FTP service identified during reconnaissance. List the available files and download only the artifacts relevant to the challenge. Check each downloaded file with file before deciding how to analyse it.
-
-The room provides a dictionary file and a small compiled program. Keep these files together in the lab workspace so the paths used in the next step are clear.
-
-## Task 4: Crack it open
-
-### 11. Identify the password-checking program
-
-The compiled program accepts one candidate word and reports whether it is correct. Running it without an argument displays its usage. The dictionary file contains candidate values.
-
-Inspect the files first:
-
-    file program
-    file random.dic
-    strings -n 5 program | head -n 40
-
-Strings output is only a clue; it does not reveal all program logic. The intended task is to test the supplied candidate list against the program rather than randomly guessing passwords.
-
-### 12. Test the supplied wordlist
-
-Use a controlled local loop to run the program against the dictionary entries. Keep the loop limited to the provided program and candidate list. The accepted candidate is the key used by the program, and the program then prints a sequence of long numbers.
-
-Do not run unknown binaries outside the lab. In this challenge the executable and wordlist are provided as part of the intended exercise, but they should still be treated as untrusted files.
-
-### 13. Decode the numeric message
-
-The output is not ordinary decimal data. The numbers correspond to multi-tap input from an old mobile-phone keypad, sometimes called T9-style multi-tap encoding. Repeated digits select different letters on the same key. Decode the sequence using the keypad mapping and check that the result forms a meaningful phrase.
-
-Submit the decoded phrase to the room. Record the transformation rather than only the answer, because it explains why the numbers appeared after the correct program key was supplied.
-
-## Task 5: Go Capture The Flag
-
-### 14. Obtain the user and root flags
-
-Use the access path established in the previous tasks to obtain a shell on the target. Verify the current identity and system context:
-
-    whoami
-    id
-    hostname
-    pwd
-    ls -la
-
-Locate the user flag as directed by the room. The target also includes a final root-level task. Do not claim root access until the identity check confirms it.
-
-The actual user and root flag values are deliberately not reproduced here. Obtain them from your own running instance and submit them in TryHackMe; in this public write-up, represent each as flag{hidden}.
-
-### 15. Bonus: Defeat Ruvik
-
-The bonus task refers to a clue about the string the_eye_of_ruvik and instructs the learner to remove the Ruvik account. This step requires root-level permissions. Follow the active room's hint, confirm the account and its home directory, and perform the requested action only on the lab target. Verify the resulting state rather than assuming the command succeeded.
-
-## What I took from this room
-
-Psycho Break is a good reminder that a CTF can combine many different skills: Nmap, source inspection, directory discovery, Atbash, reverse-image search, archive identification, Morse audio, wordlist testing, numeric keypad decoding, and Linux privilege escalation. Each stage supplies evidence for the next. The best way through it is to record clues carefully, verify each transformation, and keep the entire exercise within the assigned machine.
-
-## Phase 3 continued: Archive and encoding analysis
-
-When the room reveals an archive, inspect its contents before extraction and work in a clean directory:
+Start the target and save a full service scan:
 
 ```bash
-file archive-file
-unzip -l archive-file
+nmap -sC -sV -O -oN psychobreak-nmap.txt TARGET_IP
+```
+
+- `-sC` runs Nmap's default scripts.
+- `-sV` attempts to identify service versions.
+- `-O` enables operating-system detection.
+- `-oN` saves normal output to a file.
+
+Replace TARGET_IP with the room's current address. The intended machine exposes FTP, SSH, and a web service, with Ubuntu as the likely OS. Confirm the actual ports and results in your current scan rather than copying a port table from another instance.
+
+Keep the scan as evidence. An open service is an attack surface, not proof that the service is vulnerable.
+
+### Task 2: Web
+
+Open the target's web service and inspect the homepage source using View Page Source or:
+
+```bash
+curl -i http://TARGET_IP/
+```
+
+The page source contains a comment pointing to:
+
+```text
+/sadistRoom
+```
+
+Visit the path and inspect the page, links, and any messages. A route hidden in a source comment is only an information-disclosure clue; it is not access control.
+
+### Obtain the locker-room key
+
+The Sadist room contains an interaction that reveals the locker-room key. Read the value from your active page and submit it in the room. Dismiss the pop-up as instructed and inspect the updated page.
+
+Do not confuse the locker-room key with the later map key or Keeper key. They unlock different steps.
+
+### Decode the map message with Atbash
+
+The locker-room page presents this string:
+
+```text
+Tizmg_nv_zxxvhh_gl_gsv_nzk_kovzhv
+```
+
+This is Atbash, a substitution cipher that maps the alphabet in reverse: A ↔ Z, B ↔ Y, and so on. Applying the mapping gives:
+
+```text
+Grant me access to the map please
+```
+
+Submit the phrase as the task requests, then follow the map links to Safe Heaven and the Abandoned Room. This is a simple substitution cipher, not modern encryption.
+
+### Find the Keeper key in Safe Heaven
+
+Open Safe Heaven and inspect its page source for additional comments and clues. The room indicates that directory discovery is needed. Run Gobuster against the named path only:
+
+```bash
+gobuster dir -u http://TARGET_IP/SafeHeaven/ -w /path/to/wordlist.txt -o safeheaven-enum.txt
+```
+
+- `dir` selects directory/file discovery.
+- `-u` supplies the base URL.
+- `-w` selects a wordlist available in the AttackBox.
+- `-o` saves the results.
+
+Inspect discovered paths manually; the relevant path leads to the Keeper page.
+
+The Keeper page has a timed image-location challenge. Use reverse-image search on the supplied image and corroborate the match using distinctive visible landmarks. Submit the location required by the room and copy the Keeper key shown by the current instance. Do not guess the location from the theme or reuse a value from an old run.
+
+## Phase 2: Vulnerability Analysis & Initial Access
+
+### Task 3: Help Mee
+
+### Enter the Abandoned Room
+
+Use the Keeper key to access the Abandoned Room through the map. The page includes an escape interaction and a source comment mentioning a shell-related parameter. Inspect both the HTML source and the HTTP request before testing. The lesson is that the application restricts commands using a weak input-handling design.
+
+Test only the smallest non-destructive command that the room permits. Record the exact request parameter and response. Do not treat a rendered page or an error message as proof that a command executed.
+
+### Discover the hidden directory and archive
+
+The room's hint points toward listing a parent directory. Use the page's intended test to identify the hidden directory, then access only the challenge artifacts required to continue. Save the archive into the lab workspace and inspect its real file type:
+
+```bash
+file helpme.zip
+unzip -l helpme.zip
+```
+
+- `file` identifies the likely format from file contents.
+- `unzip -l` lists archive members without extracting them.
+
+Do not assume the file extension proves the format, and do not execute unknown files from the archive.
+
+### Extract the nested archive
+
+The archive includes a text note and a file named `Table.jpg`. Check its type:
+
+```bash
+file Table.jpg
+```
+
+The file named Table.jpg is actually another ZIP archive. Extract it into a separate directory and list the contents:
+
+```bash
 mkdir -p /tmp/psychobreak-work
-unzip archive-file -d /tmp/psychobreak-work
-find /tmp/psychobreak-work -maxdepth 4 -type f -print
+unzip Table.jpg -d /tmp/psychobreak-work
+find /tmp/psychobreak-work -maxdepth 3 -type f -print
+file /tmp/psychobreak-work/*
 ```
 
-Use the extraction tool that matches the archive type; not every archive is a ZIP file. Record the file names and nesting structure, then extract only the files needed for the task. Avoid running extracted executables on a personal system.
+The nested archive contains an image and a WAV file. Read the accompanying note for the clue about the person locked in the cell, then investigate the audio artifact.
 
-For encoded messages, identify the likely transformation from task clues. The earlier Atbash clue is reversed by mapping A↔Z, B↔Y, and so on. For multi-tap phone-keypad encoding, group the repeated digits and map them to the corresponding letters. For Morse code, preserve the spacing between letters and words; changing those boundaries can change the result.
+### Decode the WAV clue
 
-## Phase 4: Audio and password clues
-
-If the room provides an audio file, first identify it and inspect duration and format:
+Identify the audio format and duration:
 
 ```bash
-file clue-audio
-ffprobe -hide_banner clue-audio
+file clue.wav
+ffprobe -hide_banner clue.wav
 ```
 
-Use the supplied audio tool or waveform/spectrogram viewer according to the room's instructions. Listen to the audio and compare likely Morse patterns only when the task indicates that representation. Verify each character grouping against the supplied clue; do not invent a decoded phrase.
+Replace `clue.wav` with the actual filename extracted from the archive. Use the Morse audio decoder or waveform/spectrogram viewer instructed by the room. Preserve the spacing between Morse characters and words; spacing errors can change the decoded result. Verify the output against the clue and submit the word displayed by the challenge.
 
-For a password candidate, use the room's specified wordlist and hash format. Distinguish online login attempts from offline hash testing, and do not reuse recovered credentials outside the lab.
+Do not invent a decoded phrase if the audio is unclear. Return to the exact supplied file and check that you extracted the correct archive member.
 
-## Phase 5: Privilege escalation checklist
+### Recover the FTP credentials
 
-After a shell is obtained, confirm identity and available privilege paths:
+Use the credentials revealed by the earlier clues to authenticate to the FTP service found during reconnaissance. List the available files and download only the relevant challenge artifacts. Check each downloaded file before opening it:
+
+```bash
+file program
+file random.dic
+strings -n 5 program | head -n 40
+```
+
+The compiled program and dictionary are part of the challenge. Treat them as untrusted files and run them only in the lab workspace.
+
+## Phase 3: Password Recovery and Privilege Escalation
+
+### Task 4: Crack it open
+
+The supplied program accepts one candidate word and reports whether it is correct. Running the program without the required argument may reveal its usage. The dictionary file contains the candidate list.
+
+Use a controlled loop to test each word against the supplied program. The exact executable syntax should be taken from its usage output. Do not substitute a general password cracker or apply the wordlist to unrelated services.
+
+The accepted candidate makes the program print a sequence of long numbers. These values are not ordinary decimal numbers; the room indicates they represent multi-tap input from an old mobile-phone keypad.
+
+### Decode the multi-tap message
+
+In multi-tap encoding, repeated presses on one digit correspond to different letters. For example, on a traditional keypad the 2 key maps to A, B, and C depending on the number of presses. Separate letter groups are usually represented by a different delimiter or timing boundary.
+
+Group the numeric output according to the task's format, translate each group using the correct keypad mapping, and verify that the decoded phrase makes sense in context. Submit the phrase required by the room. Do not invent the program's accepted password or numeric output; read those values from the active binary's output.
+
+### Task 5: Go Capture The Flag
+
+Use the access path established by the previous stages to obtain a shell. Check the current context:
 
 ```bash
 whoami
 id
+hostname
+pwd
+ls -la
 sudo -l
-find / -perm -4000 -type f 2>/dev/null
-getcap -r / 2>/dev/null
 ```
 
-The SUID search finds files that run with their owner's effective identity; the capability search identifies binaries granted specific Linux privileges. These outputs can be large, so compare unusual entries with the room's hints and inspect the relevant binary's permissions and purpose before using it.
+These commands verify the account and host, list the current directory, and show permitted sudo commands. Continue the room's intended local privilege checks only after confirming the initial account. Verify the effective identity after every privilege transition; a user shell is not root access.
 
-For each flag, verify the account and path used to access it. Do not treat a clue, decoded phrase, or successful login as proof that a final privilege escalation succeeded.
+Retrieve the user flag from the path indicated by the active room. Follow the room's final privilege-escalation clue to reach the root flag, then verify root-level context before reading it. Public notes should redact both flags as `flag{hidden}`.
 
-## Complete task evidence
+### Bonus: Defeat Ruvik
 
-Psycho Break combines several skill areas, so keep a per-task table with the clue, transformation/tool used, verified output, and next room unlocked. The exact answers and flags should be read from the active machine and redacted as flag{hidden} in public notes.
+The bonus task mentions the clue `the_eye_of_ruvik` and asks the learner to remove the Ruvik account. This is a privileged action. Confirm the user and associated home directory, then follow the official room's requested procedure only on the lab target. Verify the account state after the action. Do not remove accounts on any system outside the CTF.
 
-## Remediation and lessons
+## Phase 4: Room Questions & Evidence Checklist
 
-Remove exposed clues and sensitive backups from web roots, avoid weak passwords, protect upload and service permissions, patch vulnerable components, and restrict privileged execution. Each stage becomes easier when the prior result is verified before it is used as a new assumption.
+| Task | Evidence to preserve |
+|---|---|
+| Recon | Nmap output showing live ports, service versions, and OS estimate |
+| Web clue | Homepage source comment and Sadist-room route |
+| Locker-room key | Exact value shown in the current room |
+| Map phrase | Atbash ciphertext and decoded plaintext |
+| Keeper key | Image-location source and key shown after the timed task |
+| Hidden directory | Relevant request and directory listing |
+| Archive chain | File types, archive listings, and nested artifact names |
+| Audio clue | WAV file and verified Morse decoding |
+| FTP access | Login success and downloaded challenge filenames |
+| Password program | Accepted candidate and program output |
+| Multi-tap clue | Numeric groups and decoded text |
+| User/root flags | Exact values from the current host, redacted publicly |
+| Bonus task | Account state before and after the authorized action |
+
+The exact locker-room key, Keeper key, image location, password candidate, numeric sequence, and flag values depend on the active environment and must be copied from the current instance. This guide does not invent them.
+
+## Phase 5: Key Takeaways & Remediation
+
+- Remove sensitive clues and backups from public web roots.
+- Do not expose command-execution functionality through weakly filtered request parameters.
+- Validate file types based on content and store uploads outside executable paths.
+- Restrict FTP and other legacy services to authorised users and protect credentials.
+- Avoid weak passwords and protect password-checking utilities.
+- Patch vulnerable components, restrict privileged files and commands, and audit account permissions.
+- Verify each step with evidence before using its output as the next assumption.
+
+Psycho Break is a chain of different techniques. The reliable way through it is to verify every clue, use the right transformation, preserve the original artifact, and confirm each access or privilege transition instead of guessing.

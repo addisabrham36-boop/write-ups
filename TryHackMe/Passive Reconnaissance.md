@@ -4,98 +4,120 @@ Official room: https://tryhackme.com/room/passiverecon
 
 ## Room Overview & Information
 
-**Category:** Network security and OSINT  
+**Category:** OSINT and reconnaissance  
 **Difficulty:** Beginner  
-**Focus:** WHOIS, DNS records, DNSDumpster, Certificate Transparency, and Shodan.
+**Focus:** Passive versus active reconnaissance, WHOIS, DNS lookups, DNSDumpster, and Shodan.
 
-Passive reconnaissance collects information from public sources without directly probing the target's services. It can reveal domain registration information, DNS configuration, subdomains, certificates, and internet-exposed services. Public does not mean harmless: only investigate domains and assets within the exercise's scope, and handle discovered personal or sensitive information responsibly.
+Passive reconnaissance collects information from existing public sources without directly probing the target's services. Active reconnaissance interacts with the target, for example by pinging a host or scanning its ports. This room uses public information and a simulated DNS lab to teach the difference.
 
-The official room notes that some public lookups require internet access. If the AttackBox cannot reach an external site, use the supported TryHackMe VPN environment or the room's instructions rather than inventing results.
+## Task 2: Passive Versus Active Recon
 
-## Phase 1: WHOIS
+### Question: “You visit the Facebook page of the target company, hoping to get some of their employee names. What kind of reconnaissance activity is this?”
 
-WHOIS can return domain-registration data such as registrar, creation or expiry dates, nameservers, and registrant details where those details are not privacy-protected.
+**Answer: P (Passive).**
 
-Run a lookup on a domain that the room authorises:
+The researcher is looking at information already published on a third-party social platform and is not directly probing the target's systems.
 
-```bash
-whois example.com
-```
+### Question: “You ping the IP address of the company webserver to check if ICMP traffic is blocked. What kind of reconnaissance activity is this?”
 
-The command queries a WHOIS service and prints the available registration record. The exact fields depend on the registry, registrar, and privacy settings. Do not assume that a missing registrant name means the domain has no owner; privacy services and registry policies often hide personal information.
+**Answer: A (Active).**
 
-Look for the registrar, important dates, and nameservers. Treat WHOIS as one source of context, not proof that a site is trustworthy.
+Ping sends network traffic to the target and observes the response. It can appear in logs and is therefore active reconnaissance.
 
-## Phase 2: DNS records
+### Question: “You happen to meet the IT administrator of the target company at a party. You try to use social engineering to get more information about their systems and network infrastructure. What kind of reconnaissance activity is this?”
 
-DNS records expose how names map to services. Query the record types relevant to the domain:
+**Answer: A (Active).**
 
-```bash
-dig example.com A
-dig example.com AAAA
-dig example.com MX
-dig example.com TXT
-dig example.com NS
-```
+This is direct interaction with a person to obtain information. The room classifies this as active reconnaissance because the researcher is directly engaging the target organisation. In a real engagement, social engineering must be explicitly included in the written scope.
 
-- `A` returns IPv4 addresses.
-- `AAAA` returns IPv6 addresses.
-- `MX` identifies mail exchangers and their preference values.
-- `TXT` returns text records, which may include email policy or verification data.
-- `NS` lists authoritative nameservers.
+## Task 3: WHOIS
 
-For a name you already know, these commands answer a specific question. They do not enumerate every possible subdomain.
+WHOIS returns domain-registration details such as registrar, registration dates, and nameservers. Some fields may be privacy-protected, and results vary by registry and date.
 
-## Phase 3: Discover subdomains with DNSDumpster
+Run:
 
-DNSDumpster aggregates publicly available DNS and related information. In the room's exercise, search for the domain specified by the task and review the results. Record the discovered subdomain, resolved IP, and record type as shown.
+\`\`\`bash
+whois tryhackme.com
+\`\`\`
 
-The purpose is to discover names that are not obvious from the homepage. A forgotten development host or old admin portal may enlarge an organisation's attack surface. Do not assume a discovered subdomain is vulnerable; passive discovery only identifies a possible asset.
+Read the relevant field rather than relying on a search snippet.
 
-If the service does not load, check the room's connectivity guidance. Do not substitute a guessed hostname or a result from another domain.
+### Question: “When was TryHackMe.com registered?”
 
-## Phase 4: Certificate Transparency
+**Room answer:** `20180705`.
 
-Certificate Transparency (CT) logs are public append-only records of issued TLS certificates. Certificates often contain domain names and subdomains in their Subject Alternative Name list. Search the domain through a CT search service such as crt.sh and review matching certificate names.
+This is the date format used by the room's WHOIS result: YYYYMMDD.
 
-Example command-line query for a public CT site, where network access is available:
+### Question: “What is the registrar of TryHackMe.com?”
 
-```bash
-curl -s 'https://crt.sh/?q=%25.example.com&output=json'
-```
+**Room answer:** `namecheap.com`.
 
-This is an illustrative query pattern. It asks crt.sh for certificate entries matching subdomains of example.com and requests JSON output. The returned data can include duplicates, expired certificates, and historical names, so validate any candidate before treating it as a current asset.
+### Question: “Which company is TryHackMe.com using for name servers?”
 
-A certificate entry shows that a name appeared in a certificate record; it does not prove that the hostname currently resolves or serves a live application.
+**Room answer:** `CLOUDFLARE.COM`.
 
-## Phase 5: Shodan
+WHOIS data can change. If the current room or live lookup returns a different value, follow the active task's data and record the query date.
 
-Shodan indexes information about internet-facing services observed by its crawlers. Search the domain or a resolved address using the room's authorised example. Review the service, port, banner, and timestamp when available.
+## Task 4: nslookup and dig
 
-A Shodan result is a historical observation, not a guarantee that the service is still online. Service banners can be inaccurate or intentionally altered. Use the results to form questions for an authorised assessment, not to claim a confirmed vulnerability.
+DNS maps names to records. Different record types answer different questions:
+- **A:** IPv4 address.
+- **AAAA:** IPv6 address.
+- **MX:** mail exchanger and preference.
+- **NS:** authoritative nameserver.
+- **TXT:** text data, often used for verification or email policy.
 
-## Phase 6: Answering the room's practical questions
+The room asks you to query the TXT record for thmlabs.com. Use either tool:
 
-The room uses public lookups and example domains. For every question asking for a specific domain, subdomain, IP, or service:
+\`\`\`bash
+nslookup -type=TXT thmlabs.com
+dig thmlabs.com TXT
+\`\`\`
 
-1. Copy the exact domain from the question.
-2. Use the specified public source (WHOIS, DNS, DNSDumpster, CT logs, or Shodan).
-3. Identify the field the question asks for.
-4. Record the exact result and its source.
-5. If the result is historical or duplicated, verify it before drawing conclusions.
+- **nslookup -type=TXT** asks for TXT records.
+- **dig thmlabs.com TXT** performs the same query using dig.
+- The answer section contains the record value.
 
-The task values are dependent on the queried domain and the data available when the lookup is performed. This guide describes the procedure rather than fabricating a supposedly universal answer.
+### Question: “What is the TXT record value for thmlabs.com?”
 
-## Phase 7: Passive versus active reconnaissance
+The record contains a flag. Obtain it from the active room's DNS result and submit it there. The flag is deliberately redacted in this public write-up as `THM{hidden}`.
 
-A DNS query to a public resolver, WHOIS lookup, CT search, or Shodan query generally relies on third-party/public data and is considered passive relative to the target. A direct port scan, HTTP request to the target, or login attempt is active and can be logged by the target.
+A DNS record is public data, not encrypted secret storage. Do not place credentials or private keys in TXT records.
 
-The distinction is about how information is gathered, not whether the activity is automatically authorised. Keep both passive and active work inside the approved scope.
+## Task 5: DNSDumpster
 
-## Phase 8: Reporting and mitigation
+DNSDumpster aggregates publicly available DNS and related information. Search for `tryhackme.com` and inspect the subdomains listed in the result. The question asks for an interesting subdomain in addition to `www` and `blog`.
 
-Maintain an asset inventory, remove obsolete DNS records, protect registrar accounts with MFA, and review public service exposure. Avoid publishing discovered personal information or sensitive host details unnecessarily. Passive data can be incomplete or stale, so label the source and observation time in a report.
+### Question: “Lookup tryhackme.com on DNSDumpster. What is one interesting subdomain that you would discover in addition to www and blog?”
+
+**Room answer:** `remote`.
+
+DNSDumpster results can change over time. Use the active room's expected result if the current site presents different data, and do not assume that a discovered hostname is currently online or vulnerable.
+
+## Task 6: Shodan.io
+
+Shodan indexes publicly reachable services observed by its crawlers. Search results include service banners, ports, and other metadata. They represent observations at a point in time and should not be treated as proof that a service is still available.
+
+### Question: “According to Shodan.io, what is the 2nd country in the world in terms of the number of publicly accessible Apache servers?”
+
+**Room answer:** **Germany**.
+
+### Question: “Based on Shodan.io, what is the 3rd most common port used for Apache?”
+
+**Room answer:** **8080**.
+
+### Question: “Based on Shodan.io, what is the 3rd most common port used for nginx?”
+
+**Room answer:** **8888**.
+
+Shodan's rankings can change as it scans new systems and changes its classification. These are the room's expected answers, not permanent global facts. If the room's live dashboard differs, follow its current result.
+
+## Reporting and responsible use
+
+For every discovery, record the source, query, date, observation, and confidence. A certificate record proves a hostname appeared in a certificate; it does not prove the host is currently online. A Shodan result shows an observed service, not necessarily a current vulnerability.
+
+Do not attempt to access or exploit discovered systems unless they are within the authorised scope. Publicly indexed information can still be sensitive, so minimise collection and report accidental exposure responsibly.
 
 ## Key takeaways
 
-WHOIS gives registration context, DNS reveals configured records, DNSDumpster helps surface subdomains, CT logs reveal names in certificates, and Shodan shows observed internet-facing services. Cross-check sources and treat every result as a lead that requires validation.
+Passive reconnaissance uses public information; active reconnaissance interacts directly with a target. WHOIS provides registration context, DNS queries return record data, DNSDumpster helps discover subdomains, and Shodan summarises observed internet-facing services. Verify results, record when they were obtained, and avoid turning a clue into an unsupported conclusion.

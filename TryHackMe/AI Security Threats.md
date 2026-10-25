@@ -2,68 +2,71 @@
 
 Room: https://tryhackme.com/room/aisecuritythreats
 
-This room examines security problems introduced by AI and ways AI can amplify older attack methods. I treat the model as one part of a larger application: the data it can read, the tools it can invoke, the identity it runs as, and the controls around it all affect the real risk.
+## Room Overview & Information
 
-## 1. Recognise model-specific vulnerabilities
+This note covers the practical workflow, evidence to collect, common interpretation errors, and defensive lessons for AI Security Threats. Use the live room as the authority for task wording and machine-specific values. The repository does not include fabricated terminal output, credentials, or flags.
 
-The main categories to recognise are:
+## 1. Establish the threat model
 
-- **Prompt injection:** untrusted text attempts to influence the model's instructions or behaviour.
-- **Training-data poisoning:** manipulated examples influence the model during training.
-- **Sensitive information disclosure:** the system reveals private prompts, records, or other protected data.
-- **Model theft or extraction:** someone obtains model weights or tries to reproduce the model through repeated queries.
-- **Adversarial input:** deliberately crafted input causes an unexpected prediction or response.
-- **Model supply-chain compromise:** a model, dataset, dependency, or training component is tampered with.
-- **Excessive agency:** the application gives an AI component more authority or action capability than its task requires.
+Start the lab and read its scenario. Identify the system, the assets it handles, the trust boundaries, the attacker-controlled inputs, and the security objective. A threat model is useful only when it is tied to a real system and a plausible abuse path.
 
-When the room asks about a scenario, identify what the attacker is trying to change or obtain. Manipulating instructions is prompt injection; corrupting the learning material is poisoning; obtaining confidential information is disclosure; and using a tool beyond its intended scope is an agency or authorisation problem.
+For AI systems, assets can include private prompts, training data, model weights, credentials, connected tools, business records, and service availability. Trust boundaries may exist between the user and model, model and retrieval system, model and tool, and developer pipeline and deployed model.
 
-## 2. AI-enhanced attacks
+## 2. Distinguish common threat classes
 
-AI can make existing attacks faster and more convincing. It can help produce fluent phishing messages, translate and personalise lures, generate voice or image deepfakes, and assist an attacker in writing or adapting code. The important point is that AI often improves scale and believability rather than creating an entirely new attack category.
+**Prompt injection** attempts to influence an AI system by placing instructions in user input or retrieved content. It is especially dangerous when the model can access private data or call tools. Treat retrieved documents and web pages as untrusted data, not privileged instructions.
 
-For the room's inbox or agent exercise, read each message and classify the actual technique shown:
+**Sensitive information disclosure** occurs when a system reveals private data through its answers, logs, retrieval layer, or tool access. The root cause may be excessive permissions or poor data separation rather than a model defect.
 
-1. Look for an email or message designed to trick a recipient into clicking, signing in, or opening an attachment. That is phishing, even if AI helped write it.
-2. Look for a synthetic or manipulated voice or image presented as a real person. That points to a deepfake.
-3. Look for a tailored conversation that uses personal details or impersonation to persuade a victim to do something. That is AI-assisted social engineering.
-4. Explain what AI contributed: scale, personalisation, realistic language, synthetic media, or rapid variation.
+**Insecure output handling** occurs when an application trusts model output and sends it directly to a shell, SQL query, browser, or HTML renderer without validation and context-appropriate encoding.
 
-Do not label a message as a deepfake simply because it sounds unusual. The evidence in the scenario should support the classification.
+**Training-data or model poisoning** changes data or model behaviour before deployment. Investigate provenance, unexpected trigger behaviour, and changes to model artifacts.
 
-## 3. Defensive uses of AI
+**Model denial of service** targets expensive inference, long contexts, repeated requests, or resource-intensive tools. Rate limits, quotas, timeouts, and resource budgets reduce the impact.
 
-Defenders can use AI to summarise alerts, cluster related events, extract indicators, help triage suspicious files, and support threat hunting. Those uses can save time, but the result still needs validation. A false positive can waste an analyst's time, while a false negative can hide a real incident.
+**Supply-chain compromise** can affect packages, plugins, model weights, datasets, deployment images, and CI/CD credentials. A model's popularity is not proof of its integrity.
 
-A safe workflow is to preserve the original event, use AI to assist with triage, verify important claims against the underlying evidence, and record which conclusions were confirmed by an analyst.
+## 3. Analyse a prompt-injection scenario
 
-## 4. Answering the room's questions
+If the task includes a prompt, retrieved document, or agent transcript, separate trusted system configuration from untrusted content. Identify the instruction the attacker wants the model to follow, the protected asset, and the missing control that makes the attack consequential.
 
-The room includes direct knowledge checks and an interactive scenario. For direct questions:
+Test only the provided lab input. Record the original behaviour, the altered input, and the output. A prompt that changes the tone of an answer is not by itself a security impact. The relevant question is whether the system crosses a boundary, such as disclosing protected content or performing an unauthorised tool action.
 
-- If asked what technology creates convincing copies of a person's voice or appearance, think of **deepfake** generation.
-- If asked which initial-access method is made harder to recognise by fluent, targeted content, think of **phishing**.
-- If an agent presents example messages, classify each message and explain how AI is used rather than replying with a label alone.
+Defences include clear separation of instructions and data, least-privilege tool permissions, explicit confirmation for consequential actions, allowlisted tool arguments, and server-side authorization independent of the model's decision.
 
-The exact interactive conversation may vary. Follow the current agent instructions, provide the classification and rationale, and use the room's own feedback to verify the answer. I have not inserted a flag because I have not independently observed the current lab's flag.
+## 4. Analyse data disclosure and tool misuse
 
-## 5. Controls that reduce AI risk
+Trace how the model obtains information. If retrieval is involved, check whether access controls are applied before the retrieved content reaches the model. Hiding a document in the interface is not enough if the retrieval service can return it to any user.
 
-- Apply least privilege to model accounts, tools, and retrieval sources.
-- Enforce authorisation in application code before sensitive data is retrieved or an action is executed.
-- Treat user text, webpages, documents, and retrieved records as untrusted input.
-- Require human approval for financial, administrative, destructive, or otherwise high-impact actions.
-- Keep model, dataset, and dependency provenance records.
-- Monitor unusual tool calls, high-volume requests, data access, and repeated attempts to override instructions.
-- Evaluate models with adversarial tests and realistic misuse scenarios.
-- Train users to verify unusual payment, credential, or access requests through a separate trusted channel.
+For tool-enabled agents, inspect which tools are available, what credentials they use, and whether the server validates each action. Never grant an agent broader access merely because the prompt says it should act responsibly. The application must enforce authorization.
 
-A system prompt is not an access-control system. Even if the model is instructed not to reveal a secret, the application must ensure it never receives data it is not authorised to disclose.
+## 5. Evaluate outputs safely
 
-## 6. How I would document a finding
+Treat model output as untrusted input. Before passing it to another component, validate its schema, enforce limits, escape it for the destination context, and reject unexpected fields. For shell, database, and file operations, prefer fixed functions with structured arguments over arbitrary generated commands.
 
-For each finding, write down the affected asset, the attack path, the evidence observed, the likely impact, and the mitigation. Separate what the room demonstrated from what I infer. Avoid copying personal information, real credentials, or private records into public notes.
+A robust test records the input, the model response, the downstream action, and whether the action was authorised. This reveals whether the weakness is in the model, orchestration code, permissions, or output handling.
+
+## 6. Answer the room questions accurately
+
+Map each question to the concept or evidence it asks for. Use the lab's scenario and results rather than assuming every AI system has the same vulnerability. When asked to classify an attack, identify the attacker-controlled input and the violated security property. When asked for a mitigation, state which control prevents the demonstrated path and where it is enforced.
+
+Do not fabricate outputs or flags. Retrieve machine-specific answers from the active room and redact flags in public notes as `flag{hidden}`.
+
+## 7. Mitigation priorities
+
+1. Define assets and trust boundaries before deployment.
+2. Apply authorization in application code, not in prompts alone.
+3. Give tools the minimum permissions and narrowest input schema possible.
+4. Treat retrieved content, uploaded files, and model outputs as untrusted.
+5. Isolate execution environments and restrict network egress.
+6. Apply request quotas, token limits, timeouts, and monitoring.
+7. Version and verify models, datasets, plugins, and dependencies.
+8. Red-team the whole application, including retrieval and tools, not just the model response.
 
 ## What I took from this room
 
-AI changes the speed and realism of attacks, and it creates new risks around data, models, and tool use. The response is layered security: protect the data and model, constrain the application around it, monitor activity, and verify AI-assisted decisions rather than trusting them blindly.
+AI security depends on the system around the model. Prompting matters, but access control, data handling, tool design, deployment integrity, and monitoring determine whether an unexpected answer becomes a real compromise.
+
+## Phase 5: Key Takeaways & Remediation
+
+The main goal is to connect every conclusion to observable evidence and enforce security controls at the correct trust boundary. Keep the original artefacts, record the exact commands and outputs from your own run, and redact any flag in public notes as `flag{hidden}`.

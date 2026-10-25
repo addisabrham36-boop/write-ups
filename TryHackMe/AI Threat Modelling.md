@@ -87,7 +87,3 @@ Keep notes about assumptions. A threat model is a snapshot of a system and shoul
 ## What I took from this room
 
 Good AI threat modelling starts with the system and its trust boundaries, then follows concrete attack paths to assets and impact. Controls must be enforced by the component that owns the relevant permission, not left to the model's good intentions.
-
-## Phase 5: Key Takeaways & Remediation
-
-The main goal is to connect every conclusion to observable evidence and enforce security controls at the correct trust boundary. Keep the original artefacts, record the exact commands and outputs from your own run, and redact any flag in public notes as `flag{hidden}`.

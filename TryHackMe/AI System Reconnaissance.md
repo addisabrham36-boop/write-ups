@@ -78,7 +78,17 @@ Reduce the exposed surface, remove debug routes from production, authenticate ad
 ## What I took from this room
 
 AI reconnaissance is ordinary application reconnaissance with extra attention to model, retrieval, and tool boundaries. The best result is an evidence-based map of what exists, who can access it, and which components deserve deeper testing.
+## Phase 5: Final Checklist and Remediation
 
-## Phase 5: Key Takeaways & Remediation
+Before closing the room, verify that the inventory separates confirmed exposure from assumptions. For each discovered route, record its purpose, HTTP method, authentication requirement, the identity used during the test, and whether it calls a model, retrieval service, or tool.
 
-The main goal is to connect every conclusion to observable evidence and enforce security controls at the correct trust boundary. Keep the original artefacts, record the exact commands and outputs from your own run, and redact any flag in public notes as `flag{hidden}`.
+| Check | Evidence to preserve | Security question |
+|---|---|---|
+| Public interface | URL, redirects, response headers | Does it disclose unnecessary platform details? |
+| API route | Method, path, request shape, status | Is the route intended and properly authenticated? |
+| Model service | Model identifier and permitted input | Is access controlled and usage rate-limited? |
+| Retrieval or upload | Data source and ownership checks | Can one user access another user's data? |
+| Tool integration | Tool definition and authorization result | Does the tool enforce permissions independently? |
+| Debug or metrics endpoint | Exposure and authentication state | Does it reveal secrets, prompts, or internal state? |
+
+Do not invent a task answer if it depends on the lab's interactive state. When the room asks for a completion confirmation, use the site's visible feedback. Remediation should minimise public endpoints, enforce authorization at the service that owns the data, restrict tool capabilities, validate uploaded content, and monitor model/API usage.

@@ -118,28 +118,25 @@ The application treats a user-supplied artifact as trusted executable object dat
 
 The three practicals have different root causes. A predictable encryption key weakens confidentiality; SSTI lets input influence a template interpreter; unsafe deserialization lets untrusted object data trigger behaviour. Identify the specific trust boundary, verify the impact in the lab, and apply a fix that removes the root cause rather than relying on a generic filter.
 
-## Expanded data-handling assessment
+## Phase 6: Complete task evidence checklist
 
-### 1. Trace data through the application
+### A04: Cryptographic failures
+Record the key hinted by the exercise, the note selected for decryption, and the output returned by the lab. The documented key clue is a four-character value beginning with KEY; use the room's exact value and inspect the decrypted note for the flag. Do not assume ciphertext is secure merely because it looks random.
 
-Identify where data enters, is validated, stored, transformed, logged, transmitted, and rendered. At every boundary, ask whether the system knows the data's source, whether it is trusted, and how it is encoded for the next component. The same data may be safe in one context and dangerous in another.
+### A05: Injection / SSTI
+Confirm the server evaluates the intended template expression before using the task's file-reading step. Preserve the request and response showing the content of the target file. A plain echoed input is not proof of template evaluation.
 
-### 2. Inspect validation and parsing
+### A08: Software or data integrity failures
+Use the serialized-object task only in the isolated lab and follow the instructions in the active room. Record where the object is received, how it is encoded for transport, and which response demonstrates the file contents were returned. Untrusted pickle data can invoke behaviour during deserialization, so do not load it on a personal machine.
 
-Check whether the server validates the expected type, size, format, and allowed values. Client-side validation improves usability but can be bypassed. Parsers for archives, images, documents, and serialized objects deserve special attention because they may consume complex attacker-controlled structures.
+| Task | Evidence to submit | Public note |
+|---|---|---|
+| Decrypt note | Exact flag from decrypted note | THM{hidden} |
+| Template processing | Exact flag read by the vulnerable renderer | THM{hidden} |
+| Unsafe deserialization | Exact flag displayed by the active challenge | THM{hidden} |
 
-### 3. Compare raw and processed values
+The values are deliberately redacted here, not replaced with guessed strings.
 
-Capture the original request, processed output, and any error returned by the lab. Determine whether the application decodes or normalizes data before validation and whether later components interpret it differently. Do not assume every malformed value is exploitable; confirm impact through a safe, repeatable test.
+## Final remediation checklist
 
-### 4. Protect secrets and personal data
-
-Avoid placing credentials, tokens, or sensitive records in URLs, client-side assets, debug responses, or logs. Minimize collection and retention, control access, and encrypt data in transit and at rest where appropriate. Encryption does not replace authorization or safe application logic.
-
-### 5. Remediation
-
-Use schema validation, safe parsers, strict content-type handling, size and timeout limits, context-appropriate output encoding, secret-management services, and least-privilege storage access. Treat file uploads and external API responses as untrusted input.
-
-### 6. Room questions
-
-Connect each task to the affected data flow, validation step, parser, or trust boundary. Confirm the exact result in the lab and do not invent sample values. Redact flags as `flag{hidden}`.
+Use authenticated encryption with well-managed keys, keep keys out of client-side data, avoid evaluating untrusted templates, and never deserialize untrusted pickle objects. Prefer a safe data format with strict schema validation, isolate file processors, and apply least privilege. Verify fixes by repeating the safe reproduction request and confirming the protected file or data is no longer exposed.

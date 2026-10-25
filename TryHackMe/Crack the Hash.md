@@ -2,22 +2,115 @@
 
 Room: https://tryhackme.com/room/crackthehash
 
-This room introduces password hashes and the idea of recovering a password when a weak password has been hashed. A hash is not supposed to be decrypted like ciphertext. Instead, cracking tools make guesses, hash each guess using the expected method, and compare the result with the stored hash.
+This room is about identifying hash types and recovering weak passwords from hashes using wordlists and cracking tools. The important part is not just running John the Ripper. I need to identify the likely hash format first, choose the correct mode, run the attack, and check the recovered result against the task.
 
-## Identify before cracking
+I only use these techniques on the hashes provided by this room or on data I am authorised to test. A hash is not the same thing as encryption: a password hash is designed to be one-way, but weak passwords can still be guessed and compared against it.
 
-The first step is to work out what kind of hash I have. Different algorithms produce different digest lengths, but length alone is not enough to identify every hash reliably. Context and the format matter too. If I choose the wrong mode in a cracking tool, even a correct password may not be found because the guesses are being processed incorrectly.
+## 1. Prepare the lab
 
-## Wordlist-based cracking
+1. Open the room and read the task's instructions.
+2. Start the AttackBox if I am using it.
+3. Copy the exact hash from the question into a text file. Do not add extra spaces or punctuation.
+4. Keep the original value in a separate file so I can verify that I did not accidentally change it.
 
-A common approach is to use a wordlist of likely passwords. In a controlled lab, tools such as John the Ripper or Hashcat can test those guesses. The exact command depends on the hash type, tool version, and the file format used by the room, so I should follow the room's instructions rather than paste a random command from another challenge.
+For a simple one-hash task:
 
-A successful crack means a candidate matched the hash. It does not mean every password using that hash type is easy to recover. Weak, common passwords are much more likely to appear in a wordlist than long, random ones.
+```bash
+printf '%s\n' 'PASTE_HASH_HERE' > hash.txt
+cat hash.txt
+```
 
-## Defending password storage
+The string `PASTE_HASH_HERE` is a placeholder, not a real challenge hash.
 
-Applications should not store plaintext passwords. They should use a password-hashing scheme designed for password storage, such as Argon2id, scrypt, bcrypt, or PBKDF2 with appropriate settings, and a unique salt per password. Fast general-purpose hashes make large numbers of guesses much cheaper.
+## 2. Identify the hash type
+
+Hash strings can look similar, so I should not choose an algorithm only because the string is hexadecimal. Check its length and structure, then use a hash-identification tool if available:
+
+```bash
+hashid 'PASTE_HASH_HERE'
+```
+
+HashID reports likely algorithms. It does not prove which algorithm was used, because different algorithms can produce strings with similar appearance. The room's clues and known format help narrow it down.
+
+Common examples include MD5 (often 32 hexadecimal characters) and SHA-1 (often 40 hexadecimal characters), but length alone is not conclusive. Password-storage formats may also include a salt, algorithm marker, and cost parameter.
+
+## 3. Check which tools are installed
+
+John the Ripper is available in many security training environments:
+
+```bash
+john --version
+john --list=formats | head
+```
+
+If the room provides a wordlist such as RockYou, check that the file exists before launching the attack:
+
+```bash
+ls -lh /usr/share/wordlists/
+```
+
+On some systems, the RockYou file may be compressed. I should use the actual path provided by the lab and follow its instructions for extracting it if needed.
+
+## 4. Run a wordlist attack
+
+For a hash format that John supports, the general pattern is:
+
+```bash
+john --format=FORMAT --wordlist=/path/to/wordlist.txt hash.txt
+```
+
+Replace `FORMAT` with the format appropriate for the supplied hash and replace the wordlist path with the real file in the lab. Do not copy the placeholder literally.
+
+John hashes each candidate password using the selected algorithm and compares the result with the target hash. If the format is wrong, the input file is malformed, or the password is not in the wordlist, the attack may not recover anything.
+
+For a format John can identify automatically, I can first try:
+
+```bash
+john --wordlist=/path/to/wordlist.txt hash.txt
+```
+
+The explicit `--format` option is useful when automatic detection is ambiguous.
+
+## 5. Display recovered passwords
+
+After John finishes, show the recovered results:
+
+```bash
+john --show hash.txt
+```
+
+If it finds a password, the output associates the recovered plaintext with the corresponding hash entry. I should submit only the value requested by the current task.
+
+If nothing is recovered:
+
+1. Check that the hash was copied exactly.
+2. Confirm the selected format is correct.
+3. Confirm that the wordlist path exists and is readable.
+4. Check whether John reports that the hash is already cracked.
+5. Re-read the room's hint. Some hashes need a different wordlist or attack method.
+
+Do not conclude that a hash is strong simply because one wordlist did not crack it. That result only means the tested candidates did not match.
+
+## 6. Understand what cracking proves
+
+A recovered password demonstrates that the password was present in the tested candidate set and the hash format was correct. It does not mean every hash using that algorithm is recoverable. Strong, unique passwords and modern password hashing with salts and a deliberately expensive work factor make offline guessing much harder.
+
+MD5 and SHA-1 are not suitable choices for new password storage. Modern systems should use a dedicated password hashing algorithm such as Argon2id, scrypt, bcrypt, or PBKDF2 with appropriate parameters.
+
+## 7. Record each room answer
+
+For each hash in the room, I should make a small table in my notes with:
+
+- The task number or label.
+- The observed hash format and why I chose it.
+- The tool and command used.
+- Whether the wordlist attack succeeded.
+- The recovered answer, kept private in this public repository as `flag{hidden}` when it is a flag.
+
+I should not paste made-up output into the write-up. The exact hash values and passwords depend on the room's task content, so I record them from the active room rather than invent them here.
 
 ## What I took from this room
 
-Hash cracking is mainly a guessing and verification process. Identifying the hash format, choosing the right mode, and using appropriate wordlists are important, but the deeper lesson is why password strength and safe password storage matter. I should record only the actual results I obtain in the lab and replace any recovered secret in a public write-up with `flag{hidden}` if it is a room flag.
+Hash cracking is a process: preserve the input, identify the format, choose the right tool, test a sensible wordlist, and verify the result. The algorithm matters, but password quality and storage configuration matter just as much. A cracking tool does not magically decrypt a hash; it tests candidate passwords until one matches.
+
+Reference: https://tryhackme.com/room/crackthehash

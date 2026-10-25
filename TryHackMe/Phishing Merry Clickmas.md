@@ -1,19 +1,45 @@
-# Phishing: Merry Clickmas — TryHackMe
+# Phishing: Merry Clickmas — TryHackMe Walkthrough
 
 Room: https://tryhackme.com/room/phishingmerryclickmas
 
-This room focuses on identifying phishing messages during a holiday-themed scenario. Attackers often use seasonal events, delivery notices, gift offers, and urgent account warnings because people are busy and more likely to act quickly.
+This room uses a seasonal phishing scenario to practise recognising suspicious messages. The festive theme is decoration; the analysis process is the same as for any email: establish who sent it, where links lead, what attachments contain, and what action the sender wants from the recipient.
 
-## Inspect the message
+## 1. Read the message as evidence
 
-I should check the sender address rather than relying on the display name, inspect where links actually point, and pay attention to unexpected attachments. A link's visible text can differ from its destination. Urgency, unusual requests, and requests for credentials are additional warning signs, but no single clue proves a message is malicious.
+Start with the sender address, display name, subject, greeting, requested action, and any deadline or threat. Look for a mismatch between the claimed organisation and the actual sending domain. Urgency is a warning sign, but it is not proof on its own.
 
-If the room provides a sample email, I should inspect the message and headers using the provided tools. I should not click a suspicious link on my personal device just to test it.
+Ask what the sender wants the recipient to do: enter credentials, open an attachment, approve a payment, change account settings, or share private information. This helps identify the likely goal of the campaign.
 
-## Email authentication
+## 2. Inspect the link destination
 
-SPF, DKIM, and DMARC provide signals about whether a message is authorised and aligned with the claimed domain. Their presence is useful, but authentication results do not guarantee that the message is safe. A compromised legitimate account can still send phishing messages.
+A displayed link can hide a different destination. In a safe training environment, inspect the URL without blindly following it. Check the registered domain, spelling, subdomains, path, and whether the link uses an unexpected redirect or URL shortener.
+
+A lock icon or HTTPS connection only indicates that the connection is encrypted to the site presented. It does not prove that the site belongs to the organisation named in the message.
+
+## 3. Examine sender and authentication details
+
+Where the room provides email headers, inspect the actual From address, Reply-To, Return-Path, Received chain, and SPF/DKIM/DMARC results. These can help identify spoofing or unexpected sending infrastructure.
+
+Authentication results need context. A message can pass authentication for a malicious domain, and an attacker may abuse a compromised legitimate account. Do not treat a single passing check as a guarantee of safety.
+
+## 4. Review attachments cautiously
+
+Do not execute unknown attachments on your main system. In the lab, use the provided safe analysis workflow and inspect metadata before opening a file. Record the file type and hash where the task asks for them. If a sandbox is used, keep it isolated and do not enter real credentials.
+
+A filename extension is not proof of the true file type. A document may also contain links, macros, embedded objects, or instructions that attempt to persuade the user to enable risky features.
+
+## 5. Decide whether to report
+
+Use a combination of evidence: sender mismatch, unexpected link, suspicious attachment, unusual request, failed authentication alignment, or a known malicious indicator. If a message requests a payment or credential change, verify it through a known contact method rather than replying to the message.
+
+A clear report states the suspicious indicators, the target URL or attachment metadata, whether anyone interacted with it, and the next action. Preserve the original message for the security team.
+
+## 6. Working through the room
+
+Read each email sample carefully and follow the task's question. If asked to identify a phishing clue, point to the exact header, URL, attachment, or request in the sample. If asked whether a message is malicious, base the decision on multiple signals and the room's evidence.
+
+The live exercise may use specific sample details that are not included here, so do not copy guessed domains or answers from another walkthrough. Verify the current sample and use the room's feedback.
 
 ## What I took from this room
 
-Phishing analysis combines visual clues, link inspection, sender information, and technical evidence. The safest habit is to pause before acting, verify unexpected requests through a separate trusted channel, and report suspicious messages through the approved process.
+Phishing is successful when a message causes a person to skip verification. Slow down, inspect the true sender and destination, avoid opening unknown attachments, and confirm sensitive requests through a separate trusted channel.

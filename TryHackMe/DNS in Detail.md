@@ -1,85 +1,138 @@
 # DNS in Detail: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/dnsindetail
+Official room: https://tryhackme.com/room/dnsindetail
 
-The Domain Name System (DNS) maps names such as `example.com` to records that clients and services can use. It is often described as the internet's phone book, but it stores several kinds of records and supports more than simple hostname-to-IP lookups.
+## Room Overview & Information
 
-## 1. How a lookup works
+**Category:** Networking fundamentals  
+**Difficulty:** Beginner  
+**Focus:** DNS purpose, domain hierarchy, record types, recursive resolution, caching, and practical record lookups.
 
-When an application needs an address for a hostname, it usually asks a configured resolver. The resolver may already have a cached answer. Otherwise, it can follow the DNS hierarchy: root servers direct it to the appropriate top-level domain servers, which direct it toward the authoritative servers for the domain.
+The Domain Name System translates human-readable domain names into records used by clients and services. It is more than a simple hostname-to-IP lookup: DNS also supports mail routing, aliases, service discovery, and domain ownership checks.
 
-The authoritative server provides records for the domain. Results can be cached according to their TTL (time to live), so different clients may temporarily see different answers while changes propagate through caches.
+This is a fundamentals room with an interactive DNS query tool rather than a target to exploit. Do not invent scan output or claim a privilege-escalation stage that the room does not contain.
 
-A recursive resolver performs the lookup work for the client. An authoritative server provides definitive records for the zones it serves. These are different roles even though a provider may operate both kinds of service.
+## Phase 1: Domain hierarchy
 
-## 2. Common record types
+A domain is read from right to left. In `www.example.com`, `.com` is the top-level domain (TLD), `example` is the registered domain label, and `www` is a subdomain label. Organisations can create additional subdomains such as `api.dev.example.com`.
 
-| Record | Purpose |
-|---|---|
-| A | Maps a name to an IPv4 address |
-| AAAA | Maps a name to an IPv6 address |
-| CNAME | Alias from one name to another canonical name |
-| MX | Mail exchanger for a domain |
-| NS | Name servers authoritative for a zone |
-| TXT | Text data, often used for verification and email security policies |
-| PTR | Reverse lookup from an address to a name |
-| SOA | Zone authority and timing information |
+A fully qualified domain name identifies a complete name in the DNS hierarchy. DNS names are not the same thing as IP addresses; DNS records map names to data, and a single name may have multiple records or answers.
 
-A CNAME points to another name, not directly to a numeric IP address. MX records identify mail servers and may have priorities. TXT records can contain important security configuration, but their presence alone does not prove a domain is secure.
+## Phase 2: Record types
 
-## 3. Query DNS from Linux
+| Record | Purpose | Example use |
+|---|---|---|
+| `A` | Maps a name to an IPv4 address | Website IPv4 address |
+| `AAAA` | Maps a name to an IPv6 address | Website IPv6 address |
+| `CNAME` | Alias to another DNS name | Store hostname pointing to a hosting provider |
+| `MX` | Mail server and priority | Directs email delivery |
+| `TXT` | Arbitrary text data | SPF policy, verification token, DMARC policy |
+| `NS` | Authoritative nameservers | Delegation of a DNS zone |
+| `SOA` | Zone authority and serial/timing data | Zone administration |
+| `PTR` | Reverse lookup mapping | Address-to-name lookup in reverse DNS |
 
-The `dig` command is useful when installed:
+MX records include a preference number. Lower preference values are tried before higher values, assuming the server is available. A CNAME points to another name, not directly to an IP address, so another lookup may be needed.
+
+## Phase 3: How a DNS query resolves
+
+1. The client checks its local resolver cache.
+2. If no usable cached answer exists, the client asks a recursive resolver.
+3. The recursive resolver may answer from its own cache.
+4. Otherwise, it follows referrals from root servers to the relevant TLD nameservers.
+5. The authoritative nameserver returns the record for the requested name.
+6. The resolver caches the answer according to its TTL and returns it to the client.
+
+The TTL is measured in seconds and determines how long a resolver may cache an answer. A cached answer may remain visible until the TTL expires, so a recent DNS change is not necessarily reflected everywhere immediately.
+
+## Phase 4: Query DNS from a terminal
+
+The room's practical website provides a DNS query emulator and shows corresponding command examples. On a Linux system with DNS tools installed, the same ideas can be practised with `dig`.
+
+Query an A record:
 
 ```bash
 dig example.com A
-dig example.com AAAA
-dig example.com MX
-dig example.com NS
-dig example.com TXT
 ```
 
-Each command asks for a particular record type. Replace `example.com` with the domain provided by the room or one you are authorised to investigate.
-
-For a concise answer, use:
+Query a specific record type:
 
 ```bash
-dig +short example.com A
+dig example.com MX
+dig example.com TXT
+dig example.com NS
 ```
 
-To query a particular resolver, specify it with `@SERVER_IP`. This can help compare resolver behaviour, but the server must be one you are authorised to use.
+Ask a particular resolver:
 
-## 4. DNS and email security
+```bash
+dig @1.1.1.1 example.com A
+```
 
-Email systems commonly use DNS to publish MX records and policies. SPF uses TXT records to describe which senders are authorised to send mail for a domain. DKIM publishes a public key that recipients can use to verify signatures. DMARC tells receiving systems how to handle messages that fail alignment checks and where reports may be sent.
+The `@` syntax selects the resolver. Replace example domains with the names authorised by your exercise. The `ANSWER SECTION` contains the records returned; `status: NOERROR` means the DNS response completed without a DNS-level error, not that the destination website is safe or reachable.
 
-These mechanisms help with sender validation, but they do not make every message trustworthy. A domain can be configured correctly while an attacker uses a lookalike domain or a compromised legitimate account.
+An alternative tool is:
 
-## 5. DNS security and reconnaissance
+```bash
+nslookup -type=MX example.com
+```
 
-DNS can reveal subdomains, mail providers, service infrastructure, and configuration details. Zone transfers should be restricted to authorised secondary servers. Public records are intended to be queried, but sensitive internal names should not be exposed unnecessarily.
+The exact output varies by resolver, cache, and domain configuration. Do not copy a sample IP address as though it were the answer for the room's test domain.
 
-DNS tunnelling can encode data inside queries and responses. Defenders can look for unusual query volume, long or high-entropy subdomain labels, unexpected record types, and communication patterns that do not fit normal resolver use.
+## Phase 5: Practical questions
 
-DNSSEC adds cryptographic validation of DNS data. It helps detect forged or modified answers, but it does not encrypt ordinary DNS queries and does not make a malicious domain safe.
+The room's practical uses the interactive query tool for `website.thm`. Use the exact record name and type shown in each question. The expected values come from the room's simulated DNS zone, not from public DNS.
 
-## 6. Troubleshooting a lookup
+**Question: “What is the CNAME of shop.website.thm?”**
 
-If a hostname does not resolve:
+1. Open the DNS query emulator.
+2. Enter `shop.website.thm` as the name.
+3. Select the `CNAME` record type.
+4. Run the query.
+5. Read the alias from the answer section and enter it exactly as displayed.
 
-1. Confirm the spelling and domain.
-2. Run `dig hostname A` and inspect the status and answer sections.
-3. Check whether the resolver is reachable.
-4. Compare the response from an approved alternative resolver if the lab permits it.
-5. Check local configuration and caches.
-6. Distinguish a DNS failure from a connection failure to an address that already resolved.
+A CNAME answer is a hostname, not an IPv4 address.
 
-A DNS response with no answer is not necessarily the same as a nonexistent domain. The status code and record type matter. NXDOMAIN indicates that the queried name does not exist according to the responding DNS server; a NOERROR response with no requested record can mean the name exists but has no record of that type.
+**Question: “What is the value of the TXT record of website.thm?”**
 
-## 7. Working through the room
+1. Query `website.thm`.
+2. Select `TXT`.
+3. Read the text value from the answer.
+4. Preserve punctuation and quoting only as required by the answer field.
 
-For each question, identify which DNS role or record type is being described. If the task provides a domain, query the requested record type and use the actual answer. Do not substitute an IP address from an unrelated example. If the room asks about caching, TTL, recursion, or authority, explain the role each plays in the lookup process.
+TXT data may contain a verification string or mail-security policy. Do not confuse the record's owner name with the record's text value.
 
-## What I took from this room
+**Question: “What is the numerical priority value for the MX record?”**
 
-DNS is both a core dependency and a useful source of security information. Knowing the record types, resolver hierarchy, caching behaviour, and failure modes makes it easier to troubleshoot applications and recognise suspicious DNS activity.
+1. Query `website.thm`.
+2. Select `MX`.
+3. Read the numeric preference field before the mail server hostname.
+4. Submit the number requested, not the hostname.
+
+**Question: “What is the IP address for the A record of www.website.thm?”**
+
+1. Query `www.website.thm`.
+2. Select `A`.
+3. Read the IPv4 address in the answer.
+4. Submit the address from the lab response.
+
+The exact values are generated by the active room's simulated DNS environment. This write-up explains how to retrieve them rather than substituting guessed answers from another instance.
+
+## Phase 6: Common errors
+
+- **NXDOMAIN:** the queried name does not exist in the DNS view used by the resolver.
+- **NOERROR with no answer:** the name may exist but have no record of the requested type.
+- **SERVFAIL:** the resolver failed to complete the lookup.
+- **Timeout:** the resolver may be unreachable, the request may be filtered, or the service may not respond.
+- **Unexpected old result:** a resolver may still have a cached answer within its TTL.
+
+A DNS answer does not prove the service is reachable. After resolving the name, network routing, firewall policy, TLS, and the application can still fail independently.
+
+## Phase 7: Security and mitigation
+
+DNS information is public by design, but careless records can expose internal naming, stale hosts, or service metadata. Review public zones, remove obsolete records, protect registrar and DNS-provider accounts with MFA, and use DNSSEC where appropriate to provide authenticity of DNS data. DNSSEC does not encrypt DNS queries and does not make a malicious destination safe.
+
+For email, configure SPF, DKIM, and DMARC carefully and monitor reports. Avoid placing secrets in TXT records because anyone who can query the zone can usually read them.
+
+## Key takeaways
+
+DNS is a distributed database with caching and delegation. Record types answer different questions, and the record value must be read from the correct query. For the practical, the correct method is to select the requested name and record type in the emulator, then copy the value returned by the lab exactly.

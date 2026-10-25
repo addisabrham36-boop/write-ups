@@ -1,21 +1,49 @@
-# Phishing with HiddenEye — TryHackMe
+# Phishing with HiddenEye: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/phishinghiddeneye
+Room: https://tryhackme.com/room/hideye
 
-This topic demonstrates how phishing pages can imitate legitimate login screens and trick people into entering credentials. Tools that generate imitation pages are dangerous when used against real people, so I should keep any practice inside the explicitly authorised lab and never collect real credentials.
+This room concerns phishing simulation and the risks of fake login pages. A phishing kit may imitate a legitimate sign-in page to collect credentials, which is why it must only be used in a controlled training environment. Do not deploy a credential-harvesting page on a public host or send it to unsuspecting people.
 
-## How the attack works
+## 1. Understand the scenario and scope
 
-A phishing page may copy the appearance of a trusted service and rely on a deceptive link to bring a victim to it. The page can look convincing while the domain is unrelated to the real provider. Users should verify the domain and avoid entering credentials after following unexpected links.
+Read the room's instructions and identify the provided target environment. Use only the simulated accounts and local or lab network the exercise authorises. Never enter real passwords or tokens into a test page.
 
-## Defensive checks
+A tool's ability to generate a page does not make the page legitimate or the activity authorised. Confirm the permitted scope before launching any listener or sharing a test URL.
 
-Use multifactor authentication, password managers that check the site origin, phishing-resistant authentication where available, and clear reporting procedures. Security awareness helps, but organisations should also use technical controls and minimise the damage a stolen password can cause.
+## 2. Understand how a phishing page works
 
-## Lab notes
+A phishing page imitates a trusted service and persuades a user to submit information. A typical flow includes a lure, a link, a page that resembles a login form, and a server-side handler. The danger comes from collecting credentials or session material and then using them to access the real service.
 
-I should follow the room's instructions and use only the provided test environment. I should not deploy a phishing page publicly, send it to unsuspecting users, or retain any credentials. If a task asks for a result, I should record the evidence and redact secrets in the public write-up.
+In the lab, focus on understanding the page and its behaviour. Observe what form fields exist, where the form submits, and what the training environment records. Do not collect information from real users.
+
+## 3. Recognise indicators
+
+Defenders can identify phishing by examining:
+- A domain that does not match the claimed organisation.
+- Unexpected redirects or URL shorteners.
+- Login forms hosted on unrelated infrastructure.
+- Requests for credentials or MFA codes in an unusual context.
+- Lookalike branding, urgency, or unexpected attachments.
+- Suspicious page source, form action, or certificate details.
+
+HTTPS does not prove that a page is genuine. Certificate validation protects the connection to the domain, not the user's judgement about whether the domain is trustworthy.
+
+## 4. Safe lab workflow
+
+Follow the room's exact setup instructions and keep the test listener within the authorised environment. Use the test accounts supplied by the lab, and verify the simulated result in the room's UI. Stop the service and remove any temporary artefacts when the exercise is complete.
+
+If the tool fails, check whether the required dependencies and network interface are available in the lab. Do not expose a listener to the public internet simply to make the demonstration work.
+
+## 5. Defensive controls
+
+Use phishing-resistant MFA where possible, password managers that recognise the legitimate domain, email authentication and filtering, safe link handling, and user reporting. Organisations should monitor suspicious sign-in attempts and revoke sessions if credentials may have been exposed.
+
+For a training simulation, use clear approval, limited test accounts, minimal data collection, and an agreed cleanup plan. The purpose is to measure and improve resilience, not to retain real credentials.
+
+## 6. Working through the room
+
+Use the supplied lab environment and follow each task's instructions. If the room asks what the tool does, explain the phishing workflow and the risk it demonstrates. If it asks for a value from the simulated page, use the result shown by the active room. Do not include real credentials or unverified flags in this note.
 
 ## What I took from this room
 
-Phishing succeeds by exploiting trust and convincing presentation. The most important defence is to verify the destination and use authentication controls that reduce the value of a stolen password.
+Phishing tools demonstrate how easily a convincing page can be created, but the security lesson is about trust and verification. Use simulations responsibly, protect credentials, and validate the domain before entering sensitive information.

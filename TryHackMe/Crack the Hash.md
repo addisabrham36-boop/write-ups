@@ -1,116 +1,133 @@
-# Crack the Hash — TryHackMe
+# Crack the Hash: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/crackthehash
+Official room: https://tryhackme.com/room/crackthehash
 
-This room is about identifying hash types and recovering weak passwords from hashes using wordlists and cracking tools. The important part is not just running John the Ripper. I need to identify the likely hash format first, choose the correct mode, run the attack, and check the recovered result against the task.
+## Room Overview & Information
 
-I only use these techniques on the hashes provided by this room or on data I am authorised to test. A hash is not the same thing as encryption: a password hash is designed to be one-way, but weak passwords can still be guessed and compared against it.
+**Category:** Password security / cryptography  
+**Difficulty:** Easy  
+**Focus:** Hash identification, wordlist attacks, Hashcat, John the Ripper, salts, and interpreting cracking results.
 
-## 1. Prepare the lab
+A hash is a one-way digest of input data. Password cracking does not decrypt the hash; it hashes candidate passwords and compares the results. Success depends on identifying the correct algorithm, understanding whether a salt is present, and using a candidate list that contains the original password.
 
-1. Open the room and read the task's instructions.
-2. Start the AttackBox if I am using it.
-3. Copy the exact hash from the question into a text file. Do not add extra spaces or punctuation.
-4. Keep the original value in a separate file so I can verify that I did not accidentally change it.
+Use the room's supplied hashes and wordlist. Do not attempt password attacks against accounts or systems outside an authorised lab.
 
-For a simple one-hash task:
+## Phase 1: Identify the hash format
 
-```bash
-printf '%s\n' 'PASTE_HASH_HERE' > hash.txt
-cat hash.txt
-```
+A hash's length and character set can suggest the algorithm, but they do not always uniquely identify it. For example, a 32-character hexadecimal value may be MD5 or another 128-bit format. Use multiple clues and confirm the candidate format before cracking.
 
-The string `PASTE_HASH_HERE` is a placeholder, not a real challenge hash.
+Useful tools include:
+- **HashID:** suggests likely hash types.
+- **Hashcat:** performs GPU/CPU-assisted candidate testing.
+- **John the Ripper:** supports many password hash formats.
+- **CrackStation or similar lookup sites:** may identify common unsalted hashes, but should not be used for confidential data.
 
-## 2. Identify the hash type
+The room's hashes include MD5, SHA-1, SHA-256, bcrypt, MD4, NTLM, SHA-512 crypt, and HMAC-SHA1. These formats require different handling.
 
-Hash strings can look similar, so I should not choose an algorithm only because the string is hexadecimal. Check its length and structure, then use a hash-identification tool if available:
+## Phase 2: Prepare the hashes
 
-```bash
-hashid 'PASTE_HASH_HERE'
-```
+Create a text file with one hash per line, or keep a separate record of each hash and its likely algorithm. Do not combine unrelated hashes without tracking which result belongs to which question.
 
-HashID reports likely algorithms. It does not prove which algorithm was used, because different algorithms can produce strings with similar appearance. The room's clues and known format help narrow it down.
+Calculate a file hash when you need to preserve an artefact's identity, but remember that password hashes are not all the same format. Salted formats include extra fields such as a salt or cost factor.
 
-Common examples include MD5 (often 32 hexadecimal characters) and SHA-1 (often 40 hexadecimal characters), but length alone is not conclusive. Password-storage formats may also include a salt, algorithm marker, and cost parameter.
+For this room, the main task is to identify each hash and test it against the supplied wordlist.
 
-## 3. Check which tools are installed
+## Phase 3: Use Hashcat
 
-John the Ripper is available in many security training environments:
+Hashcat uses a mode number for each hash format. The mode must match the actual hash. Common modes relevant to the room include:
 
-```bash
-john --version
-john --list=formats | head
-```
+| Hash format | Hashcat mode |
+|---|---:|
+| MD5 | 0 |
+| SHA-1 | 100 |
+| SHA-256 | 1400 |
+| bcrypt | 3200 |
+| MD4 | 900 |
+| NTLM | 1000 |
+| SHA-512 crypt | 1800 |
+| HMAC-SHA1, key is salt | 160 |
 
-If the room provides a wordlist such as RockYou, check that the file exists before launching the attack:
+A basic wordlist attack has this form:
 
-```bash
-ls -lh /usr/share/wordlists/
-```
+\`\`\`bash
+hashcat -m MODE -a 0 HASH_FILE WORDLIST
+\`\`\`
 
-On some systems, the RockYou file may be compressed. I should use the actual path provided by the lab and follow its instructions for extracting it if needed.
+- **-m MODE** selects the hash algorithm.
+- **-a 0** selects a straight/wordlist attack.
+- **HASH_FILE** contains the hash or hashes.
+- **WORDLIST** contains candidate passwords.
 
-## 4. Run a wordlist attack
+Use the mode that matches the hash format. If the room's AttackBox has the RockYou wordlist compressed, follow the room's instructions to make it available before running Hashcat.
 
-For a hash format that John supports, the general pattern is:
+## Task 1: Level 1
 
-```bash
-john --format=FORMAT --wordlist=/path/to/wordlist.txt hash.txt
-```
+The first five hashes are cracked with the supplied wordlist. The results are:
 
-Replace `FORMAT` with the format appropriate for the supplied hash and replace the wordlist path with the real file in the lab. Do not copy the placeholder literally.
+| Hash format / clue | Recovered password |
+|---|---|
+| MD5 | `easy` |
+| SHA-1 | `password123` |
+| SHA-256 | `letmein` |
+| bcrypt | `bleh` |
+| MD4 | `Eternity22` |
 
-John hashes each candidate password using the selected algorithm and compares the result with the target hash. If the format is wrong, the input file is malformed, or the password is not in the wordlist, the attack may not recover anything.
+The MD4 hash's password is not present in the standard RockYou list used by the example, so it may require a lookup source or another candidate list. The task is testing the recovered value, not merely whether one specific tool finds it.
 
-For a format John can identify automatically, I can first try:
+## Task 2: Level 2
 
-```bash
-john --wordlist=/path/to/wordlist.txt hash.txt
-```
+The remaining hashes include:
 
-The explicit `--format` option is useful when automatic detection is ambiguous.
+| Hash format / clue | Recovered password |
+|---|---|
+| SHA-256 | `paule` |
+| NTLM | `n63umy8lkf4i` |
+| SHA-512 crypt | `waka99` |
+| HMAC-SHA1 with salt | `tryhackme` |
 
-## 5. Display recovered passwords
+For the HMAC-SHA1 entry, the salt is `481616481616`. A salted hash must be represented in the format expected by the tool. If the salt is missing or placed incorrectly, the cracking result will not match.
 
-After John finishes, show the recovered results:
+## Step-by-step cracking workflow
 
-```bash
-john --show hash.txt
-```
+1. Copy the hash exactly, including any prefix, salt, or cost parameters.
+2. Identify likely formats using HashID and the room's hints.
+3. Verify the candidate format against the tool's documentation.
+4. Choose the matching Hashcat mode or John format.
+5. Run a wordlist attack against the room-provided hash.
+6. Inspect the result and map it back to the original hash.
+7. Verify the recovered value against the task prompt.
+8. Record which method worked and whether the password appeared in the wordlist.
 
-If it finds a password, the output associates the recovered plaintext with the corresponding hash entry. I should submit only the value requested by the current task.
+Example for an MD5 hash:
 
-If nothing is recovered:
+\`\`\`bash
+hashcat -m 0 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+\`\`\`
 
-1. Check that the hash was copied exactly.
-2. Confirm the selected format is correct.
-3. Confirm that the wordlist path exists and is readable.
-4. Check whether John reports that the hash is already cracked.
-5. Re-read the room's hint. Some hashes need a different wordlist or attack method.
+Example for a SHA-1 hash:
 
-Do not conclude that a hash is strong simply because one wordlist did not crack it. That result only means the tested candidates did not match.
+\`\`\`bash
+hashcat -m 100 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+\`\`\`
 
-## 6. Understand what cracking proves
+Use a file containing only the relevant hash if you want to avoid mixing results from different formats. The exact path to RockYou may differ in the AttackBox.
 
-A recovered password demonstrates that the password was present in the tested candidate set and the hash format was correct. It does not mean every hash using that algorithm is recoverable. Strong, unique passwords and modern password hashing with salts and a deliberately expensive work factor make offline guessing much harder.
+## Troubleshooting
 
-MD5 and SHA-1 are not suitable choices for new password storage. Modern systems should use a dedicated password hashing algorithm such as Argon2id, scrypt, bcrypt, or PBKDF2 with appropriate parameters.
+- **No password recovered:** the mode may be wrong, the wordlist may not contain the candidate, or the hash may need a salt.
+- **Hashcat rejects the input:** inspect formatting, whitespace, line endings, and required salt fields.
+- **Several algorithms appear possible:** use the task's context and test the likely candidates instead of trusting one detector.
+- **A result appears but seems wrong:** check which hash it belongs to and confirm the output format.
+- **A hash is slow to crack:** bcrypt and SHA-512 crypt deliberately require more work than fast hashes such as MD5.
 
-## 7. Record each room answer
+## Security lessons
 
-For each hash in the room, I should make a small table in my notes with:
+- Store passwords using a dedicated password-hashing function such as Argon2id, scrypt, or bcrypt with a unique salt.
+- Do not use fast general-purpose hashes like MD5 or SHA-1 for password storage.
+- Enforce long, unique passwords and screen against common or breached passwords.
+- Use MFA where appropriate.
+- Protect hash databases as sensitive data because they enable offline guessing.
 
-- The task number or label.
-- The observed hash format and why I chose it.
-- The tool and command used.
-- Whether the wordlist attack succeeded.
-- The recovered answer, kept private in this public repository as `flag{hidden}` when it is a flag.
+## Key takeaways
 
-I should not paste made-up output into the write-up. The exact hash values and passwords depend on the room's task content, so I record them from the active room rather than invent them here.
-
-## What I took from this room
-
-Hash cracking is a process: preserve the input, identify the format, choose the right tool, test a sensible wordlist, and verify the result. The algorithm matters, but password quality and storage configuration matter just as much. A cracking tool does not magically decrypt a hash; it tests candidate passwords until one matches.
-
-Reference: https://tryhackme.com/room/crackthehash
+Hash cracking is a process of classification and candidate testing. Identify the format, handle salts correctly, choose the right mode, and verify which candidate matches each hash. The room demonstrates why fast hashes and common passwords are weak choices for protecting user credentials.

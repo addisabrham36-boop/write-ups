@@ -69,7 +69,3 @@ Where the lab uses a model or dataset that is only available inside the running 
 ## What I took from this room
 
 Model security is not only about the model architecture. Data provenance, labels, preprocessing, packaging, deployment, and monitoring all affect the final behaviour. A good investigation connects the observed result to the stage that could have caused it.
-
-## Phase 5: Key Takeaways & Remediation
-
-The main goal is to connect every conclusion to observable evidence and enforce security controls at the correct trust boundary. Keep the original artefacts, record the exact commands and outputs from your own run, and redact any flag in public notes as `flag{hidden}`.

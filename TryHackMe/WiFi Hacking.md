@@ -1,55 +1,67 @@
-# WiFi Hacking: TryHackMe Walkthrough
+# Wi-Fi Hacking: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/wifihacking
+Official room: https://tryhackme.com/room/wifihacking
 
-Wireless security testing examines how a Wi-Fi network authenticates clients and protects traffic. The exact tools and steps depend on the lab hardware, driver support, and the protocol being tested. All active tests must remain within the network and devices explicitly assigned by the room.
+## Room Overview & Information
 
-## 1. Check the lab requirements first
+**Category:** Wireless security testing  
+**Difficulty:** Beginner  
+**Focus:** Wireless reconnaissance, adapter modes, access-point identification, authentication weaknesses, and defensive lessons.
 
-Wireless exercises may require a compatible adapter, monitor-mode support, and a lab network that is intentionally configured for testing. A normal laptop's built-in adapter may not support every feature. If the room provides an AttackBox or simulated environment, follow its instructions instead of assuming local hardware will work.
+Wireless testing must be performed only on the access point and client environment supplied by the room or on equipment you own and have permission to test. Capturing or interfering with a neighbour's wireless traffic is not an acceptable substitute for a lab.
 
-Record the lab's target SSID, BSSID, channel, and authorised scope. These values identify the test network. Do not use a real neighbour's network as a substitute.
+## Phase 1: Confirm the test environment
 
-## 2. Understand what is being tested
+Follow the room's instructions to start the wireless lab and identify the interface and target access point. Wireless tools often require a compatible adapter and elevated permissions. If the lab runs in a browser-based VM, use the interface provided by that VM rather than assuming your physical laptop's Wi-Fi adapter is passed through.
 
-Wireless assessments commonly examine:
-- Whether the network uses a secure protocol such as WPA2-AES or WPA3.
-- Whether the passphrase is strong and unique.
-- Whether clients validate the correct access point or authentication server.
-- Whether guest devices are isolated from internal systems.
-- Whether management interfaces and router firmware are secure.
-- Whether monitoring can detect rogue access points or suspicious authentication activity.
+Check available interfaces:
 
-A visible SSID does not mean a network is open, and a captured authentication exchange does not automatically reveal the password. The security result depends on the protocol, configuration, and password strength.
+```bash
+ip link
+iw dev
+```
 
-## 3. Passive observation versus active testing
+If the expected adapter is missing, verify the lab setup and driver support before attempting any wireless operation.
 
-Passive observation listens for wireless frames and may reveal network names, access-point identifiers, channels, and client behaviour. Active testing transmits frames or interacts with the network and can disrupt connectivity. Only perform the active actions specifically required by the authorised lab.
+## Phase 2: Understand the target
 
-When reviewing a capture, identify the frame type and the context. Management frames help devices discover and associate with access points; control frames help coordinate access to the medium; data frames carry higher-layer traffic. Protected data should not be assumed readable simply because it was captured.
+Record the SSID, BSSID, channel, and security mode from the room's interface. The SSID is a network name; the BSSID identifies a particular access-point radio. Similar network names may belong to different devices, so confirm the BSSID or other task-specific identifier.
 
-## 4. Interpret authentication carefully
+The security mode tells you what kind of authentication and encryption is configured. WEP is obsolete; WPA2-Personal depends on the strength of the shared passphrase; enterprise Wi-Fi uses a different identity and authentication model.
 
-Personal Wi-Fi commonly uses a pre-shared passphrase. Enterprise networks often use 802.1X with an authentication server and individual credentials or certificates. Weak passwords, obsolete encryption, misconfigured enterprise authentication, and poor client validation create different risks.
+## Phase 3: Wireless reconnaissance
 
-Do not treat a generic command or a tutorial's output as proof that the lab succeeded. Use the exact procedure provided by the room, inspect the actual output, and explain what the evidence establishes.
+In an authorised lab with the required adapter support, a wireless discovery tool can list access points and clients. Use the exact interface and options specified by the active task. Record the results before changing anything.
 
-## 5. Troubleshooting in a lab
+A typical tool output may include:
+- BSSID and SSID.
+- Channel and signal strength.
+- Encryption and authentication information.
+- Client devices associated with the AP.
+- Management-frame observations.
 
-- If the adapter is not visible, check whether the lab supports the hardware and whether the correct interface is selected.
-- If monitor mode is unavailable, confirm driver and adapter support rather than repeatedly running unrelated commands.
-- If the target is not visible, verify the correct lab is active, the channel is correct, and the adapter can observe that band.
-- If the task result differs from a guide, check the target details and room version. Wireless lab environments can change.
-- If a test disrupts connectivity, stop and restore the environment according to the lab instructions.
+These fields are evidence about the environment, not proof that a network is vulnerable. An access point's presence does not authorise testing it.
 
-## 6. Defences
+## Phase 4: Follow the room's practical
 
-Use modern encryption, a long unique passphrase, updated router firmware, strong administrative credentials, and guest-network isolation. Enterprise deployments should validate authentication certificates and avoid insecure fallback modes. Monitor for rogue access points and unusual association patterns.
+Use the lab's supplied steps for the challenge. Identify which condition the task is testing, such as weak authentication, unsafe configuration, or the ability to observe a particular management-frame exchange. Test one hypothesis at a time and verify the result in the simulator.
 
-## 7. Working through the room
+Do not use deauthentication or packet-injection techniques against networks outside the lab. Those techniques can interrupt legitimate users and may be illegal without explicit authorisation.
 
-Follow the room's exact scope and identify what the task asks you to observe or verify. Use the provided SSID and BSSID, then record the observed protocol and security property. If the exercise asks about a weakness, explain the condition that makes it possible and the configuration change that addresses it.
+If the room asks for a specific network property or flag, obtain it from the current task interface. Wireless values and challenge state can vary between instances, so this write-up does not substitute guessed BSSIDs, passphrases, or flags.
 
-## What I took from this room
+## Phase 5: Troubleshooting
 
-Wireless testing requires more than knowing a tool name. I need to understand the protocol, confirm the target, distinguish passive observation from disruptive actions, and tie every conclusion to evidence from the authorised lab.
+- **No access point appears:** confirm the adapter is present, the correct interface is selected, and the lab is active.
+- **Monitor mode is unavailable:** check adapter and driver support; not every virtual adapter supports it.
+- **The target appears on a different channel:** confirm the task's BSSID and channel and follow the lab's instructions.
+- **No client appears:** there may be no active client, or the capture may not be observing the relevant channel.
+- **A captured exchange does not prove a password:** verify what the evidence demonstrates; a handshake is not the plaintext passphrase.
+
+## Phase 6: Defensive recommendations
+
+Use modern Wi-Fi security, strong unique credentials, enterprise certificate validation where applicable, firmware updates, network segmentation, and monitoring for rogue access points. Disable unused WPS functionality if it is not required, and review saved client profiles to reduce automatic connection to untrusted networks.
+
+## Key takeaways
+
+Wireless testing combines radio reconnaissance with careful interpretation of authentication and configuration. The first job is to identify the exact authorised target and record evidence. The final conclusion should match what the lab actually demonstrates, not what a tool might theoretically be able to do.

@@ -91,3 +91,42 @@ Use the task's exact input and output. Identify the restriction, test it methodi
 ## Key takeaways
 
 A meaningful bypass crosses a defined security boundary. Understand the input path, the interpreter, and the restriction being applied. The durable fix is to remove the unsafe execution path, validate input, and reduce the permissions of the process that handles requests.
+
+## Expanded technical workflow: restricted-function bypass
+
+### Establish the intended boundary
+
+Read the task brief and identify the exact function or command the lab says is blocked. Record the input field, expected response, and the restrictions the application claims to enforce. Test only the supplied challenge instance.
+
+The central question is whether the control blocks a capability securely or merely rejects a small list of strings. A blacklist can be bypassed by alternate syntax, encodings, aliases, or an unexpected execution path. Do not assume a bypass exists until a harmless test demonstrates that the restricted behaviour actually occurs.
+
+### Observe before changing inputs
+
+Capture a baseline request and response. In a browser, use Developer Tools; in an HTTP challenge, an intercepting proxy can preserve the method, path, headers, cookies, and body. Change one element at a time and record the result. This makes it possible to distinguish server validation from client-side validation and from downstream command execution.
+
+If the task is about command execution, prefer harmless inspection commands permitted by the room. Never test payloads against a production service or a host outside the lab.
+
+### Understand the parsing layers
+
+A value may pass through multiple interpreters: URL decoding, application validation, shell parsing, a template engine, and the operating system. A filter that runs before decoding may see a different string from the component that eventually executes it. Conversely, special characters may be escaped or removed before reaching the sensitive function.
+
+Document which layer appears to interpret the value. A server error alone does not prove command execution; confirm the effect using a safe, observable result specified by the task.
+
+### Validate a suspected bypass
+
+A sound test includes:
+1. The original input and baseline response.
+2. The modified input and exact response.
+3. A clear explanation of which validation rule was evaded.
+4. Evidence that the intended restricted operation occurred.
+5. A negative control, where possible, showing the baseline behaviour differs.
+
+Do not treat an HTTP 200 response as proof of success. Inspect the response body, application state, or other explicit evidence.
+
+### Defensive recommendations
+
+Avoid denylist-only filtering. Do not construct shell commands from untrusted input. Use fixed functions and structured arguments, allowlist expected values, apply least privilege, isolate the process, and validate authorization on the server. If shell use is unavoidable, use safe APIs and avoid passing user-controlled text through a shell interpreter. Log rejected inputs in a way that does not expose secrets.
+
+### Troubleshooting and room answers
+
+If the input appears to have no effect, confirm that you are editing the correct parameter, that the request reaches the intended endpoint, and that the lab instance is active. Check whether the application normalizes input before validation. Use the room's own task feedback to determine the requested answer, and redact any flag as `flag{hidden}` in public notes.

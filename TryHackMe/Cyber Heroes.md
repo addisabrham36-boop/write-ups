@@ -87,3 +87,29 @@ A secure implementation would submit credentials to a server over HTTPS. The ser
 ## Key takeaways
 
 CyberHeroes is solved by inspecting the login page source rather than brute-forcing the form. The JavaScript exposes both the expected username and the reversible password check. The deeper lesson is that client-side checks are for user experience, not security; the server must make and enforce the authentication decision.
+
+## Expanded web challenge investigation
+
+### 1. Build a request map
+
+Open the challenge application and inspect its pages, forms, API calls, and JavaScript. Use the browser Network panel to identify the exact request that produces the behaviour described by the room. Record the route, method, parameters, and response shape before testing.
+
+### 2. Identify the trust boundary
+
+Determine which values come from the browser and which decisions must be made by the server. Never assume a value is trusted because it is stored in a hidden input, URL parameter, local storage, or client-side object. The server must validate identity, permissions, and business rules independently.
+
+### 3. Test one hypothesis at a time
+
+Capture a baseline request in an intercepting proxy. Modify a single field and compare the response. If the issue concerns authorization, use only the test users provided by the room. If it concerns input processing, use the task's harmless test value and verify an actual effect rather than relying only on status codes.
+
+### 4. Validate and explain the result
+
+A good write-up ties each conclusion to the request that caused it. Include a sanitized request/response excerpt, the condition that was bypassed, and the impact. Do not include session tokens or unrelated personal data.
+
+### 5. Fix and retest
+
+Apply server-side validation, least-privilege access, safe query APIs, explicit authorization checks, and appropriate logging. Retest both the previously successful attack path and the legitimate user flow to ensure that the fix prevents abuse without breaking intended behaviour.
+
+### 6. Room answers
+
+Use the active challenge to obtain exact endpoint names, values, and flags. Do not copy a guessed answer from a similarly named room. Redact public flags as `flag{hidden}`.

@@ -1,69 +1,75 @@
 # AI Models and Data: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/aimodels
+Room: https://tryhackme.com/room/aimodelsanddata
 
-This room is about the relationship between data, models, and the behaviour of an AI system. I keep the distinction clear because many AI security problems are described as “model problems” when the actual weakness starts with the data pipeline, access controls, or the way the model is deployed.
+## Room Overview & Information
 
-## 1. Understand the data lifecycle
+This note covers the practical workflow, evidence to collect, common interpretation errors, and defensive lessons for AI Models and Data. Use the live room as the authority for task wording and machine-specific values. The repository does not include fabricated terminal output, credentials, or flags.
 
-A typical machine-learning project has several datasets and stages:
+## 1. Start with the task and data flow
 
-- **Training data** is used to fit the model's parameters.
-- **Validation data** helps compare configurations and tune the model.
-- **Test data** estimates how well the final model performs on examples it was not trained or tuned on.
-- **Inference data** is supplied when the deployed model is being used.
+Start the room environment and identify what it asks you to inspect: a model, training dataset, prompt, inference result, or configuration file. Write down the expected input and output before testing. This baseline helps distinguish a normal model limitation from a security problem.
 
-These sets serve different purposes. If examples from the test set leak into training, the evaluation can look better than real-world performance. If training data is collected without checking its origin, the model may learn biased, inaccurate, or deliberately manipulated patterns.
+AI data flows often include collection, cleaning, labelling, training, evaluation, packaging, deployment, and monitoring. A weakness at one stage can propagate to later stages. For example, poisoned training examples may affect a model long after the original dataset is gone, while a changed model file may indicate supply-chain tampering rather than data poisoning.
 
-While working through the room, I read each question carefully and identify which stage it describes. “Used to train the model” points to training data; “used to tune or select a model” points to validation data; and “final unbiased evaluation” points to test data.
+## 2. Inspect supplied files safely
 
-## 2. Separate model types and tasks
+Identify files by content, not just by extension:
 
-A model learns a mapping from input to output. A classification model assigns an input to a category, a regression model predicts a numeric value, and a generative model creates new content such as text or images. A large language model is a generative model trained to process and produce language.
+```bash
+file ARTIFACT
+sha256sum ARTIFACT
+stat ARTIFACT
+strings -n 6 ARTIFACT | head -n 80
+```
 
-The model's answer is not automatically a fact. Outputs depend on the training process, prompt, context, decoding settings, and deployment logic. For questions that compare model behaviour, focus on the task and the kind of output rather than assuming every AI system works like a chatbot.
+Replace `ARTIFACT` with a real filename from the room. Record the exact hash before analysis. Do not load unknown pickle-based models or datasets with unrestricted deserialization on a personal computer; use the lab environment and safe methods recommended by the task.
 
-## 3. Data quality and data leakage
+For tabular datasets, inspect column names, row counts, missing values, duplicates, label distribution, and suspiciously repeated examples. For text datasets, look for duplicated phrases, unexpected instructions, strange label associations, and data that does not match the stated collection source. Avoid printing sensitive records unnecessarily.
 
-When assessing a dataset, I look for:
+## 3. Understand model behaviour
 
-1. **Relevance:** Does it represent the task and the environment where the model will be used?
-2. **Quality:** Are labels, records, and values accurate and consistent?
-3. **Representativeness:** Are important groups or situations missing?
-4. **Provenance:** Where did the data come from, and was its use authorised?
-5. **Sensitivity:** Does it contain personal information, credentials, or confidential business data?
-6. **Separation:** Were training, validation, and test records kept appropriately separate?
+A model maps inputs to outputs according to learned parameters and its surrounding code. The same model can behave differently depending on preprocessing, prompt templates, decoding settings, tool access, and post-processing. Therefore, record the full inference context where the lab makes it available.
 
-Data leakage happens when information that would not legitimately be available at prediction time influences training or evaluation. It can make a model appear excellent in testing while failing in production.
+For a simple repeatable test, preserve the input and output exactly and compare results across the baseline and the suspicious case. Change one variable at a time. If the model's output changes, ask whether the change follows from the input, configuration, data, or an external tool call.
 
-## 4. Security threats to data and models
+A model error is not automatically a security vulnerability. Identify the security property at risk, such as confidentiality, integrity, availability, provenance, or control of tools.
 
-- **Data poisoning:** an attacker alters training or reference data to influence future outputs.
-- **Sensitive information disclosure:** private data is exposed through training, retrieval, logs, or inference.
-- **Model extraction:** repeated queries or access to model files are used to reproduce a model.
-- **Model inversion or inference:** outputs are used to infer sensitive details about training data or individuals.
-- **Distribution shift:** real-world inputs differ from the data on which the model was trained.
-- **Supply-chain compromise:** a model, dataset, dependency, or pre-trained artifact is replaced or tampered with.
+## 4. Data quality and poisoning
 
-These threats need different controls. Dataset provenance and review help reduce poisoning risk; least-privilege access and data minimisation reduce exposure; and model registries, checksums, versioning, and trusted artifact sources help protect the supply chain.
+Training data can be incomplete, biased, duplicated, mislabeled, or deliberately poisoned. Poisoning aims to influence the model's learned behaviour, often for a trigger or target class. Evidence can include unusual clusters, repeated trigger patterns, label inconsistencies, or a reliable difference between clean and suspicious examples.
 
-## 5. A practical way to work through the room
+Use the room's provided analysis method and compare the suspected records with normal records. Do not claim poisoning from a single odd example. Stronger evidence comes from a repeatable relationship between a suspicious data pattern and model behaviour, plus an explanation of why that pattern is not expected.
 
-1. Open the official room and read the task text before answering.
-2. Identify whether the question is about data, model behaviour, evaluation, privacy, or security.
-3. Match the wording to the lifecycle stage or threat category.
-4. If the task provides an interactive example, inspect the data or scenario it presents rather than guessing from the title.
-5. Submit the answer in the room's requested format and read the explanation after it is accepted.
-6. Record the concept and the reason it is correct in these notes. Do not copy private lab data into a public repository.
+Mitigations include provenance tracking, dataset versioning, duplicate and outlier analysis, label review, access control over data pipelines, and evaluation on a trusted holdout set. These controls reduce risk but do not guarantee that every hidden trigger will be found.
 
-I do not invent a flag or a successful result when I have not observed it in the live room. If the room's question or UI changes, use the explanation above to reason from the current evidence.
+## 5. Model provenance and integrity
 
-## 6. Defences and operational checks
+A model artifact should be traceable to a known source, build process, version, and approval. Compare the artifact hash with a trusted manifest when the room supplies one. If no trusted baseline exists, a hash only identifies the file you currently have; it cannot independently establish that the file is legitimate.
 
-A responsible AI data process should document dataset owners and sources, restrict access, scan for secrets, remove data that is not needed, preserve versions, and evaluate models on representative held-out data. Production systems also need monitoring because performance and input distributions can change over time.
+Secure model delivery with authenticated sources, signed manifests, controlled registries, and a review process for model updates. Restrict who can publish models and who can deploy them. Log model versions at inference time so suspicious behaviour can be linked to a specific release.
 
-For model artifacts, record the source, version, hash, dependencies, and approval status. Do not load unknown model files or packages on a normal workstation just because a tutorial says to try them.
+## 6. Work through the room questions
+
+For every question, locate the specific evidence requested. A question about a data property should be answered from the dataset; a question about model behaviour should be supported by an inference test; and a question about integrity should be answered from the version or hash evidence. Preserve exact spelling and formatting for submitted values.
+
+Where the lab uses a model or dataset that is only available inside the running environment, obtain the answer there. Do not invent row counts, hashes, output labels, or flags. Redact public flags as `flag{hidden}`.
+
+## 7. Defensive checklist
+
+- Track data sources, licences, owners, and versions.
+- Review data quality and labels before training.
+- Separate training, evaluation, and production data.
+- Protect model registries and build credentials.
+- Verify artifact integrity before deployment.
+- Test for unexpected behaviour using representative and adversarial inputs.
+- Log the model version and relevant inference metadata.
+- Have a rollback process for a suspicious release.
 
 ## What I took from this room
 
-AI security begins before a prompt is sent. Data provenance, quality, evaluation, privacy, and model lifecycle controls influence the safety and reliability of the finished system. A good benchmark score is only useful when the evaluation is sound and the deployed system is protected.
+Model security is not only about the model architecture. Data provenance, labels, preprocessing, packaging, deployment, and monitoring all affect the final behaviour. A good investigation connects the observed result to the stage that could have caused it.
+
+## Phase 5: Key Takeaways & Remediation
+
+The main goal is to connect every conclusion to observable evidence and enforce security controls at the correct trust boundary. Keep the original artefacts, record the exact commands and outputs from your own run, and redact any flag in public notes as `flag{hidden}`.

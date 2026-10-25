@@ -2,58 +2,92 @@
 
 Room: https://tryhackme.com/room/bypassfunctions
 
-This note treats the room as a controlled exercise in understanding application restrictions and the difference between a filter and a security boundary. The exact language, function, and restrictions must be taken from the live task; names alone are not enough to infer the intended bypass.
+## Room Overview & Information
 
-## 1. Read the constraints first
+**Category:** Web application security / PHP hardening  
+**Focus:** Understanding restricted PHP functions, why blacklists fail, tracing input into an interpreter, and proving a weakness safely.
 
-Start the lab and identify which input field, function, or execution environment the task provides. Record what is allowed, what is blocked, and what output the application returns. Do not begin by trying random strings. The goal is to understand the rule being enforced and whether the rule actually prevents the unsafe behaviour.
+The room title suggests a function restriction or filtering challenge. The correct bypass depends on the exact PHP version, disabled-function configuration, available extensions, and how the application uses user input. Do not infer a specific exploit from the title alone. The walkthrough below sets out a reproducible way to analyse the actual lab without inventing a payload or claiming a result that has not been observed.
 
-## 2. Separate filtering from security enforcement
+## Phase 1: Start the lab and inspect the application
 
-A blacklist rejects a known set of strings or characters. It can fail when equivalent syntax, alternate encodings, or another code path reaches the same operation. An allowlist defines the specific input forms that are acceptable and is usually easier to reason about when the expected format is narrow.
+Start the target and record the assigned IP. Identify the web service:
 
-Even an allowlist is not enough if the application later interprets the input in a dangerous context. A value safe as plain text may become unsafe when inserted into a shell command, SQL statement, HTML document, or template without context-aware handling.
+\`\`\`bash
+nmap -sC -sV -oN bypass-functions-nmap.txt TARGET_IP
+\`\`\`
 
-## 3. Reproduce the behaviour methodically
+- **-sC** runs Nmap's default scripts.
+- **-sV** attempts to identify service versions.
+- **-oN** saves the output for review.
 
-For each test:
-1. Record the original input and expected result.
-2. Change one property at a time.
-3. Observe the exact error or output.
-4. Determine whether the server rejected the input, transformed it, or interpreted it.
-5. Repeat only with values permitted by the lab.
-6. Document the smallest input that demonstrates the issue.
+Open the web page and identify the input field or function described by the task. Record the request method, endpoint, parameters, response status, and error text. A field that accepts input is not automatically vulnerable; the key question is how the server processes the value.
 
-This approach helps distinguish a real bypass from an unrelated error or a display quirk. It also makes the finding reproducible.
+## Phase 2: Understand PHP function restrictions
 
-## 4. Understand execution context
+PHP's configuration can disable selected functions. Administrators sometimes use the disabled-functions setting to reduce the risk of dangerous operations such as process execution. This can be useful as defence in depth, but it is not a complete sandbox. The application may still expose equivalent functionality through another API, extension, or unsafe data flow.
 
-The meaning of a character depends on where it is interpreted. A quote may be harmless inside a string but special in a shell, SQL query, or programming-language expression. Encoding changes representation; it does not automatically make an input safe after decoding.
+The exact available functions depend on the installed PHP version and extensions. If the room exposes configuration information, inspect only the fields required by the task. Do not assume a function is disabled merely because a website returns an error.
 
-Trace the data from the user-controlled field through validation and into the operation that consumes it. If the value is passed to a parser or interpreter, identify the exact grammar and the protections that apply at that boundary.
+A secure design should avoid allowing untrusted input to control an interpreter or command in the first place. A blacklist of function names is not a substitute for separating data from executable instructions.
 
-## 5. Verify impact without causing damage
+## Phase 3: Trace the input path
 
-Use a harmless proof in the authorised lab. Avoid destructive file operations, credential theft, persistence, or actions against systems outside the assigned environment. If the exercise demonstrates command execution, confirm it with a benign result and record the execution identity.
+Use the browser's Network tab or Burp Suite to capture the request. Send it to Repeater and change one input at a time.
 
-A filter bypass does not automatically prove full compromise. State exactly what was demonstrated and what remains unverified.
+For each test, record:
+1. The original input.
+2. The expected behaviour.
+3. The actual response.
+4. Any error or transformation.
+5. Whether the server evaluated the input or simply displayed it.
+6. The evidence that supports the conclusion.
 
-## 6. Defensive design
+If the application evaluates a value, identify the language and context. PHP string parsing, shell parsing, SQL syntax, and template syntax have different rules. A character that is harmless in one context may be meaningful in another.
 
-- Prefer structured APIs over constructing executable strings.
-- Use parameterised queries for database operations.
-- Apply context-aware output encoding for HTML and other interpreters.
-- Validate against a strict allowlist.
-- Keep dangerous functionality isolated and minimally privileged.
-- Add tests for alternate encodings and equivalent syntax.
-- Log rejected inputs and anomalous behaviour without unnecessarily storing secrets.
+## Phase 4: Determine what the filter actually blocks
 
-Disabling one function may reduce exposure, but it does not fix the underlying design if another function provides the same unsafe capability.
+A filter may reject a function name, a character, a keyword, or a pattern. Test the rule with harmless inputs that reveal its behaviour. Do not begin by trying a long list of obfuscated payloads.
 
-## 7. Working through the room
+Check whether the application:
+- Rejects the input before PHP processes it.
+- Rewrites or removes part of the input.
+- Passes the value to a PHP function.
+- Passes the value to an operating-system command.
+- Uses the value in a database query.
+- Displays the value without executing it.
 
-Use the restrictions and examples supplied by the current task. Identify the intended operation, determine how the filter works, and test one hypothesis at a time. The accepted answer may depend on the specific lab code, so verify the current output rather than copying a guessed payload from another guide.
+This distinction determines what a successful bypass would mean. A filter bypass is not proof of code execution unless the server actually performs the unsafe operation.
 
-## What I took from this room
+## Phase 5: Validate impact safely
 
-A bypass is meaningful only when it crosses a defined security boundary. Understanding the input path and execution context leads to a stronger finding and a more durable fix than memorising a list of special characters.
+Use only the proof method provided by the active lab. Prefer a harmless output that confirms the relevant behaviour without changing system state. If the task demonstrates command execution, verify the execution context and record the result.
+
+Do not use destructive file operations, persistence, credential theft, or commands against systems outside the room. If a shell is part of the lab, confirm the identity and host before any further action. Code execution under a web-server account does not automatically mean root access.
+
+## Phase 6: Troubleshooting
+
+- **Input is rejected:** inspect the exact error and determine which rule triggered it.
+- **Input is reflected but not evaluated:** reflection alone is not code execution.
+- **A test works locally but not remotely:** the PHP version, configuration, extension set, or application path may differ.
+- **A function appears disabled:** verify the actual configuration and whether an alternate code path is available.
+- **Output is inconsistent:** change one variable at a time and preserve each request/response pair.
+
+## Phase 7: Remediation
+
+- Avoid shell execution for operations that can be performed with safe library APIs.
+- If a subprocess is required, pass a fixed executable and structured arguments rather than concatenating user input.
+- Validate inputs against a strict allowlist appropriate to the expected data.
+- Use parameterised queries and context-aware output encoding.
+- Run the web process with minimal permissions.
+- Keep PHP and extensions patched.
+- Treat disabled-functions settings as supplementary hardening, not the primary security boundary.
+- Add regression tests for equivalent syntax and alternate input representations.
+
+## Phase 8: Complete the room using live evidence
+
+Use the task's exact input and output. Identify the restriction, test it methodically, and follow the room's intended proof. If a question requests a particular value or flag, obtain it from the current lab and redact the flag in public notes. This write-up deliberately does not invent an exploit string or claim that a specific bypass succeeded without evidence from the active target.
+
+## Key takeaways
+
+A meaningful bypass crosses a defined security boundary. Understand the input path, the interpreter, and the restriction being applied. The durable fix is to remove the unsafe execution path, validate input, and reduce the permissions of the process that handles requests.

@@ -1,65 +1,137 @@
 # Linux Fundamentals Part 1: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/linuxfundamentalspart1
+Official room: https://tryhackme.com/room/linuxfundamentalspart1
 
-Linux is common in servers, cloud environments, security tools, and embedded devices. This room introduces the terminal and the commands needed to navigate a filesystem, inspect files, and understand the command line without relying entirely on a graphical desktop.
+## Room Overview & Information
 
-## 1. Open the terminal and understand commands
+**Category:** Linux fundamentals  
+**Difficulty:** Beginner  
+**Focus:** Linux shell, filesystem navigation, reading files, searching, shell operators, and basic system interaction.
 
-A shell reads commands and runs programs. A command may take options and arguments. For example, ls -la /etc lists the contents of /etc with detailed information, including hidden entries. The command is the program, -la are options, and /etc is the path being listed.
+Linux is common on servers, cloud infrastructure, containers, and security tools. The terminal is a way to issue commands to the shell, which starts programs and connects their input and output. A command should be understood as a program plus its arguments, not as a magic phrase to copy.
 
-Try the following in the lab:
+## Phase 1: Open a terminal and understand the prompt
 
-    whoami
-    pwd
-    uname -a
+A prompt may show the username, hostname, current directory, and shell. The exact appearance varies by distribution and shell configuration.
 
-whoami prints the current username. pwd prints the current working directory. uname -a displays kernel and system information. The result is specific to the lab machine.
+Check the current identity and directory:
 
-## 2. Navigate the filesystem
+```bash
+whoami
+pwd
+id
+```
 
-Linux uses one directory tree rooted at /. Common directories include /home for user home directories, /etc for system configuration, /var for changing data such as logs, and /tmp for temporary files.
+- `whoami` prints the effective username.
+- `pwd` prints the current working directory.
+- `id` shows user and group identifiers.
 
-    ls
-    ls -la
-    cd /tmp
-    pwd
-    cd ~
+The tilde (`~`) usually represents the current user's home directory.
 
-ls lists visible entries. ls -la also shows hidden entries and details. cd changes the current directory. The tilde represents the current user's home directory.
+## Phase 2: Navigate the filesystem
 
-A name beginning with a dot is hidden by convention, not encrypted. Use ls -la when you need to check for such entries.
+```bash
+ls
+ls -la
+cd /etc
+cd ..
+cd ~
+```
 
-## 3. Read and search files
+- `ls` lists visible entries.
+- `-l` shows details such as permissions, owner, size, and modification time.
+- `-a` includes hidden entries whose names begin with a dot.
+- `cd` changes the current directory.
+- `..` means the parent directory.
+- `~` means the home directory.
 
-- cat filename.txt displays a short file.
-- less filename.txt lets you scroll through a longer file.
-- head filename.txt displays the beginning.
-- tail filename.txt displays the end.
-- file filename.txt identifies the file type.
+Absolute paths begin at the filesystem root, `/`. Relative paths are interpreted from the current directory. This distinction matters when a command says a file cannot be found.
 
-Replace the example filename with one that exists in the room.
+## Phase 3: Read and search files
 
-To search text, use grep -n "pattern" filename.txt. To search for matching paths under the current directory, use find . -name "*.txt". grep searches file contents; find searches filesystem paths. If a command returns no output, there may simply be no matches.
+```bash
+cat notes.txt
+less /var/log/syslog
+head -n 20 notes.txt
+tail -n 20 notes.txt
+grep -n "error" notes.txt
+find . -type f -name "*.txt"
+```
 
-## 4. Create and move files
+- `cat` prints a file.
+- `less` lets you page through a file.
+- `head` shows the first lines.
+- `tail` shows the last lines.
+- `grep -n` searches for a string and displays matching line numbers.
+- `find` searches the directory tree for matching paths.
 
-Commands such as touch, mkdir, cp, and mv create files, create directories, copy files, and move or rename paths. Practise in a directory you control. Before using mv or deleting anything, check the source and destination carefully; a typo can affect the wrong files.
+Use `sudo` only when the task requires elevated permissions. Do not change ownership or permissions just to silence an error without understanding the consequence.
 
-## 5. Permissions and elevated privileges
+## Phase 4: Files, directories, and permissions
 
-Linux permissions control who can read, write, or execute files. Use ls -l to inspect permission bits and ownership, and id to see the current user and groups. sudo can run an authorised command with elevated privileges. It should not be used automatically to get around every permission error. First determine why access is denied.
+Linux permissions distinguish read (`r`), write (`w`), and execute (`x`) for the owner, group, and others. For a file, execute permission allows it to be run as a program; for a directory, execute permission controls whether the user can traverse it.
 
-## 6. Help and command discovery
+```bash
+stat notes.txt
+chmod 640 notes.txt
+```
 
-man ls opens the manual page for ls. Many programs also support --help. The which command can show the executable found for a command name, although aliases and shell functions can affect command resolution.
+`stat` inspects metadata. `chmod 640` sets owner read/write, group read, and no permissions for others. This is an example for a file that should not be executable; do not apply it indiscriminately to system files.
 
-## 7. Working through the room
+Create or copy files with:
 
-Read the task prompt, identify the directory or file it refers to, and run the relevant command. If a question asks for a hidden file, remember to list hidden entries with ls -la. If a command fails, check the current directory with pwd, confirm the filename with ls, and read the exact error.
+```bash
+mkdir practice
+cp notes.txt practice/
+mv practice/notes.txt practice/notes-copy.txt
+```
 
-Do not assume the same files exist on your own machine. Use the AttackBox or lab environment provided by TryHackMe and record the actual result from that environment.
+These commands create a directory, copy a file, and rename/move the copy.
 
-## What I took from this room
+## Phase 5: Redirects and pipes
 
-The command line becomes manageable when I understand paths, listing, reading, searching, and permissions. These fundamentals are the basis for later Linux enumeration and incident-response work.
+The shell can redirect output and connect commands:
+
+```bash
+command > output.txt
+command >> output.txt
+command 2> errors.txt
+command1 | command2
+```
+
+- `>` overwrites a file with standard output.
+- `>>` appends standard output.
+- `2>` redirects standard error.
+- `|` sends one program's standard output to another program's standard input.
+
+Be careful with `>`: it overwrites the destination immediately. Use a temporary file or append mode when you need to preserve existing content.
+
+## Phase 6: Users, processes, and system information
+
+```bash
+ps aux
+top
+uname -a
+df -h
+free -h
+ip addr
+ip route
+```
+
+These commands inspect running processes, a live process view, kernel/system details, disk usage, memory, interface addresses, and routes. They are common starting points for both troubleshooting and defensive investigation.
+
+## Phase 7: Working through the room
+
+Read each task carefully and use the terminal to inspect the exact path or value it asks about. If the room asks for a hidden file, include hidden entries with `ls -la`. If it asks for a command's output, run the command in the provided environment. Paths and file contents may differ across instances, so do not invent output.
+
+## Troubleshooting
+
+- **Command not found:** check spelling and whether the tool is installed.
+- **No such file or directory:** check `pwd`, path spelling, and case.
+- **Permission denied:** inspect permissions and current identity before using `sudo`.
+- **Unexpected output:** read the command's manual with `man COMMAND` or use `COMMAND --help`.
+- **File overwritten:** remember that `>` replaces a file; use `>>` to append.
+
+## Key takeaways
+
+Linux fundamentals are the foundation for security work. Know where you are, understand file permissions, read the output of commands, and use pipes and redirection deliberately. These habits reduce mistakes when investigating logs or working in a lab.

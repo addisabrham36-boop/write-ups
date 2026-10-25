@@ -1,84 +1,118 @@
 # AI System Reconnaissance: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/aisystemreconnaissance
+Official room: https://tryhackme.com/room/aisystemreconnaissance
 
-This room is about finding AI and machine-learning services that are actually deployed, identifying what software is exposed, and checking which metadata or management interfaces can be reached. Threat modelling predicts what might go wrong; reconnaissance establishes what exists in the authorised environment.
+## Room Overview & Information
 
-## 1. Understand the target environment
+**Category:** AI security / reconnaissance  
+**Difficulty:** Beginner to intermediate  
+**Focus:** Identifying AI-enabled services, mapping exposed interfaces, fingerprinting model endpoints, and documenting an AI system's attack surface.
 
-Start the room's lab and record the exact subnet or target addresses it provides. Use only those values. Do not scan a public range or a university network just because it is reachable from the same machine.
+AI reconnaissance follows the same core discipline as web and network reconnaissance, but the assets include model endpoints, inference APIs, retrieval systems, agent tools, model registries, and data pipelines. The goal is to establish what exists and how it is exposed before testing whether any component is vulnerable.
 
-AI infrastructure can include model inference servers, experiment trackers, vector databases, notebook services, orchestration platforms, object storage, and APIs. Some share ports with ordinary web applications, so a port number is only a clue.
+Use only the room's assigned targets. AI endpoints can incur costs, process sensitive data, or invoke tools, so uncontrolled probing is not appropriate outside an authorised environment.
 
-## 2. Discover services
+## Phase 1: Define scope and identify the service
 
-Use the port list and target range specified by the active room. A generic service-detection pattern is:
+Start the lab and record the current target address. If the room provides a hostname, use that exact hostname and follow the instructions for resolving it. Do not scan unrelated network ranges.
 
-```bash
-nmap -sV -p 5000,6333,6334,8000,8001,8002,8080,8081,8082,8265,8888,9000,9001 TARGET_SUBNET
-```
-
-Replace `TARGET_SUBNET` with the authorised lab range. The command asks Nmap to identify services on the listed ports. If the room provides a narrower list, use that list rather than scanning unrelated ports.
-
-To preserve results for later comparison:
+For an authorised machine, start with a service scan:
 
 ```bash
-nmap -sV -oN ai-services.txt -p 5000,6333,6334,8000,8001,8002,8080,8081,8082,8265,8888,9000,9001 TARGET_SUBNET
+nmap -sC -sV -oN ai-recon-nmap.txt MACHINE_IP
 ```
 
-Read the state and service columns. An open port means a service accepted a connection; it does not, by itself, prove which framework is running or that the service is vulnerable.
+- `-sC` runs Nmap's default scripts.
+- `-sV` attempts to identify service versions.
+- `-oN` saves a readable report.
+- `MACHINE_IP` is the current lab target.
 
-## 3. Fingerprint HTTP services
+Use the scan to identify web services and API ports. A port number or banner is only a clue; verify the application behaviour before labelling a service as an AI endpoint.
 
-For an identified web service, inspect its response:
+## Phase 2: Map the web/API surface
+
+Open the application in a browser and inspect the pages, API requests, JavaScript assets, and response headers. Browser Developer Tools → **Network** can reveal the endpoint paths and request formats used by the frontend.
+
+For a simple endpoint check:
 
 ```bash
-curl -i http://TARGET_IP:PORT/
+curl -i http://MACHINE_IP/
 ```
 
-Use the exact host and port from your scan. Look at the status code, headers, response body, error messages, and API naming. A health endpoint, model listing, metrics page, or API documentation may reveal the product. Confirm a fingerprint using more than one clue because reverse proxies and custom error pages can hide the actual service.
+The `-i` flag includes response headers. If the service uses a hostname or non-default port, use the exact URL from the room.
 
-If the room supplies a specific endpoint, use that path instead of guessing. Do not send destructive requests or modify model state unless the task explicitly requires it.
+When mapping an AI application, look for:
+- Public chat or inference endpoints.
+- API documentation or schema routes.
+- Model metadata or version information.
+- File-upload and document-ingestion routes.
+- Retrieval or search endpoints.
+- Plugin or tool configuration.
+- Administrative routes and health checks.
+- Authentication requirements and rate limits.
 
-## 4. Enumerate metadata responsibly
+Do not assume every path exists. Record only endpoints actually observed in the room.
 
-Different services expose different types of information:
+## Phase 3: Recognise AI service patterns
 
-- **Experiment tracking:** experiment names, runs, model versions, and artifact locations.
-- **Inference endpoints:** model names, versions, input/output schema, and health state.
-- **Vector databases:** collection names, schema, and index configuration.
-- **Notebook platforms:** running kernels, notebooks, or environment configuration.
-- **Object storage and registries:** model files, datasets, and artifact metadata.
-- **Orchestration platforms:** job metadata, service configuration, and workload information.
+AI services may expose ordinary HTTP endpoints that accept JSON. Common request fields can include a prompt, messages array, model name, input text, or a list of documents. The exact schema is application-specific.
 
-An exposed endpoint may reveal more than intended, but access should remain within the lab's scope. Collect the minimum evidence needed to answer the question. Do not copy secrets or private data into a public write-up.
+If an endpoint returns a JSON error, inspect the status code and response body. A 401 often indicates authentication is required, 403 indicates a refusal or permission boundary, and 404 may indicate an incorrect route. None of these status codes alone proves that the underlying service is secure.
 
-## 5. Map the supply chain
+Avoid sending private data during reconnaissance. Use harmless test input and keep requests small.
 
-An AI system depends on more than its model file. Dependencies, training datasets, model registries, container images, notebooks, and external model hubs may all affect security.
+## Phase 4: Fingerprint without overclaiming
 
-Record where artifacts come from, how versions are pinned, whether hashes are verified, and who can modify them. An internal package name that can be registered publicly may create dependency-confusion risk. A publicly readable model registry may expose intellectual property or sensitive training artifacts.
+Evidence that a service uses AI may include a documented model endpoint, a model identifier in the response, application documentation, or an interface that performs inference. A generic chatbot-like response is not proof of which model or version is deployed.
 
-## 6. Think about detection and hardening
+Record:
+- Observed URL and HTTP method.
+- Authentication requirement.
+- Input and output format.
+- Visible model or service identifier, if any.
+- Rate limits and error behaviour.
+- Whether the endpoint appears to retrieve external data or invoke tools.
+- Timestamp and source of the observation.
 
-Reconnaissance can leave patterns such as rapid port sweeps, repeated requests to API metadata endpoints, enumeration of model versions, or access to notebooks outside normal user workflows. Defenders should:
+Separate facts from hypotheses. For example, “the API returned model name X” is an observation; “the system is vulnerable to prompt injection” requires a separate test.
 
-- Inventory AI services and their owners.
-- Require authentication on management and tracking interfaces.
-- Restrict administrative ports to trusted networks.
-- Avoid exposing debug pages, metrics, and artifact stores publicly.
-- Monitor unusual request rates and API paths.
-- Review model and dependency provenance.
-- Rotate exposed credentials and limit token scope.
+## Phase 5: Map trust boundaries
 
-## 7. Work through the room questions
+Identify which components process user-controlled content and which have access to sensitive resources. An AI system may include a frontend, inference API, model server, retrieval database, document store, plugin service, and external tools. The important question is where data crosses from an untrusted source into a component with greater authority.
 
-For each task, identify which phase is being tested: discovery, service fingerprinting, metadata enumeration, supply-chain review, or defensive log analysis. Use the room's scan results and response bodies as evidence. For an interactive SOC exercise, classify each event by the behaviour it represents and explain which control would detect or prevent it.
+Examples of useful questions:
+- Can an unauthenticated user query the model?
+- Can the model retrieve private documents?
+- Does the model have access to tools that change state?
+- Are model files or configuration exposed?
+- Does the API enforce authorisation independently of model instructions?
+- Are logs or debug endpoints publicly reachable?
 
-Do not infer that every unusual request is malicious. Compare it with normal application traffic and the context in the event. Likewise, a service banner alone is not proof that sensitive information was exposed.
+Do not execute a high-impact action just to see whether a tool is available. Inspect the interface and use the room's safe test cases.
 
-I do not include fabricated scan output, credentials, or flags. The current lab's answers should be verified against the services and logs shown in the active room.
+## Phase 6: Working through the room
 
-## What I took from this room
+For each task, follow the current lab's prompt and inspect the actual service:
+1. Identify the requested endpoint or asset.
+2. Use the room-provided target and tools.
+3. Read the request and response fields carefully.
+4. Distinguish service discovery from vulnerability confirmation.
+5. Submit only the value requested by the task.
+6. Preserve evidence and redact flags or sensitive data in public notes.
 
-AI infrastructure extends the attack surface beyond conventional web servers and databases. The same fundamentals still apply: enumerate carefully, verify service identity, document evidence, and secure every exposed interface with authentication, least privilege, patching, and monitoring.
+Dynamic values such as ports, model names, endpoints, and flags must come from the active instance. Do not substitute guessed output from a different version.
+
+## Phase 7: Defensive recommendations
+
+- Require authentication and authorisation on sensitive endpoints.
+- Keep model servers, registries, and administrative interfaces off public networks unless needed.
+- Apply rate limits and request-size limits.
+- Separate model inference from privileged tool execution.
+- Restrict retrieval sources and enforce user permissions at query time.
+- Avoid returning stack traces, secrets, or internal metadata in errors.
+- Maintain an inventory of models, versions, data sources, and dependencies.
+- Monitor unusual query volume, tool use, and access to sensitive data.
+
+## Key takeaways
+
+AI system reconnaissance is asset discovery plus trust-boundary mapping. Identify exposed services, inspect their interfaces, record what the evidence shows, and avoid treating an AI-like response as proof of a particular architecture or vulnerability. Good reconnaissance produces a reliable map for a scoped assessment.

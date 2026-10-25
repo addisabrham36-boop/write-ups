@@ -27,9 +27,9 @@ The note-sharing service encrypts notes using a weak, shared derivative key. A k
 
 Open the practical at:
 
-\`\`\`text
+```text
 http://MACHINE_IP:8001
-\`\`\`
+```
 
 Replace MACHINE_IP with the address assigned by the active room.
 
@@ -37,9 +37,9 @@ Replace MACHINE_IP with the address assigned by the active room.
 
 The room hints that the key is four bytes and begins with the letters KEY. The intended key is:
 
-\`\`\`text
+```text
 KEY1
-\`\`\`
+```
 
 Enter this key in the note-sharing interface and select **Decrypt All Notes**. Inspect the decrypted notes and copy the flag from the one containing it. The flag is redacted as `THM{hidden}`.
 
@@ -55,9 +55,9 @@ The application renders dynamic content using a server-side template engine. Ser
 
 Open the practical at:
 
-\`\`\`text
+```text
 http://MACHINE_IP:8000
-\`\`\`
+```
 
 Replace MACHINE_IP with the active lab address.
 

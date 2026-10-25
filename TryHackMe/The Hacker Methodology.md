@@ -24,9 +24,9 @@ Separate verified facts from assumptions. A public certificate may reveal a host
 
 For an authorised lab, a basic scan can be recorded with:
 
-\`\`\`bash
+```bash
 nmap -sC -sV -oN scan.txt TARGET_IP
-\`\`\`
+```
 
 The default scripts gather common service information, service-version detection probes open ports, and the output file preserves the results. Use the live address from the room.
 

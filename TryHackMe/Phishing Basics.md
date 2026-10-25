@@ -84,3 +84,33 @@ For each example message, assess the sender, wording, URL destination, attachmen
 ## Key takeaways
 
 Phishing succeeds by manipulating trust and urgency. Inspect the real sender and destination, validate unusual requests independently, avoid opening unexpected files, and report suspicious messages quickly. No single visual clue proves a message is safe or malicious; use the evidence as a whole.
+
+## Expanded phishing-analysis workflow
+
+### 1. Preserve the message
+
+If the room provides an email, retain the original message or its raw source where possible. Record the sender, recipient, date, subject, Message-ID, attachment names, and the reported delivery path. Do not open unknown links or attachments on a personal device.
+
+### 2. Check sender identity and authentication
+
+Inspect the visible From address, Reply-To, Return-Path, and relevant mail headers. Display names can be spoofed and a legitimate-looking domain can contain subtle spelling changes. SPF, DKIM, and DMARC results provide useful context, but a pass result does not guarantee that a message is safe.
+
+### 3. Inspect links safely
+
+Read the actual URL destination rather than trusting the visible link text. Look for unexpected subdomains, misleading paths, URL shorteners, encoded destinations, and domains that resemble a legitimate brand. Do not visit a suspicious link unless the lab provides a safe detonation environment.
+
+### 4. Analyse attachments
+
+Check the filename, file type, hash, and sender context. File extensions can be misleading. Use the platform's sandbox or isolated analysis environment for suspicious attachments, and never enable macros or execute content merely to see what it does.
+
+### 5. Look for social-engineering clues
+
+Urgency, secrecy, requests to bypass normal approval, unusual payment details, unexpected password resets, and requests for credentials are warning signs. However, writing quality alone is not reliable: legitimate messages can be poorly written and phishing messages can be polished.
+
+### 6. Report and contain
+
+Use the organization's reporting mechanism. Preserve the message, block or quarantine it according to policy, search for similar messages, and reset credentials only when evidence suggests they were exposed. If a user clicked a link, determine whether they entered credentials, approved an MFA prompt, downloaded a file, or granted permissions.
+
+### 7. Answer the room questions
+
+For each task, point to the header, URL, attachment, or behavioural clue that supports the answer. Copy exact domains and sender fields from the provided sample. Do not claim that a message is malicious based on one clue alone; explain how the evidence combines. Redact public flags as `flag{hidden}`.

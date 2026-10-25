@@ -16,15 +16,15 @@ Start the machine and copy the current IP address shown by TryHackMe. Do not reu
 
 Open the site in the AttackBox browser:
 
-\`\`\`text
+```text
 http://MACHINE_IP/
-\`\`\`
+```
 
 If the page does not load, confirm the machine has finished booting and that the AttackBox or VPN is connected. Open the login page from the site's own link or navigate to:
 
-\`\`\`text
+```text
 http://MACHINE_IP/login.html
-\`\`\`
+```
 
 The page asks for login details. Before guessing passwords, inspect how the page performs authentication.
 
@@ -42,21 +42,21 @@ The comparison includes the username `h3ck3rBoi` and a call to a string-reversal
 
 The source contains the string:
 
-\`\`\`text
+```text
 54321@terceSrepuS
-\`\`\`
+```
 
 The function reverses the string before comparing it with the supplied password. Reverse the characters from end to beginning:
 
-\`\`\`text
+```text
 SuperSecret@12345
-\`\`\`
+```
 
 This gives the password expected by the client-side function. The username shown in the same comparison is:
 
-\`\`\`text
+```text
 h3ck3rBoi
-\`\`\`
+```
 
 These are credentials for the intentionally vulnerable CyberHeroes lab only. Do not reuse them on other services.
 

@@ -4,105 +4,73 @@ Official room: https://tryhackme.com/room/hh-thebrochure-081f3e36
 
 ## Room Overview & Information
 
-**Category:** OSINT and digital artefact analysis  
-**Difficulty:** Beginner  
-**Focus:** Image metadata, visible clues, public information, encoded fragments, and correlation.
+**Event:** Hacker Holidays  
+**Category:** OSINT  
+**Difficulty:** Easy  
+**Objective:** Analyse the supplied brochure, find the related public social-media account, inspect a suspicious follower, and recover the flag.
 
-The Brochure is part of the Hacker Holidays storyline. It begins with an image and asks the learner to follow clues toward a hidden connection. The challenge is to join several pieces of evidence without assuming that one metadata field or a matching name reveals the whole answer.
+This is a short OSINT puzzle. The key is to follow the clues from the image to a public account and then inspect the unusual follower. The answer does not require attacking a server.
 
-## Phase 1: Preserve the supplied artefact
+## Phase 1: Inspect the brochure
 
-Download the image from the active room and keep an unchanged copy. Record its exact filename, file size, and hash so later observations refer to the same artefact.
+Download the brochure image from the active room and preserve the original. Check the file type and metadata:
 
 \`\`\`bash
 file brochure-image.jpg
-stat brochure-image.jpg
-sha256sum brochure-image.jpg
 exiftool brochure-image.jpg
+sha256sum brochure-image.jpg
 \`\`\`
 
-Replace the example filename with the actual file supplied by the room.
+Replace the example filename with the one supplied by the room. ExifTool may reveal useful metadata, but the challenge's intended path is based on the content and associated public information. The published walkthrough reports that running the image through Aperi'Solve does not reveal an obvious hidden payload, so do not assume every image puzzle requires steganography.
 
-- **file** identifies the likely format from its contents.
-- **stat** displays size and filesystem timestamps.
-- **sha256sum** creates a digest for exact-file comparison.
-- **exiftool** extracts available metadata.
+Read the text and branding in the brochure carefully. The important clue is the name **Byte Lotus Resorts**.
 
-If ExifTool is not installed, use the room's recommended alternative. Metadata may be absent or deliberately modified. A timestamp is not necessarily the true creation time, and an author field is not proof of identity.
+## Phase 2: Find the related Instagram account
 
-## Phase 2: Inspect the visible image
+Search Instagram for **Byte Lotus Resorts**. The clue leads to the public account:
 
-Look closely at the brochure itself. Read text, logos, names, dates, QR codes, and unusual design elements. Zoom into small details rather than relying on a thumbnail. If the text is difficult to read, use OCR in the lab environment and compare the extracted text against the original image.
+\`\`\`text
+@thebytelotusresort
+\`\`\`
 
-Keep three things separate in your notes:
-1. What is visibly present in the image.
-2. What metadata or a tool reports.
-3. What you infer from those observations.
+Open the account and inspect its visible profile information and followers. The room's intended clue is that the account has only one follower. That follower is suspicious in the context of the challenge and is the next lead.
 
-This separation prevents a plausible interpretation from being mistaken for direct evidence.
+Do not broaden the search into unrelated personal information. Follow only the account and profile clues required by the puzzle.
 
-## Phase 3: Check for additional embedded data
+## Phase 3: Inspect the suspicious follower
 
-If the room's clues suggest that the image may contain extra data, inspect the file structure without modifying the original:
+Open the single follower's profile and inspect the visible username or encoded text. The room hints that the relevant value uses Base64. Base64 is an encoding, not encryption, and it can be decoded without a secret key.
+
+If you have copied the encoded string into a file, decode it in the AttackBox:
 
 \`\`\`bash
-strings -n 5 brochure-image.jpg | head -n 80
-xxd -l 128 brochure-image.jpg
+printf '%s' 'BASE64_VALUE' | base64 --decode
 \`\`\`
 
-**strings** extracts printable sequences; **xxd** shows the first bytes in hexadecimal. These are triage tools. A lack of readable text does not prove that no embedded data exists, and a readable string may be unrelated to the challenge.
+Replace BASE64_VALUE with the exact string shown by the follower profile. The `printf` command avoids adding a newline to the input. Alternatively, use CyberChef's **From Base64** operation.
 
-Use steganography tools only if the task provides a reason to suspect hidden content. Do not apply random tools until something appears to fit; first identify the clue and the file format.
+Keep the original string and decoded result in your notes. If the result is not readable, confirm that you copied the full value and that the encoding is actually Base64. Do not guess the flag from the account name.
 
-## Phase 4: Follow the public trail
+## Phase 4: Recover and verify the flag
 
-The room's storyline points toward an AI-related clue and a social-media trail. Record the exact names or phrases shown in the supplied artefact, then use them to locate the relevant public account, page, or post. Check that the account's content connects back to the brochure rather than relying on a name match alone.
+Follow the decoded clue and the profile information to identify the flag shown by the active challenge. Verify the exact characters and submit it to TryHackMe. This public write-up deliberately redacts the flag as `THM{hidden}`.
 
-For each relevant page:
-- Record the URL and timestamp.
-- Identify the phrase, image, or reference that links it to the prior clue.
-- Check whether it points to another account or contains an encoded fragment.
-- Preserve the original fragment before decoding it.
-- Follow one link at a time so the chain can be reproduced.
+### Task question: “Uncover the flag!”
 
-Avoid collecting unrelated personal information. The objective is to solve the authorised puzzle, not to build a broader profile of a real person.
+The complete evidence chain is:
+1. Inspect the supplied brochure and identify the Byte Lotus Resorts clue.
+2. Search Instagram for that name.
+3. Open the account at `@thebytelotusresort`.
+4. Inspect its single suspicious follower.
+5. Decode the relevant Base64 value.
+6. Use the result to recover the room's flag.
 
-## Phase 5: Decode fragments carefully
+## Phase 5: Why this is OSINT
 
-If a public post contains an encoded string, inspect the character set and the room's hints before choosing a decoder. Base64 commonly uses letters, digits, plus and slash characters, with optional equals padding. Hexadecimal uses digits and letters A through F. Other ciphers may preserve letter patterns or use a clue from the story.
+OSINT uses publicly available information to answer a specific question. The challenge does not depend on compromising Instagram or bypassing access controls. It relies on correlating a clue in one artefact with a public account and then interpreting the follower's encoded information.
 
-Keep the original text, the transformation used, and the resulting text in your notes. If the output is not meaningful, revisit the format instead of applying random transformations until something looks plausible.
-
-Encoding is not encryption. A decoded result may contain another clue or another encoded layer; analyse each stage separately.
-
-## Phase 6: Correlate clues
-
-An OSINT conclusion should be supported by several consistent details. A matching name alone may be coincidence. A matching phrase, linked account, timestamp, and related artefact provide stronger support when they form a coherent chain.
-
-Build a simple evidence table:
-
-| Evidence | Direct observation | Interpretation | Confidence |
-|---|---|---|---|
-| Brochure image | Text, design, or metadata shown | Possible clue | Low until corroborated |
-| Public post | Exact URL and content | Possible connection to the image | Medium if details match |
-| Encoded fragment | Original string and decoded result | Follow-up clue | High only after verification |
-
-The confidence rating is your assessment, not a substitute for evidence. Record contradictions rather than hiding them.
-
-## Phase 7: Verify the final answer
-
-Trace the final value to the last clue in the chain and check its exact spelling and formatting. Submit the value shown by the active room. Do not substitute a guessed flag or answer from a different instance. In a public note, represent a confirmed flag as `flag{hidden}`.
-
-## Phase 8: Lessons and responsible use
-
-- Preserve the original artefact and record its hash.
-- Treat metadata as a clue, not proof.
-- Verify public-account connections with more than one matching detail.
-- Keep raw evidence separate from interpretation.
-- Avoid collecting unrelated personal data.
-- Document each transformation so another learner can reproduce the result.
-- Use public information only within the room's intended purpose and scope.
+A single match can be a coincidence, so connect each step to the preceding clue. In this room, the brochure branding, matching account, unusual follower count, and Base64 hint form the intended chain.
 
 ## Key takeaways
 
-OSINT combines small public clues into a supported conclusion. Image metadata, visible details, public accounts, and encoded text can each contribute, but every link in the chain needs evidence. A plausible story is not the same as a verified finding.
+The Brochure is solved through clue correlation rather than exploitation. Read the image, search the exact brand name, inspect the suspicious follower, and decode the value indicated by the task. Preserve the original evidence and redact the flag in public notes.

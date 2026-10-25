@@ -1,4 +1,4 @@
-# Phishing: HiddenEye — TryHackMe Walkthrough
+# Phishing: HiddenEye — Complete TryHackMe Walkthrough
 
 Official room: https://tryhackme.com/room/phishinghiddeneye
 
@@ -6,117 +6,88 @@ Official room: https://tryhackme.com/room/phishinghiddeneye
 
 **Category:** Social engineering and phishing awareness  
 **Difficulty:** Beginner  
-**Tasks:** Installation and first phishing-page demonstration, link masking, and a Gmail-themed example.
+**Topics:** Lookalike pages, URL masking, HTTPS misconceptions, and ethical phishing simulation.
 
-HiddenEye is a phishing simulation tool that can generate lookalike login pages. The room teaches how these pages exploit user trust and why a realistic-looking page or HTTPS connection is not proof that a website is legitimate. Use the tool only in the room's authorised environment. Do not send phishing links to real people or collect real credentials.
+HiddenEye is a phishing simulation tool capable of creating pages that imitate popular login interfaces. This room demonstrates how a page can look legitimate while the destination is controlled by someone else. Keep all actions in the provided training environment, use dummy accounts, and do not collect or retain real credentials.
 
-## Task 1: Installation & Creating Your First Phishing Page
+## Phase 1: Reconnaissance & Enumeration
 
-Follow the room's current instructions for the provided AttackBox or lab environment. Tool dependencies and repository installation steps can change, so use the commands on the active room page rather than installing an unverified copy from an unrelated source.
+### Task 1: Installation and first phishing-page demonstration
 
-The goal of this task is to observe how a phishing simulation can imitate a legitimate login page. Compare the simulated page with the real service's known domain and expected sign-in flow. Do not enter a real password or use the simulated page outside the lab.
+Follow the active room's setup instructions for the provided AttackBox. Dependencies and repository installation steps can change, so use the official room's current instructions rather than installing an unverified copy from an unrelated source.
+
+Open the generated training page and compare it with the legitimate service's sign-in page. Visual similarity is a clue attackers exploit, not proof that the destination is authentic. Inspect the actual hostname and link path. Do not enter a real password into the simulation.
 
 ### Question: “Which image shows a legit web-page? They are identical and most phishing pages nowadays have HTTPS enabled. (Image 1 or Image 2)”
 
-**Answer: Image 2.**
+**Answer:** Image 2.
 
-The task highlights that the two pages can look identical. The domain and the context of the link matter more than visual design alone. HTTPS encrypts the connection to the domain in the address bar; it does not prove that the domain belongs to the organisation being impersonated.
+The intended lesson is to validate the destination domain and context rather than trust the page's appearance. HTTPS encrypts the connection to the domain in the address bar; it does not guarantee that the domain belongs to the organisation being impersonated.
 
 ### Question: “What will you use this tool for?”
 
-**Answer: Educational Purposes.**
+**Answer:** Educational Purposes.
 
-The tool is intended here for a controlled learning exercise. A phishing toolkit must not be used to deceive real users, collect credentials, or access accounts without permission.
+Use the tool only for controlled learning or other explicitly authorised testing. Do not deceive real users, harvest credentials, or use captured information to access accounts.
 
-## Task 2: Masking Your Link
+## Phase 2: Vulnerability Analysis & Link Validation
 
-Link masking attempts to make a destination appear more trustworthy than it is. A message may display a familiar brand name while the actual URL points to an unrelated domain or a redirect service.
+### Task 2: Masking your link
 
-When reviewing a link:
-1. Hover over it or inspect the link address without opening it.
+A phishing message can make a link appear familiar while directing the browser to an unrelated hostname. To inspect a URL safely:
+
+1. Hover over the link or inspect its underlying href without opening it.
 2. Read the hostname carefully.
-3. Identify the registered domain, reading from right to left.
-4. Check for misspellings, extra subdomains, URL shorteners, and unexpected redirects.
-5. If the message claims to be from a service you use, open that service using a known bookmark or manually entered address instead.
+3. Identify the registered domain, not just a familiar word earlier in the URL.
+4. Check for misspellings, added subdomains, URL shorteners, and redirects.
+5. Navigate to a sensitive service through a known bookmark or manually entered address instead of clicking an unexpected link.
 
-A domain such as `accounts.example.com.attacker.test` belongs to `attacker.test`, not `example.com`. A lock icon does not make a deceptive domain legitimate.
+For example, accounts.example.com.attacker.test is hosted under attacker.test, not example.com. A valid certificate only shows that the connection is encrypted to the named domain.
 
-## Task 3: Creating a Gmail Phishing Page
+### Task 3: Gmail-themed simulation
 
-The room demonstrates a Gmail-themed lookalike page to show how attackers can abuse familiar branding. The important learning objective is to understand the risk and recognise the indicators, not to deploy a credential-harvesting page.
-
-Compare the simulated page with the legitimate sign-in process:
-- Is the hostname exactly the expected Google domain?
-- Was the link received unexpectedly?
-- Does the page request credentials after an unusual prompt?
-- Does the link redirect through an unrelated service?
-- Is the user being pressured to act immediately?
-
-Do not submit real Google credentials to a simulation. Use only the test environment and accounts explicitly provided by the room.
+The room uses a Gmail-themed page to demonstrate the persuasive effect of familiar branding. Compare the URL with the real service, inspect the message that led to the page, and identify whether it asks for credentials under an unusual pretext. Do not submit genuine Google credentials. The room is testing recognition and ethical use, not permission to deploy a credential-harvesting page.
 
 ### Question: “What is the weakest link in cyber-security?”
 
-**Answer: Humans.**
+**Answer:** Humans.
 
-This is the room's intended awareness answer: social engineering targets human judgement and trust. The phrase does not mean users are to blame for every incident. Good security design assumes people can be deceived and adds controls that limit the impact.
+This is the intended awareness answer because social engineering targets human trust and decision-making. It does not mean that people should be blamed for every incident. Effective security assumes that users can be deceived and limits the damage through authentication, access control, filtering, and clear reporting processes.
 
 ### Question: “Do most phishing pages have HTTPS (Yay/Nay)?”
 
-**Answer: Yay.**
+**Answer:** Yay.
 
-Many phishing pages use HTTPS. A valid TLS connection means traffic is encrypted to the domain in the browser; it does not establish that the site is genuine. Always verify the hostname and the context of the link.
+Phishing sites often use HTTPS. TLS protects traffic between the browser and the named domain; it does not validate the domain's business identity. Check the hostname and the source of the link.
 
-## Evidence and interpretation
+## Phase 3: Post-Exercise Investigation
 
-The exercise shows four key ideas:
-1. A phishing page can closely imitate a legitimate page.
-2. Link masking can make the destination less obvious.
-3. Humans are frequent targets of social engineering.
-4. HTTPS is not a reliable test of whether a page is trustworthy.
+No privileged shell, administrator role, or host compromise is part of the standard awareness tasks. The relevant post-exercise work is to understand what evidence would exist in a real phishing investigation:
+- Email sender and authentication headers.
+- Real URL, redirect chain, and domain registration context.
+- Web server and DNS logs.
+- Authentication logs showing whether credentials were submitted.
+- Suspicious mailbox rules, session grants, or endpoint activity after a click.
 
-The strongest verification method is to inspect the actual domain and navigate to the service through a known, trusted route.
+If real credentials were accidentally entered into a phishing page, change them through the legitimate service, revoke active sessions, review account activity, and report the incident. Do not reuse the exposed password.
 
-## Remediation and prevention
+## Phase 4: Room Questions & Answers
 
-- Use phishing-resistant MFA where possible.
+| Exact question | Answer |
+|---|---|
+| Which image shows a legit web-page? (Image 1 or Image 2) | Image 2 |
+| What will you use this tool for? | Educational Purposes |
+| What is the weakest link in cyber-security? | Humans |
+| Do most phishing pages have HTTPS (Yay/Nay)? | Yay |
+
+## Phase 5: Key Takeaways & Remediation
+
+- Verify hostnames instead of judging sites by branding alone.
 - Use a password manager that recognises the legitimate domain.
-- Train users to report suspicious messages without fear of blame.
-- Deploy email authentication and filtering.
-- Monitor for unusual authentication attempts and new forwarding rules.
-- Use unique passwords for every service.
-- Provide a quick process for revoking sessions and rotating exposed credentials.
-- Keep phishing simulations scoped, approved, and limited to test accounts.
+- Prefer phishing-resistant MFA.
+- Filter suspicious email and inspect domains/redirects.
+- Provide a safe way for users to report suspected phishing without fear of blame.
+- Monitor suspicious authentication, mailbox changes, and unusual sessions.
+- Keep phishing simulations approved and limited to test users and training infrastructure.
 
-## Key takeaways
-
-HiddenEye demonstrates how easy it can be to imitate a familiar login page. The defensive lesson is to verify the destination, not just the page's appearance or HTTPS status, and to use phishing tools only for authorised education and testing.
-
-## Expanded lab analysis and defensive focus
-
-### 1. Confirm the training context
-
-This room concerns phishing simulations and a phishing-tool workflow. Keep all activity inside the supplied training environment and use test identities only. Do not deploy credential-collection pages against real people or services, reuse captured passwords, or expose collected data.
-
-### 2. Understand the attack chain
-
-A phishing campaign commonly includes a lure, a lookalike page or request, a delivery channel, a victim interaction, and a collection or redirect stage. Each stage can leave evidence in URL reputation, DNS, web-server logs, browser history, authentication logs, and user reports. The security lesson is to recognize and interrupt the chain, not to treat a convincing page as legitimate.
-
-### 3. Inspect the exercise artefacts
-
-Use the room's interface and supplied data to determine what the tool did, which page or URL was presented, and what observable result the task asks about. Record the environment, actions, and output. Avoid publishing operational instructions that would enable credential harvesting outside the lab.
-
-### 4. Analyze indicators safely
-
-Examine the domain, TLS information, URL path, page content, redirects, and request timing in the lab. HTTPS only protects the connection to the named endpoint; it does not prove the page belongs to the legitimate organization. Look for mismatched domains, suspicious redirects, unexpected credential requests, and inconsistencies with the normal login flow.
-
-### 5. Verify simulated outcomes
-
-If the task includes a submitted test credential or a success message, use only the room's dummy data and report what the environment demonstrably recorded. Do not infer that a real credential was captured from a page merely loading successfully. Do not retain or reproduce passwords in a public write-up.
-
-### 6. Detection and prevention
-
-Use phishing-resistant MFA where possible, password managers that bind credentials to the legitimate domain, email authentication, web filtering, endpoint monitoring, and user reporting. Train users to verify unusual requests through a separate known channel. Monitor suspicious login patterns and revoke compromised sessions quickly.
-
-### 7. Room questions
-
-Use the active room's exact scenario and evidence for each answer. Where a question depends on a lab-only value, retrieve it from the exercise rather than guessing. Redact flags as `flag{hidden}`, and never include captured credentials in the repository.
+The central lesson is that a phishing page can look polished and use HTTPS while still being fraudulent. The destination and the context matter more than the page's visual appearance.

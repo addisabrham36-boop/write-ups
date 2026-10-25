@@ -1,65 +1,137 @@
-# The Building Blocks of AI: TryHackMe Walkthrough
+# The Building Blocks of AI: Complete TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/thebuildingblocksofai
+Official room: https://tryhackme.com/room/thebuildingblocksofai
 
-This room introduces the terms used to describe artificial intelligence and machine learning. The most useful starting point is to distinguish the task a system performs from the process used to build it. AI is the broad field; machine learning is one approach within it, and deep learning is a family of machine-learning methods based on neural networks.
+## Room Overview & Information
 
-## 1. Understand the lifecycle
+**Category:** Artificial intelligence and machine learning fundamentals  
+**Difficulty:** Beginner  
+**Purpose:** Explain the main AI terms, how models learn from data, how neural networks and large language models work, and why those distinctions matter for security.
 
-A basic machine-learning workflow looks like this:
+This is a conceptual room with knowledge checks, not an exploitation VM. Nmap, shell access, and privilege escalation are not part of the learning objective. The right method is to connect each question to the definition and example in the room rather than force an attack workflow onto a theory lesson.
 
-1. Collect and prepare data.
-2. Choose a model and training approach.
-3. Train the model using examples.
-4. Evaluate it on data that was not used to fit it.
-5. Deploy the model for inference.
-6. Monitor its behaviour and update it when needed.
+## Phase 1: Introduction and Terminology
 
-Training adjusts model parameters. Inference uses the trained model to produce an output for new input. A model that performs well on its training examples may still fail on new data, so evaluation is essential.
+### Task 1: Introduction
 
-## 2. Match the task to the model output
+Artificial intelligence (AI) is the broad field of building systems that perform tasks associated with intelligence, such as recognising patterns, making predictions, understanding language, or generating content. AI is not one algorithm or one product.
 
-- **Classification:** assigns an input to a category, such as spam or not spam.
-- **Regression:** predicts a numeric value, such as a demand estimate.
-- **Clustering:** groups similar examples without relying on predefined labels in the same way as supervised classification.
-- **Generative modelling:** creates new content such as text, images, audio, or code.
-- **Reinforcement learning:** learns a policy through interaction and feedback such as rewards.
+Machine learning (ML) is a subfield of AI in which a system learns patterns from data rather than relying only on rules written by a programmer. Deep learning is a family of machine-learning methods based on neural networks with multiple layers. A large language model (LLM) is a model trained to process and generate language, usually using a transformer architecture.
 
-These categories are not mutually exclusive in every modern system. They are useful descriptions of the main objective.
+### Key distinction
 
-## 3. Understand data and labels
+| Term | Meaning | Example |
+|---|---|---|
+| Artificial intelligence | Broad field of intelligent-behaviour systems | A planning or decision-support system |
+| Machine learning | Learning patterns from data | A classifier trained on spam examples |
+| Deep learning | ML using multi-layer neural networks | Image recognition using a neural network |
+| Generative AI | Models that generate new content | Text, image, audio, or code generation |
+| LLM | Large-scale model trained for language tasks | Summarising a document or answering a question |
 
-Supervised learning uses labelled examples. Unsupervised learning looks for patterns or structure without the same kind of target labels. Training data teaches the model; validation data helps tune choices; and test data estimates performance after development decisions have been made.
+These categories overlap. Generative AI can use deep learning, and an LLM is one kind of generative model. Avoid treating the terms as synonyms.
 
-Poor labels, missing groups, biased collection, or maliciously altered examples can damage a model. If test data leaks into training, reported performance may be overly optimistic. The quality and origin of data matter as much as the model architecture.
+## Phase 2: Data and Machine Learning
 
-## 4. Neural networks and deep learning
+### Task 2: How machine learning works
 
-A neural network consists of connected computational units arranged in layers. Each layer transforms its input, and training adjusts weights to reduce a loss function. Deep learning uses networks with multiple layers to learn complex patterns.
+A typical ML lifecycle has six stages:
 
-This does not mean the model reasons exactly like a human brain. The biological analogy is limited. A model learns statistical patterns from data and can still produce incorrect or nonsensical outputs.
+1. **Collect data:** gather examples that relate to the task.
+2. **Prepare data:** remove errors, format fields, handle missing values, and define labels where needed.
+3. **Train a model:** use data to adjust model parameters.
+4. **Evaluate the model:** measure performance on held-out examples.
+5. **Deploy for inference:** use the trained model on new inputs.
+6. **Monitor and improve:** detect changes in data, errors, and performance over time.
 
-## 5. Overfitting, underfitting, and generalisation
+Training and inference are different. Training changes the learned model parameters. Inference uses the trained model to produce an output for a new input. A system can run inference without retraining the model for each request.
 
-- **Overfitting:** the model learns training-specific details and performs poorly on new examples.
-- **Underfitting:** the model is too limited or insufficiently trained to capture useful patterns.
-- **Generalisation:** the ability to perform on new examples from the intended environment.
-- **Distribution shift:** production inputs differ from the training or evaluation data.
+### Four common learning approaches
 
-Accuracy is not always enough. A classifier used for fraud detection may need precision, recall, false-positive rates, and an assessment of the cost of different errors. The right metric depends on the problem.
+**Supervised learning** uses labelled examples, such as emails marked “spam” or “not spam”. The model learns to predict the label for new examples.
 
-## 6. Limitations and security
+**Unsupervised learning** finds structure in data without relying on the same kind of target labels. Clustering similar network events is one example.
 
-AI output is not automatically correct or unbiased. Models may reveal sensitive information, respond badly to unusual inputs, or behave differently after the deployment environment changes. Generative models can also produce plausible statements that have no factual basis.
+**Semi-supervised learning** combines a smaller set of labelled examples with a larger set of unlabelled data.
 
-Security depends on the entire application: data provenance, access control, model supply chain, input handling, output validation, and monitoring. A model's fluent answer should be checked before it is used for important decisions.
+**Reinforcement learning** learns behaviour through actions and feedback, often represented as rewards or penalties. It is used when a system must learn a policy through interaction.
 
-## 7. Working through the room
+### Classification and regression
 
-When a task describes a model or workflow, identify its input, output, and training method. If it describes categories such as spam detection, numeric forecasting, or generating text, match the task to the corresponding model objective. If it asks about training, validation, or test data, focus on the role each dataset plays.
+Classification predicts a category, such as whether a network event is suspicious. Regression predicts a numeric quantity, such as expected demand. Clustering groups similar examples. These are different problem types and should not be mixed up with the learning strategy used to train the model.
 
-Use the terminology and examples provided by the active room. Do not assume the same wording appears in every version of a learning platform.
+### Training, validation, and test data
 
-## What I took from this room
+Training data is used to fit the model. Validation data helps compare choices during development. Test data estimates performance after model-selection decisions have been made. If test data leaks into training, the reported result can be overly optimistic.
 
-AI is a collection of approaches, not one single technology. Understanding data, training, inference, evaluation, and model limitations makes it easier to recognise both the useful capabilities and the security risks of AI systems.
+Data quality matters. Missing data, poor labels, collection bias, duplicates, or manipulated examples can lead to poor or unfair outcomes. Data poisoning is a security risk in which an attacker deliberately contaminates training data to influence the resulting model.
+
+## Phase 3: Neural Networks and Deep Learning
+
+### Task 3: Neural networks
+
+A neural network is composed of computational units arranged in layers. The input layer receives data, hidden layers transform the representation, and the output layer produces the model's result. Connections have weights that training adjusts to reduce an error or loss function.
+
+The term “neural” is inspired by the brain, but a neural network does not work exactly like a biological brain. It is a mathematical model that learns statistical patterns from examples.
+
+A deeper network can learn complex intermediate representations. Deep learning usually refers to neural networks with multiple layers, often more than three layers under the simplified definition used in introductory materials. The exact boundary is a teaching convention rather than a universal scientific threshold.
+
+### Common failure modes
+
+- **Overfitting:** the model memorises details of training examples and performs poorly on new data.
+- **Underfitting:** the model is too simple or inadequately trained to learn the important pattern.
+- **Poor generalisation:** performance falls on inputs that differ from the training data.
+- **Distribution shift or drift:** real-world data changes over time, making prior performance less reliable.
+- **Bias:** patterns in the data or the model can produce systematically worse outcomes for some groups.
+
+Accuracy alone may be misleading. Fraud detection, for example, may need precision, recall, false-positive rates, and a review of the cost of different mistakes.
+
+## Phase 4: Large Language Models
+
+### Task 4: LLMs and transformers
+
+A large language model is trained on text and related data to model language patterns. Modern LLMs commonly use the transformer architecture, which uses attention mechanisms to process relationships between tokens in the context.
+
+Text is broken into tokens. A model generates output by predicting a likely next token based on the preceding context, repeatedly building the response. It does not guarantee that a fluent statement is factually true.
+
+LLM development can include several stages:
+- **Pre-training:** learn broad language patterns from a large dataset.
+- **Fine-tuning:** further train a model for a task or preferred behaviour.
+- **Human-feedback alignment:** use feedback or preference data to steer responses toward desired behaviour. RLHF, or reinforcement learning from human feedback, is one alignment technique described in introductory LLM explanations.
+- **Inference:** accept a prompt and produce a completion or response.
+
+The model's response also depends on surrounding components such as the system prompt, retrieval documents, tool definitions, decoding settings, and output processing. A model issue and an application design flaw are not always the same thing.
+
+## Phase 5: Room Questions and Answer Method
+
+The room's interactive questions may use wording specific to its current version. Use the task content above to identify the expected concept.
+
+| Question focus | Answer concept | Reason |
+|---|---|---|
+| Broad field concerned with intelligent behaviour | Artificial intelligence | It is the umbrella field |
+| Learning patterns from data | Machine learning | The system learns from examples rather than only fixed rules |
+| Multiple layers of connected computational units | Neural network / deep learning | Layers transform learned representations |
+| Learning from labelled examples | Supervised learning | Examples include target labels |
+| Finding patterns without target labels | Unsupervised learning | Structure is inferred from data |
+| Learning through rewards or feedback | Reinforcement learning | The system learns a policy through interaction |
+| Fitting parameters using examples | Training | Training changes model parameters |
+| Producing output from a trained model | Inference | The model is being used, not necessarily retrained |
+| LLM architecture commonly used today | Transformer | Attention helps model token relationships |
+| Generating text token by token | Next-token prediction | The model iteratively predicts output tokens |
+
+These are knowledge-check concepts, not a claim that every line is the exact text of the live question. Copy the official question wording and any required answer format from the room UI when submitting. There is no stable machine-specific flag to invent for this conceptual guide.
+
+## Phase 6: Security Lessons
+
+AI security risks follow from the same lifecycle:
+- **Data poisoning** tampers with training examples.
+- **Model extraction** uses repeated queries to approximate a model's behaviour.
+- **Privacy leakage** occurs when sensitive information is exposed by the model or surrounding application.
+- **Prompt injection** attempts to influence the model using attacker-controlled instructions.
+- **Model drift** describes performance degradation as the environment changes.
+- **Supply-chain compromise** can affect datasets, libraries, model artifacts, and updates.
+
+Secure AI systems require trusted data provenance, access control, safe artifact loading, careful evaluation, privacy protections, and monitoring after deployment. Do not allow a model's text output alone to authorize sensitive actions. The API or tool that owns a resource must independently enforce permissions.
+
+## Key takeaways
+
+AI is the broad field; machine learning learns patterns from data; deep learning uses multi-layer neural networks; and LLMs commonly use transformers to generate language token by token. The distinction between training and inference helps explain how a model is built and how it is used. Security depends not just on the model, but also on data quality, provenance, application permissions, tool access, and ongoing monitoring.

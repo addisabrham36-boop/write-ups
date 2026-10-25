@@ -1,120 +1,82 @@
-# GamingServer: TryHackMe Walkthrough
+# GamingServer: Complete TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/gamingserver
+Official room: https://tryhackme.com/room/gamingserver
 
-GamingServer is a beginner boot-to-root machine. The chain is web enumeration, an exposed SSH private key, cracking its weak passphrase, SSH access as the user, and privilege escalation through unsafe LXD group membership. The flags are omitted here; retrieve them from your own live instance.
+## Room Overview & Information
 
-## 1. Scan the target
+**Category:** Linux boot-to-root / privilege escalation  
+**Difficulty:** Beginner  
+**Attack chain:** Web reconnaissance → exposed SSH private key → offline passphrase recovery → SSH access → abuse of LXD group membership  
+**Target:** The active TryHackMe machine only.
 
-Start the lab and record the assigned IP. Run:
+The target address, host configuration, and flag values may vary between deployments. Replace TARGET_IP with the address assigned to your current lab instance. This guide explains how to verify each stage; it does not invent machine-specific flag values.
 
-    nmap -sC -sV -oN gamingserver-nmap.txt TARGET_IP
+## Phase 1: Reconnaissance & Enumeration
 
-The intended machine exposes SSH and HTTP. Confirm the actual ports and service versions from your own scan. If the initial scan misses something, run a full TCP scan:
+### 1. Scan the target
 
-    nmap -p- --min-rate 1000 -oN gamingserver-allports.txt TARGET_IP
-
-## 2. Inspect the web page
-
-Open the HTTP service and inspect the homepage source. The page contains a username clue in its HTML comments. This is a reminder that comments hidden from normal page rendering are still sent to the browser.
-
-Run directory enumeration against the target:
-
-    gobuster dir -u http://TARGET_IP/ -w /path/to/wordlist.txt
-
-Use a wordlist available in the AttackBox. The discovered /secret path contains an SSH private key, and another exposed path provides a dictionary file. Verify the actual paths and filenames in the active lab before downloading them.
-
-For example, once the paths have been confirmed:
-
-    curl -f http://TARGET_IP/secret/secretKey -o secretKey
-    chmod 600 secretKey
-
-Do not use a fixed IP or copy files from another instance. These commands are examples of retrieving the files from your own authorised target.
-
-## 3. Crack the SSH key passphrase
-
-The private key is protected by a passphrase. John the Ripper can test candidate passphrases against a hash extracted from the key. Use the SSH-to-John conversion script installed with your lab tools:
-
-    ssh2john secretKey > secretKey.hash
-    john --wordlist=/path/to/dict.list secretKey.hash
-
-The dictionary path should point to the file discovered in the room. The passphrase is weak enough to be found from that supplied list. Verify the candidate through the intended SSH login rather than assuming any line printed by a cracking tool is correct.
-
-Protect private-key files with restrictive permissions and never place them in a public web directory. A passphrase helps, but a weak passphrase can still be guessed offline.
-
-## 4. Connect over SSH
-
-Use the username identified from the page source and the recovered key:
-
-    ssh -i secretKey USERNAME@TARGET_IP
-
-Replace USERNAME with the value found in the room. If SSH rejects the key, check that you are using the correct user and key, that the key file permissions are restricted, and that the passphrase is correct.
-
-After login, verify the account and inspect the home directory:
-
-    whoami
-    id
-    pwd
-    ls -la
-
-Locate the user flag as directed by the room and submit it in TryHackMe. The flag is intentionally not reproduced in this public write-up.
-
-## 5. Identify the LXD privilege-escalation path
-
-The user belongs to the lxd group. LXD manages system containers, and membership can be highly privileged because a user may be able to create a privileged container and mount the host filesystem into it. This is not a normal low-privilege permission; group membership should be restricted to trusted administrators.
-
-Confirm the group membership with id. Then follow the room's LXD escalation method using an Alpine image built for the lab's architecture. If the image is built on another system, ensure it is compatible with the target.
-
-The general sequence is to import the image, initialise a privileged container, attach the host root filesystem as a disk device, start the container, and open a shell inside it. The commands below show the shape of the workflow; use the actual image filename and alias you imported:
-
-    lxc image import IMAGE_FILE --alias labimage
-    lxc init labimage labcontainer -c security.privileged=true
-    lxc config device add labcontainer hostroot disk source=/ path=/mnt/root recursive=true
-    lxc start labcontainer
-    lxc exec labcontainer /bin/sh
-
-Inside the container, inspect the mounted host root directory. Verify the filesystem path before reading the root flag. Do not run this technique on a host outside the lab.
-
-## 6. Verify root access and document the fix
-
-The mounted filesystem provides access to the host's root files because the container was created with privileged access and a host-root mount. Verify the target paths and retrieve the root flag from the live machine. Do not publish the flag value.
-
-The defensive fixes are straightforward: remove unnecessary public access to the SSH private key, rotate the key, enforce a strong passphrase, remove the user from the lxd group if they do not need it, and restrict container management privileges.
-
-## What I took from this room
-
-GamingServer chains two avoidable misconfigurations. A private key should never be exposed by the web server, and LXD administration should not be granted casually. Enumeration revealed both weaknesses, while verification at each stage prevented me from guessing the final result.
-
-## Phase 1: Refine enumeration
-
-Preserve the initial scan and use it to direct the next action:
+Start the machine and record its current IP. Run a service/version scan and save the output:
 
 ```bash
 nmap -sC -sV -oN gamingserver-nmap.txt TARGET_IP
+```
+
+- `-sC` runs Nmap's default scripts.
+- `-sV` attempts to identify service versions.
+- `-oN` saves human-readable results.
+- `TARGET_IP` is the current lab address.
+
+The intended machine exposes SSH and HTTP. If those results do not explain the service surface, and the room permits it, run a full TCP scan:
+
+```bash
 nmap -p- -T4 -oN gamingserver-allports.txt TARGET_IP
 ```
 
-The first command runs default scripts and attempts service/version detection. The second enumerates all TCP ports with a faster timing profile. Run the full scan only inside the authorized room and inspect the output for any service missed by the initial scan.
+`-p-` scans TCP ports 1 through 65535. `-T4` uses a faster timing profile, which is generally suitable for many labs but may be less reliable on slow links. Only enumerate the assigned host.
 
-The web page includes a username clue in an HTML comment. View the source in the browser or retrieve it for inspection:
+### 2. Inspect the website and page source
+
+Open the HTTP service in the browser. Inspect the homepage source with the browser's View Page Source command or retrieve it:
 
 ```bash
 curl -i http://TARGET_IP/
 ```
 
-Use Gobuster against the HTTP service and follow the hidden-directory clue in the page source. Record the exact path and verify the server returns the private-key file and dictionary file described in the room.
+The `-i` option displays response headers as well as the body. Search the HTML comments for clues about the user or the location of a private key. HTML comments are delivered to the browser and can reveal information even when they are not visible on the rendered page.
 
-## Phase 2: Recover the SSH key passphrase
+### 3. Discover the exposed files
 
-Download the private key from the discovered path into the local lab workspace. Keep the file private and restrict its permissions:
+Enumerate paths with Gobuster using a wordlist present in the AttackBox:
+
+```bash
+gobuster dir -u http://TARGET_IP/ -w /usr/share/wordlists/dirb/common.txt -o gamingserver-web.txt
+```
+
+- `dir` performs directory/file discovery.
+- `-u` sets the base URL.
+- `-w` selects the wordlist.
+- `-o` saves results.
+
+Inspect the discovered paths manually. The intended trail leads to the exposed `/secret/` location containing an SSH private key, and a separate path containing the dictionary file used later. A discovered path is only a lead; open it and verify its contents in the active instance.
+
+Download the key into the local lab workspace after confirming its exact path:
 
 ```bash
 curl -f http://TARGET_IP/secret/secretKey -o secretKey
 chmod 600 secretKey
 file secretKey
+sha256sum secretKey
 ```
 
-Convert the key into a format suitable for John the Ripper:
+The `-f` option makes curl fail on an HTTP error status, `-o` specifies the local output filename, and `chmod 600` restricts file access to the owner. The hash records which key copy was analysed. Do not publish the private key.
+
+## Phase 2: Vulnerability Analysis & Initial Access
+
+### 4. Recover the SSH key's passphrase
+
+A private key protected by a passphrase can be tested offline. The room provides a dictionary file; use that file rather than an unrelated wordlist.
+
+First locate the dictionary file from the web enumeration results and save it in the working directory. Convert the encrypted key to John's format:
 
 ```bash
 ssh2john secretKey > secretKey.hash
@@ -122,38 +84,93 @@ john --wordlist=./dict.lst secretKey.hash
 john --show secretKey.hash
 ```
 
-ssh2john extracts a passphrase-checking representation; John tests candidate words from the room's dictionary. The show option displays any recovered result. Use the actual dictionary filename found on the machine.
+- `ssh2john` creates a representation of the key that John the Ripper can test.
+- `--wordlist` tells John which candidate list to use.
+- `--show` displays a previously recovered result.
 
-The passphrase is weak enough to appear in the provided list. Protect private keys with a strong unique passphrase and never store them in publicly served directories.
+Replace `dict.lst` with the exact dictionary filename found in your instance. The path may differ from the example. If no candidate is recovered, confirm the key file is complete, that the conversion succeeded, and that you selected the correct dictionary. Do not assume that a cracking tool succeeded unless it reports a result.
 
-## Phase 3: Initial access and LXD privilege escalation
+The passphrase belongs only to the deliberately vulnerable lab key. Use a strong, unique passphrase for real private keys.
 
-Connect using the username obtained from the comment and the recovered key:
+### 5. Connect over SSH and verify the user
+
+Use the username revealed by the page source and the recovered key:
 
 ```bash
 ssh -i secretKey USERNAME@TARGET_IP
+```
+
+Replace USERNAME with the exact user identified in the room. If SSH requests a passphrase, enter the recovered lab passphrase. If the server rejects the key, check the username, target IP, key file, and local key permissions.
+
+After login, capture the current context:
+
+```bash
 whoami
 id
+hostname
 pwd
 ls -la
 ```
 
-Confirm the effective account and groups. The intended escalation clue is membership in the lxd group. LXD manages system containers, and membership can be highly privileged because a user may be able to create a privileged container and access host resources depending on the version and configuration.
+These commands verify the account, group memberships, hostname, location, and home-directory contents. Retrieve the user flag from the location indicated by the room and submit the value shown by the active machine. Keep the flag redacted in public notes as `flag{hidden}`.
 
-Use the exact container procedure specified by the current room. Before running it, establish whether an image is available, whether LXD is configured, and whether the current user can create and configure containers. The resulting access path depends on the room's host configuration.
+## Phase 3: Privilege Escalation & Post-Exploitation
 
-If the intended technique succeeds, verify the resulting host context with id, hostname, and the path from which you read the root flag. Do not treat root inside a container as host root unless the host filesystem access demonstrates it.
+### 6. Identify the LXD group membership
 
-## Phase 4: Flags and task questions
+Check the current user's groups:
 
-The user flag is located in the user home directory as directed by the room. The root flag becomes readable only after the LXD misconfiguration has been successfully abused. Read both from the live machine; flag values are not assumed to be the same across instances.
+```bash
+id
+getent group lxd
+```
 
-## Phase 5: Remediation
+The intended escalation clue is membership in the `lxd` group. LXD manages system containers. Depending on configuration, a user with container-management rights may be able to create a privileged container and mount host filesystem paths into it. This is a powerful administrative capability, not an ordinary user permission.
 
-- Never expose private SSH keys through the web root.
-- Protect keys with strong passphrases and remove them from public storage.
+### 7. Understand and validate the container path
+
+The room's technique imports a compatible Alpine image, creates a privileged container, mounts the host root filesystem into the container, and enters a shell. The image must match the target architecture and must be available to the lab user.
+
+The workflow should be verified stage by stage:
+1. Confirm LXD is installed and the current account can manage it.
+2. Import the room's image and confirm it appears in the LXD image list.
+3. Create the container with the privileged setting shown in the official task.
+4. Attach the host root filesystem as a disk device at the specified mount path.
+5. Start the container and verify that it is running.
+6. Enter the container and inspect the mounted path.
+7. Confirm that the files belong to the host filesystem, not only to the container.
+8. Retrieve the root flag only after the host-level access is demonstrated.
+
+Do not run the procedure against a production host. A root shell inside a normal unprivileged container does not automatically equal root on the host. In this room, the dangerous combination is container-management permission plus a privileged container and a writable host-root mount.
+
+### 8. Verify root access and retrieve the flag
+
+After the host filesystem is mounted, inspect the documented mount path and verify the expected target file before reading it. Record the exact path and permissions that permit access. Copy the flag from the active machine; do not replace it with a value from an online walkthrough.
+
+## Phase 4: Room Questions & Evidence Checklist
+
+| Objective | Evidence required |
+|---|---|
+| Identify the exposed services | Saved Nmap report from the current target |
+| Find the username clue | HTML source comment on the homepage |
+| Locate the private key and wordlist | Gobuster findings and manual path validation |
+| Recover the passphrase | John output tied to the downloaded key and room dictionary |
+| Obtain initial access | Successful SSH login plus whoami/id output |
+| Identify the escalation path | LXD group membership and permitted container-management actions |
+| Obtain root access | Verified host filesystem access and root-level context |
+| Retrieve user/root flags | Exact flag files from the active instance, redacted publicly |
+
+The room-specific username, passphrase, and flag values must be read from the active target if the current instance differs. A successful login or a container shell alone is not sufficient evidence of root-level host access.
+
+## Phase 5: Key Takeaways & Remediation
+
+- Never expose SSH private keys or wordlists through a public web root.
+- Rotate any private key that was publicly exposed and remove the served copy from the deployment.
+- Protect keys using restrictive permissions and strong passphrases.
 - Restrict LXD group membership to trusted administrators.
-- Use unprivileged containers and restricted profiles; do not expose host devices or filesystem paths unnecessarily.
-- Keep container management software and the host OS updated.
-- Audit user/group membership and alert on unexpected container creation.
-- Treat container managers as privileged control planes, not ordinary user tools.
+- Avoid granting ordinary users the ability to create privileged containers or mount host paths.
+- Use unprivileged containers, restricted profiles, and least-privilege device and filesystem access.
+- Audit container-management activity and alert on unexpected container creation.
+- Patch and monitor the host operating system and container runtime.
+
+GamingServer combines information disclosure with an overly privileged container-management group. Each transition should be justified by a concrete result: scan, discovered file, recovered key passphrase, verified SSH identity, and finally a proven host privilege boundary failure.

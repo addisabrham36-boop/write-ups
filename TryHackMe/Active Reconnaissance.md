@@ -110,70 +110,21 @@ Active recon is a normal part of authorised testing, but it should be rate-limit
 
 Ping tests ICMP reachability, traceroute estimates the network path, Telnet and Netcat test TCP connections, and a browser or curl inspects web behaviour. Each tool answers a different question. Active reconnaissance works best when every probe has a clear purpose and the result is interpreted within its limits.
 
-## Expanded practical workflow
+## Phase 5: Task Evidence and Tool Selection
 
-### 1. Confirm scope and record the target
+Each task should be answered using the output of the appropriate tool, not by assuming every target behaves the same way.
 
-Active reconnaissance sends traffic to the target, so begin with the exact hostname or IP permitted by the room. Record the target, start time, and any restrictions. Never scan a public range simply because a hostname resolves to an address.
+| Task focus | Tool or evidence | Important limitation |
+|---|---|---|
+| Inspect a web response | Browser or curl | A response code alone does not prove the endpoint is safe or vulnerable |
+| Check basic IP reachability | ping | ICMP may be filtered even when a host is online |
+| Trace the network path | traceroute or tracepath | Routers may not return all probe responses |
+| Test a specific TCP service | nc or telnet, where the room allows it | A successful connection proves reachability, not application authorization |
+| Identify open ports | Nmap in the authorized lab | Service banners and script results are hints requiring verification |
+| Inspect public registration or DNS data | WHOIS and DNS lookup tools | Records may be stale and do not grant permission for active testing |
 
-Resolve the name and record the result:
+Record the exact target, command, time, output, and conclusion. If a tool reports failure, distinguish name-resolution, routing, filtering, connection, and application-layer errors before deciding what to try next.
 
-```bash
-getent ahosts TARGET_HOST
-```
+## Phase 6: Defensive Takeaways
 
-This uses the host's configured name-resolution path. If the room provides a fixed lab IP, use that value as the source of truth.
-
-### 2. Basic service discovery
-
-A conservative first scan identifies common ports and attempts service/version detection:
-
-```bash
-nmap -sC -sV -oN nmap-initial.txt TARGET_IP
-```
-
-- `-sC` runs Nmap's default scripts.
-- `-sV` probes open ports to identify services and versions.
-- `-oN` saves readable output for later comparison.
-
-After reviewing the first result, a full TCP-port scan can reveal services on uncommon ports:
-
-```bash
-nmap -p- -T4 -oN nmap-all-tcp.txt TARGET_IP
-```
-
-`-p-` checks TCP ports 1 through 65535; `-T4` increases scan speed and should only be used when the lab and network conditions permit it. If a port is found, scan it with relevant scripts and version detection rather than blindly running every script.
-
-### 3. Web enumeration
-
-If HTTP or HTTPS is exposed, inspect the page, response headers, cookies, redirects, robots.txt, and any linked API documentation. Use a directory wordlist appropriate for the target and keep the request rate reasonable:
-
-```bash
-gobuster dir -u http://TARGET_HOST/ -w /path/to/wordlist.txt -o gobuster-root.txt
-```
-
-The URL must match the scheme and hostname used by the lab. If the application relies on a virtual host, an IP-only request may return a default site. Use the hostname specified by the room and verify it resolves to the target.
-
-A discovered path is not automatically a vulnerability. Open it, inspect its response, and determine whether authentication or authorization is required.
-
-### 4. Enumerate services selectively
-
-Choose enumeration based on what the scan actually found. For SMB, inspect shares and protocol details only if SMB is exposed. For DNS, test the records and zone-transfer behaviour relevant to the supplied domain. For databases, first determine whether the port is reachable and whether the room authorizes authentication testing. For SSH, record the service version and authentication options but do not assume the version alone proves exploitability.
-
-Avoid running tools against services that do not exist. Each command should answer a question raised by the previous result.
-
-### 5. Validate findings and preserve evidence
-
-Save scan output, exact commands, tool versions, and meaningful response excerpts. Distinguish confirmed facts (an open port or returned header) from hypotheses (a suspected vulnerability). Verify any suspected flaw using the smallest safe test allowed by the room.
-
-### 6. Common problems
-
-- If the hostname resolves to the wrong address, check the lab's IP and local hosts mapping.
-- If a web scan returns only a default page, verify the Host header and base path.
-- If a scan shows no ports, confirm the target is started and the IP is current.
-- If results change between scans, consider filtering, service startup, and rate limits.
-- If a tool returns an error, read it before changing multiple options at once.
-
-### 7. Answer the room questions
-
-Use the active room's exact target and output. When a question asks for an open port, service, version, hostname, or header, retrieve it from your own scan or request. Do not copy another instance's results. Redact any flag as `flag{hidden}` in public notes.
+Active reconnaissance is visible interaction with a target. Organisations can reduce unwanted exposure by removing unnecessary services, restricting management access, patching exposed applications, limiting banner details, and monitoring unusual connection attempts. Reconnaissance findings should be documented and handed into vulnerability management rather than left as an unprioritised list.

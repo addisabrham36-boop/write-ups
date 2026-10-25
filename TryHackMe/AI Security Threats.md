@@ -1,72 +1,201 @@
-# AI Security Threats: TryHackMe Walkthrough
+# AI Security Threats: Complete TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/aisecuritythreats
+Official room: https://tryhackme.com/room/aisecuritythreats
 
 ## Room Overview & Information
 
-This note covers the practical workflow, evidence to collect, common interpretation errors, and defensive lessons for AI Security Threats. Use the live room as the authority for task wording and machine-specific values. The repository does not include fabricated terminal output, credentials, or flags.
+**Category:** AI security, threat intelligence, defensive operations  
+**Prerequisite:** The Building Blocks of AI or equivalent knowledge of machine learning, neural networks, and large language models  
+**Learning objectives:** Identify model-specific vulnerabilities, recognise AI-enhanced attacks, use AI for security operations, and apply controls to AI systems.
 
-## 1. Establish the threat model
+This room is an interactive learning module with AI agents, not a boot-to-root VM. There is no general Nmap-to-root path. Some answers are factual knowledge checks; others require interacting with MENTOR, reviewing simulated inbox messages, or asking AEGIS to analyse logs. Flags produced by these agents are session results and should be copied from the active room rather than invented.
 
-Start the lab and read its scenario. Identify the system, the assets it handles, the trust boundaries, the attacker-controlled inputs, and the security objective. A threat model is useful only when it is tied to a real system and a plausible abuse path.
+## Phase 1: Understand AI-Specific Vulnerabilities
 
-For AI systems, assets can include private prompts, training data, model weights, credentials, connected tools, business records, and service availability. Trust boundaries may exist between the user and model, model and retrieval system, model and tool, and developer pipeline and deployed model.
+### Task 1: Introduction
 
-## 2. Distinguish common threat classes
+The room continues from the previous module on how AI, machine learning, neural networks, and LLMs work. Security risks arise both from the models themselves and from the systems built around them.
 
-**Prompt injection** attempts to influence an AI system by placing instructions in user input or retrieved content. It is especially dangerous when the model can access private data or call tools. Treat retrieved documents and web pages as untrusted data, not privileged instructions.
+### Task 2: Vulnerabilities in AI Models
 
-**Sensitive information disclosure** occurs when a system reveals private data through its answers, logs, retrieval layer, or tool access. The root cause may be excessive permissions or poor data separation rather than a model defect.
+Open the MENTOR agent. The task is to test whether prompt injection can override its system instructions and cause it to disclose its system prompt. Read the task's rules and record the response that demonstrates the disclosure; the objective is to understand the boundary failure, not to treat all model output as trustworthy.
 
-**Insecure output handling** occurs when an application trusts model output and sends it directly to a shell, SQL query, browser, or HTML renderer without validation and context-appropriate encoding.
+The five model-specific issues in the task are:
 
-**Training-data or model poisoning** changes data or model behaviour before deployment. Investigate provenance, unexpected trigger behaviour, and changes to model artifacts.
+- **Prompt injection:** malicious instructions in direct user input or indirect content cause a model to deviate from its intended instructions.
+- **Data poisoning:** an attacker contaminates training data to influence model behaviour.
+- **Model extraction:** repeated API queries are used to approximate or clone a model's behaviour.
+- **Privacy leakage:** a model reveals sensitive information learned from or supplied to it.
+- **Model drift:** a model's performance degrades as the real-world environment changes from the data or conditions it was trained on.
 
-**Model denial of service** targets expensive inference, long contexts, repeated requests, or resource-intensive tools. Rate limits, quotas, timeouts, and resource budgets reduce the impact.
+#### Questions and answers
 
-**Supply-chain compromise** can affect packages, plugins, model weights, datasets, deployment images, and CI/CD credentials. A model's popularity is not proof of its integrity.
+**Question:** “What MITRE framework was developed specifically to map tactics and techniques used against AI systems?”
 
-## 3. Analyse a prompt-injection scenario
+**Answer:** **MITRE ATLAS**.
 
-If the task includes a prompt, retrieved document, or agent transcript, separate trusted system configuration from untrusted content. Identify the instruction the attacker wants the model to follow, the protected asset, and the missing control that makes the attack consequential.
+**Question:** “What AI vulnerability occurs when user input overrides the original instructions provided to a model?”
 
-Test only the provided lab input. Record the original behaviour, the altered input, and the output. A prompt that changes the tone of an answer is not by itself a security impact. The relevant question is whether the system crosses a boundary, such as disclosing protected content or performing an unauthorised tool action.
+**Answer:** **Prompt injection**.
 
-Defences include clear separation of instructions and data, least-privilege tool permissions, explicit confirmation for consequential actions, allowlisted tool arguments, and server-side authorization independent of the model's decision.
+**Question:** “What attack involves manipulating training data to cause a model to produce incorrect or biased outputs?”
 
-## 4. Analyse data disclosure and tool misuse
+**Answer:** **Data poisoning**.
 
-Trace how the model obtains information. If retrieval is involved, check whether access controls are applied before the retrieved content reaches the model. Hiding a document in the interface is not enough if the retrieval service can return it to any user.
+**Question:** “What attack involves repeatedly querying a model's API to train a clone that replicates its behaviour?”
 
-For tool-enabled agents, inspect which tools are available, what credentials they use, and whether the server validates each action. Never grant an agent broader access merely because the prompt says it should act responsibly. The application must enforce authorization.
+**Answer:** **Model extraction**.
 
-## 5. Evaluate outputs safely
+**Question:** “What term describes the gradual degradation of a model's performance as the environment it was trained on changes over time?”
 
-Treat model output as untrusted input. Before passing it to another component, validate its schema, enforce limits, escape it for the destination context, and reject unexpected fields. For shell, database, and file operations, prefer fixed functions with structured arguments over arbitrary generated commands.
+**Answer:** **Model drift**.
 
-A robust test records the input, the model response, the downstream action, and whether the action was authorised. This reveals whether the weakness is in the model, orchestration code, permissions, or output handling.
+**Question:** “What's the flag?”
 
-## 6. Answer the room questions accurately
+**How to obtain it:** Interact with the MENTOR agent, follow the task's prompt-injection objective, and copy the flag displayed by the active room. The flag is agent-generated and is not reproduced here as an unverified constant.
 
-Map each question to the concept or evidence it asks for. Use the lab's scenario and results rather than assuming every AI system has the same vulnerability. When asked to classify an attack, identify the attacker-controlled input and the violated security property. When asked for a mitigation, state which control prevents the demonstrated path and where it is enforced.
+### Task 3: AI-Enhanced Attacks
 
-Do not fabricate outputs or flags. Retrieve machine-specific answers from the active room and redact flags in public notes as `flag{hidden}`.
+This section asks you to classify simulated messages in the Syntara Corp inbox. Three familiar attack types are discussed:
 
-## 7. Mitigation priorities
+- **AI-generated or AI-assisted malware:** AI can help produce or modify code, lowering the effort required to generate variants.
+- **Deepfakes:** generated or manipulated images, video, or voice imitate a real person.
+- **AI-enhanced phishing and social engineering:** AI generates fluent, personalised messages at scale and can adapt the wording to a target.
 
-1. Define assets and trust boundaries before deployment.
-2. Apply authorization in application code, not in prompts alone.
-3. Give tools the minimum permissions and narrowest input schema possible.
-4. Treat retrieved content, uploaded files, and model outputs as untrusted.
-5. Isolate execution environments and restrict network egress.
-6. Apply request quotas, token limits, timeouts, and monitoring.
-7. Version and verify models, datasets, plugins, and dependencies.
-8. Red-team the whole application, including retrieval and tools, not just the model response.
+Open the room's agent and examine each of the three messages. For each message, identify the attack type and explain the evidence. A single urgent tone is not enough to identify phishing, and a voice clone is not proven merely because a message claims to be from an executive. Use the content and the task context together.
 
-## What I took from this room
+#### Questions and answers
 
-AI security depends on the system around the model. Prompting matters, but access control, data handling, tool design, deployment integrity, and monitoring determine whether an unexpected answer becomes a real compromise.
+**Question:** “What AI technique is used to generate convincing replicas of a person's voice or appearance?”
 
-## Phase 5: Key Takeaways & Remediation
+**Answer:** **Deepfakes**.
 
-The main goal is to connect every conclusion to observable evidence and enforce security controls at the correct trust boundary. Keep the original artefacts, record the exact commands and outputs from your own run, and redact any flag in public notes as `flag{hidden}`.
+**Question:** “What common initial access method has become significantly harder to detect due to AI's ability to generate fluent, targeted content at scale?”
+
+**Answer:** **Phishing**.
+
+**Question:** “What is the flag?”
+
+**How to obtain it:** Correctly classify all three messages and explain how AI was used in each. Copy the flag returned by the live agent. Do not invent the value or publish a session-specific flag without verifying it.
+
+### Task 4: Defensive AI
+
+The task demonstrates using AI to support security analysis and investigation. An LLM can summarise telemetry, identify notable log fields, suggest investigation paths, and produce a leadership summary. It remains an assistant rather than an authoritative incident responder.
+
+The room's example firewall event is:
+
+\`\`\`text
+Jun 19 03:14:22 helix-fw01 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=185.220.101.47 DST=10.0.0.5 PROTO=TCP DPT=22
+\`\`\`
+
+Interpretation:
+- The event timestamp is Jun 19 at 03:14:22.
+- The host logging the event is helix-fw01.
+- UFW BLOCK indicates that the firewall blocked the packet.
+- SRC=185.220.101.47 is the source address.
+- DST=10.0.0.5 is the destination address.
+- PROTO=TCP means the packet uses TCP.
+- DPT=22 indicates the destination port is SSH.
+
+This event supports the conclusion that a TCP connection attempt to port 22 was blocked. It does not prove that the source successfully authenticated, that a compromise occurred, or that the address belongs to a particular actor.
+
+The room also supplies a simulated suspicious email:
+
+\`\`\`text
+From: security@helix-financial-secure.com
+Subject: Urgent: Unusual sign-in detected
+Body: We detected a sign-in on your Helix Financial account from Romania. Verify your identity immediately or access will be suspended: https://helix-financial-secure.com/verify
+\`\`\`
+
+Assess the sender domain, urgency, requested action, and link destination. A lookalike hostname and threat of account suspension are suspicious indicators. Do not open a live URL merely because an AI tool labels it suspicious.
+
+#### Questions and answers
+
+**Question:** “According to IBM, how many days faster does AI help identify and contain breaches?”
+
+**Answer:** **108 days**.
+
+This is the figure quoted in the room's lesson. It is a reported finding, not a promise that every organisation will improve by exactly that amount.
+
+**Question:** “What Microsoft product is mentioned as an example of a security tool leveraging AI for analysis?”
+
+**Verification note:** Use the exact product name in the current Defensive AI lesson. It is not confirmed from the task excerpt available to this write-up, so the name is deliberately not guessed.
+
+**Question:** “What defensive AI capability involves feeding an LLM raw logs to help identify what happened during a security incident?”
+
+**Answer:** **Investigation**.
+
+The task describes providing logs to a model to help explain events, suggest follow-up queries, and support incident triage.
+
+**Question:** “What's the flag?”
+
+**How to obtain it:** Ask AEGIS to analyse the supplied firewall log, triage the supplied email, summarise what has happened for leadership, and suggest further hunting steps as requested by the practical. Submit the flag displayed by the active task.
+
+### Task 5: Securing AI
+
+The lesson's core point is that AI systems need ordinary security controls plus controls specific to data, model access, and inference behaviour. It mentions authentication, role-based access control (RBAC), multi-factor authentication (MFA), training-data governance, model monitoring, and standards for AI security management.
+
+Apply access control at the service boundary rather than relying on a system prompt. Keep model and retrieval permissions least-privileged, restrict access to model management interfaces, protect training data and model artifacts, and log sensitive actions. Test for prompt injection, privacy leakage, and unintended tool invocation before deployment.
+
+## Phase 2: Graduation Practical
+
+### Task 6: Graduation Time
+
+The AI Security Analyst Orientation website is a final quiz based on this room and The Building Blocks of AI. Click View Site and answer each question from the lessons. The task requires a passing score before it displays the completion flag.
+
+For each question:
+1. Identify whether it asks about AI/ML fundamentals, LLMs, an AI vulnerability, an AI-enhanced attack, a defensive use case, or a secure-adoption principle.
+2. Match the term to the definition given in the learning material.
+3. Submit the answer and use the site's feedback to resolve any mistake.
+4. Copy the completion flag only after the site confirms success.
+
+**Question:** “What's the flag?”
+
+**How to obtain it:** Finish the Orientation assessment on the live site and copy the flag it displays. The assessment is interactive and may change, so this write-up does not substitute a guessed flag.
+
+### Task 7: Conclusion
+
+This final section summarises the learning path. AI covers systems designed to perform tasks associated with intelligence; machine learning learns patterns from data; neural networks learn layered representations; and LLMs generate text based on learned patterns and their context. Security requires attention to model vulnerabilities, AI-enhanced attacks, defensive applications, and safe adoption.
+
+## Phase 3: Key Takeaways & Remediation
+
+### Model and data security
+- Protect training data from unauthorised modification.
+- Track model provenance and verify model artifacts before deployment.
+- Monitor model drift and re-evaluate performance as the environment changes.
+- Protect model APIs against unauthorised extraction and abuse.
+- Minimise sensitive data in prompts and prevent cross-user retrieval.
+
+### Application and agent security
+- Enforce authorisation in APIs, data stores, and tool handlers.
+- Treat user prompts and retrieved documents as untrusted.
+- Validate tool arguments and constrain what tools are allowed to do.
+- Require human approval for high-impact actions.
+- Keep credentials out of prompts, responses, and unprotected logs.
+
+### Security operations
+- Use AI to accelerate triage, correlation, and summarisation, not to replace verification.
+- Preserve original logs and cross-check model-generated interpretations against raw events.
+- Treat AI-generated incident summaries as drafts that need analyst review.
+- Track the evidence and uncertainty behind each conclusion.
+
+## Complete question checklist
+
+| Task | Question | Answer or required evidence |
+|---|---|---|
+| 2 | MITRE framework for AI attack techniques | MITRE ATLAS |
+| 2 | User input overrides model instructions | Prompt injection |
+| 2 | Malicious training data changes outputs | Data poisoning |
+| 2 | Repeated API queries clone model behaviour | Model extraction |
+| 2 | Performance declines as environment changes | Model drift |
+| 2 | Flag | Retrieve from MENTOR after solving the task |
+| 3 | AI replicas of a person's voice or appearance | Deepfakes |
+| 3 | AI-fluent targeted initial-access technique | Phishing |
+| 3 | Flag | Retrieve from the inbox agent |
+| 4 | IBM's stated speed improvement | 108 days |
+| 4 | Microsoft AI-enabled security product | Confirm exact name in current task material |
+| 4 | LLM reads raw logs to help reconstruct an incident | Investigation |
+| 4 | Flag | Retrieve from AEGIS practical |
+| 6 | Graduation flag | Complete the orientation quiz and copy its displayed flag |
+
+The knowledge-check answers above are grounded in the room's lesson content. Flags and any product name not confirmed from the exact current wording must be read from the active task rather than guessed.

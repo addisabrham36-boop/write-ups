@@ -122,48 +122,35 @@ Do not attempt to access or exploit discovered systems unless they are within th
 
 Passive reconnaissance uses public information; active reconnaissance interacts directly with a target. WHOIS provides registration context, DNS queries return record data, DNSDumpster helps discover subdomains, and Shodan summarises observed internet-facing services. Verify results, record when they were obtained, and avoid turning a clue into an unsupported conclusion.
 
-## Expanded practical workflow
+## Phase 5: Verification, Reporting, and Defence
 
-### 1. Define the target and passive boundary
+### Verify findings before reporting
 
-Passive reconnaissance collects information from public or already available sources without directly probing the target infrastructure. Confirm the target organization or domain from the room and record the scope. Do not assume that a public subdomain or third-party service is authorized for active testing.
+Use each source for the type of fact it can actually establish. WHOIS supports conclusions about registration metadata at the time of the query. DNS supports conclusions about returned records. DNSDumpster can suggest candidate subdomains. Shodan reports observations of services indexed by its crawlers. None of these alone proves that a host is currently online, vulnerable, or controlled by the organisation.
 
-### 2. Registration and DNS information
+For each result, save the source URL or command, the collection date, the exact returned value, and a confidence note. If sources disagree, document the discrepancy rather than selecting the value that looks most plausible.
 
-WHOIS or registrar records can provide registration dates, nameservers, and contact or organization data, depending on privacy controls. DNS records reveal how a domain is configured. Query only the records needed for the task:
+### Command reference
 
-```bash
-dig TARGET_DOMAIN A
-dig TARGET_DOMAIN AAAA
-dig TARGET_DOMAIN MX
-dig TARGET_DOMAIN NS
-dig TARGET_DOMAIN TXT
-```
+    whois TARGET_DOMAIN
+    dig TARGET_DOMAIN A
+    dig TARGET_DOMAIN MX
+    dig TARGET_DOMAIN NS
+    dig TARGET_DOMAIN TXT
+    nslookup -type=TXT TARGET_DOMAIN
 
-Replace TARGET_DOMAIN with the exact domain from the room. A records map names to IPv4 addresses, AAAA records to IPv6 addresses, MX records identify mail exchangers, NS records identify authoritative nameservers, and TXT records can include verification or email-security policies.
+Replace TARGET_DOMAIN with the domain asked about in the room. WHOIS queries registration metadata; dig asks for a specific DNS record type; nslookup performs a similar DNS lookup. The query type matters: an MX record answers mail-routing questions, while an A record answers an IPv4 mapping question.
 
-DNS answers may be cached or change over time. Record the query time and resolver if the exact result matters.
+### Room-answer checklist
 
-### 3. Certificate transparency and subdomains
+| Topic | What to check |
+|---|---|
+| Passive vs active reconnaissance | Whether the action reads existing public information or sends traffic to the target |
+| Registration date | WHOIS creation/registered-on field and date format |
+| Registrar | Registrar field, not the registrant or nameserver provider |
+| Nameservers | NS/WHOIS nameserver entries |
+| TXT flag | Entire TXT value returned by the lab's DNS query |
+| Interesting subdomain | Exact DNSDumpster result expected by the room |
+| Shodan rankings | The room's current displayed country or port ranking |
 
-Certificate-transparency logs show certificates that have been issued and may reveal hostnames. Search only the room's target domain and record candidate subdomains. A name in a certificate log does not prove that the service is still online or belongs to the target today.
-
-Use public search engines, official documentation, and the room's specified services to collect the requested clues. Do not brute-force DNS or probe candidate hosts unless the room explicitly authorizes active enumeration.
-
-### 4. Public documents and metadata
-
-Public PDFs, office documents, repositories, and job postings can reveal software names, usernames, internal terminology, or metadata. Treat this information as a lead, not proof of a vulnerability. Avoid collecting personal information that is not relevant to the exercise.
-
-If the room asks for a particular record or value, save the source URL and verify the exact field rather than relying on a search-result snippet alone.
-
-### 5. Organize the findings
-
-Maintain an inventory with the asset, source, timestamp, observed value, confidence, and next step. Mark facts separately from assumptions. Passive data can be stale or misleading, so validate important findings before using them in a security assessment.
-
-### 6. Answering the room tasks
-
-For each question, identify the public source the room expects, navigate to the relevant record, and capture the exact value. If the question asks for a domain, mail server, nameserver, or organization detail, use the correct DNS or registration record type. Do not substitute an IP or unrelated hostname because it looks plausible.
-
-### 7. Ethical and defensive use
-
-Passive recon helps defenders understand their external attack surface. Remove abandoned DNS records, avoid exposing internal names in public documents, monitor certificate issuance, and keep public repositories free of secrets. If a secret is exposed, rotate it rather than simply deleting the public copy.
+The Shodan rankings are time-sensitive. The answers included above are the documented room answers, but if the active task shows updated rankings, use the currently displayed result. Keep all active testing within explicit scope and do not probe a discovered host merely because it appeared in a public data source.

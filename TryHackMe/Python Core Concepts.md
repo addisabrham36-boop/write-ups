@@ -1,79 +1,162 @@
-# Python Core Concepts — TryHackMe
+# Python Core Concepts: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/pythonbasics
+Official room: https://tryhackme.com/room/pythonbasics
 
-I wanted to work through the Python basics because scripting is useful in cybersecurity for all sorts of jobs. It can help me read logs, process a list of IP addresses, automate repetitive checks, or understand a tool that is written in Python. I do not need to become a professional developer before using it, but I do need to understand what the code is actually doing instead of copying commands and hoping the computer respects my feelings.
+## Room Overview & Information
 
-## Variables and data types
+**Category:** Programming fundamentals  
+**Difficulty:** Beginner  
+**Focus:** Python syntax, variables, data types, collections, conditionals, loops, functions, file handling, and using scripts for security work.
 
-A variable is a name I use to store a value. For example:
+Python is useful in cybersecurity because it can automate repetitive tasks such as parsing logs, validating indicators, transforming data, and making HTTP requests. A script should make the work more repeatable, but it must still be tested and should not silently make assumptions about the data.
 
-```python
-name = "Abrham"
-age = 18
-is_learning = True
-```
+## Phase 1: Run Python
 
-Here, `name` is a string, `age` is an integer, and `is_learning` is a Boolean. Python also has floating-point numbers for values with decimals, and collections such as lists and dictionaries for keeping related data together.
+Check the installed version:
 
-The type matters because different values support different operations. Adding two numbers gives a numeric result, while joining strings combines text. If I am unsure what type a value has, I can check it with `type(value)`.
+\`\`\`bash
+python3 --version
+python3
+\`\`\`
 
-## Conditions
+The first command prints the version. The second starts the interactive interpreter. Exit the interpreter with `exit()` or Ctrl+D.
 
-Conditions let a program choose what to do based on whether something is true or false.
+A Python file commonly ends in `.py`. Run it with:
 
-```python
+\`\`\`bash
+python3 script.py
+\`\`\`
+
+Indentation is part of Python's syntax. Code inside a function, loop, or conditional must be indented consistently.
+
+## Phase 2: Variables and data types
+
+\`\`\`python
+username = "analyst"
 attempts = 3
+success = False
+score = 8.5
+\`\`\`
 
-if attempts >= 3:
-    print("Check the account")
-else:
-    print("Keep monitoring")
-```
+A variable name refers to a value. Strings hold text, integers hold whole numbers, floats hold decimal values, and booleans represent True or False.
 
-The indentation is part of Python's syntax, not decoration. The code inside the `if` block is only executed when the condition is true. I can use `elif` when I need to check another condition before falling back to `else`.
+Check a type with `type(value)`. Convert values deliberately: converting untrusted text to an integer can raise a ValueError if it is not numeric.
 
-## Loops
+## Phase 3: Lists and dictionaries
 
-A loop repeats work. A `for` loop is useful when I want to go through items in a collection:
+A list stores an ordered collection:
 
-```python
+\`\`\`python
 ports = [22, 80, 443]
+print(ports[0])
+ports.append(8080)
+\`\`\`
 
-for port in ports:
-    print(port)
-```
+Indexes begin at zero, so `ports[0]` is the first item. Appending adds an item to the end.
 
-A `while` loop repeats while its condition remains true. I need to be careful with it, because if the condition never becomes false, the program can keep running forever. Computers are very committed to following bad instructions.
+A dictionary stores key-value pairs:
 
-## Functions
+\`\`\`python
+event = {"user": "alice", "status": "failed"}
+print(event["user"])
+\`\`\`
 
-Functions let me package a task so I can reuse it instead of writing the same logic over and over.
+Dictionaries are useful for structured log records. Use `event.get("source_ip")` when a field may be absent, rather than assuming every record contains it.
 
-```python
-def is_common_web_port(port):
-    return port in [80, 443]
+## Phase 4: Conditions
 
-print(is_common_web_port(443))
-```
+\`\`\`python
+status_code = 401
 
-The function takes a value called `port` and returns whether it is one of the listed ports. Returning a value is different from printing it: `return` gives the result back to the code that called the function.
+if status_code == 200:
+    print("Request succeeded")
+elif status_code == 401:
+    print("Authentication required")
+else:
+    print("Other response")
+\`\`\`
 
-## Working with files
+- `if` checks the first condition.
+- `elif` checks another condition if earlier conditions were false.
+- `else` handles the remaining cases.
+- `==` compares values; `=` assigns a value.
 
-Python can read text files, which is useful when working with logs or lists. A safe basic pattern is to open a file with a context manager:
+For security scripts, conditions should distinguish known cases without treating every unexpected value as safe.
 
-```python
-with open("sample.txt", "r", encoding="utf-8") as file:
-    contents = file.read()
+## Phase 5: Loops
 
-print(contents)
-```
+\`\`\`python
+failed_users = ["alice", "bob", "carol"]
 
-The `with` block handles closing the file when the block finishes. The file needs to exist at that path, otherwise Python raises an error. When I write scripts that handle real data, I should also consider missing files, invalid input, and whether I have permission to access the file.
+for user in failed_users:
+    print(user)
+\`\`\`
 
-## What I took from this room
+A `for` loop processes each item. A `while` loop repeats while a condition remains true. Ensure while loops can terminate, especially when reading network data or retrying a request.
 
-The main thing is to understand the building blocks: variables store values, conditions make decisions, loops repeat tasks, functions organise reusable logic, and file handling lets a program work with data outside the script. These basics are enough to start writing small helper scripts and to make more sense of Python-based security tools.
+## Phase 6: Functions
 
-This is a fundamentals write-up, not a record of a specific exploit or completed target. I should add exact room answers or terminal output only when I have checked them against the actual task.
+\`\`\`python
+def is_failed_login(event):
+    return event.get("status") == "failed"
+
+sample = {"user": "alice", "status": "failed"}
+print(is_failed_login(sample))
+\`\`\`
+
+A function groups reusable logic. Parameters provide input and `return` gives the result back to the caller. Small functions are easier to test than one long script.
+
+## Phase 7: File handling
+
+\`\`\`python
+with open("events.txt", "r", encoding="utf-8") as handle:
+    for line in handle:
+        line = line.strip()
+        if "failed" in line.lower():
+            print(line)
+\`\`\`
+
+The `with` block closes the file even if an error occurs. `strip()` removes surrounding whitespace, and `lower()` makes a simple case-insensitive check. This example is intentionally basic; structured logs should be parsed using their real format rather than searching raw text alone.
+
+## Phase 8: Errors and debugging
+
+Use exceptions to handle expected failures:
+
+\`\`\`python
+try:
+    attempts = int("three")
+except ValueError:
+    print("The input is not an integer")
+\`\`\`
+
+Do not catch every exception and ignore it. Broad exception handling can hide bugs or cause a security script to report a false success. Print a useful error message and exit safely when the required input is invalid.
+
+## Phase 9: A small security-oriented example
+
+This script reads a text file and counts lines containing the word failed:
+
+\`\`\`python
+from pathlib import Path
+
+path = Path("events.txt")
+if not path.is_file():
+    raise SystemExit(f"Input file not found: {path}")
+
+count = 0
+with path.open("r", encoding="utf-8", errors="replace") as handle:
+    for line in handle:
+        if "failed" in line.casefold():
+            count += 1
+
+print(f"Lines containing failed: {count}")
+\`\`\`
+
+It checks that the file exists, reads it safely, tolerates decoding problems by replacing invalid characters, and counts matching lines. It is a learning example, not a full log parser or a reliable incident detector.
+
+## Working through the room
+
+For each question, identify whether it tests syntax, a data type, a collection, a condition, a loop, or a function. Run the example in the room's interpreter and inspect the result. If the task asks for output, use the actual interpreter output rather than copying a value from another environment.
+
+## Key takeaways
+
+Python becomes useful when the basics are clear: values, conditions, loops, functions, files, and exceptions. In security work, scripts should validate inputs, handle errors explicitly, and produce results that can be checked against the original evidence.

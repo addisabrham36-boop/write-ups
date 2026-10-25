@@ -117,3 +117,29 @@ The application treats a user-supplied artifact as trusted executable object dat
 ## Key takeaways
 
 The three practicals have different root causes. A predictable encryption key weakens confidentiality; SSTI lets input influence a template interpreter; unsafe deserialization lets untrusted object data trigger behaviour. Identify the specific trust boundary, verify the impact in the lab, and apply a fix that removes the root cause rather than relying on a generic filter.
+
+## Expanded data-handling assessment
+
+### 1. Trace data through the application
+
+Identify where data enters, is validated, stored, transformed, logged, transmitted, and rendered. At every boundary, ask whether the system knows the data's source, whether it is trusted, and how it is encoded for the next component. The same data may be safe in one context and dangerous in another.
+
+### 2. Inspect validation and parsing
+
+Check whether the server validates the expected type, size, format, and allowed values. Client-side validation improves usability but can be bypassed. Parsers for archives, images, documents, and serialized objects deserve special attention because they may consume complex attacker-controlled structures.
+
+### 3. Compare raw and processed values
+
+Capture the original request, processed output, and any error returned by the lab. Determine whether the application decodes or normalizes data before validation and whether later components interpret it differently. Do not assume every malformed value is exploitable; confirm impact through a safe, repeatable test.
+
+### 4. Protect secrets and personal data
+
+Avoid placing credentials, tokens, or sensitive records in URLs, client-side assets, debug responses, or logs. Minimize collection and retention, control access, and encrypt data in transit and at rest where appropriate. Encryption does not replace authorization or safe application logic.
+
+### 5. Remediation
+
+Use schema validation, safe parsers, strict content-type handling, size and timeout limits, context-appropriate output encoding, secret-management services, and least-privilege storage access. Treat file uploads and external API responses as untrusted input.
+
+### 6. Room questions
+
+Connect each task to the affected data flow, validation step, parser, or trust boundary. Confirm the exact result in the lab and do not invent sample values. Redact flags as `flag{hidden}`.

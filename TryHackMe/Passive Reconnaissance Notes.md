@@ -45,3 +45,29 @@ Passive work relies on existing public information. Active reconnaissance intera
 ## What I took from this room
 
 Passive reconnaissance builds an initial picture from public evidence. Its value comes from accurate attribution, source tracking, and careful separation between what is known and what still needs to be verified.
+
+## Expanded research workflow
+
+### 1. Keep passive and active techniques separate
+
+Passive recon uses public sources or information already available without directly probing the target. Active recon sends traffic to the target. A public hostname discovered through a search engine is not automatically in scope for active testing.
+
+### 2. Record source and confidence
+
+For each finding, record the value, source URL, collection time, and confidence. Public data can be stale, duplicated, or misattributed. A subdomain in an old document does not prove that the host is currently operated by the target.
+
+### 3. Use common public sources
+
+Relevant sources can include official web pages, registrar and DNS records, certificate-transparency logs, public documentation, public repositories, search engines, and metadata in documents that are intentionally public. Avoid collecting private personal information unless it is necessary and explicitly within the exercise.
+
+### 4. Verify before acting
+
+Corroborate important findings with a second source when possible. Keep facts separate from hypotheses, and never treat a search snippet as definitive when the source itself can be inspected. If a secret is found in a public source, do not reproduce it; recommend removal and rotation.
+
+### 5. Turn recon into defensive work
+
+Defenders can use the same process to inventory their external attack surface, remove abandoned DNS records, reduce unnecessary public metadata, and monitor newly issued certificates. Passive recon is most useful when findings lead to verified asset ownership and a controlled next step.
+
+### 6. Room questions
+
+For each task, use the specific public source identified in the room and record the exact value it shows. Preserve the original spelling, domain structure, and relevant date. Do not guess when a record is unavailable; note that it could not be verified in the current environment.

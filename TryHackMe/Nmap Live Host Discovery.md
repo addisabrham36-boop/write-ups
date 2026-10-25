@@ -120,9 +120,9 @@ Nmap offers several probes for determining whether a host is up. A discovery opt
 
 An example of a host-discovery scan using ICMP Echo is:
 
-\`\`\`bash
+```bash
 nmap -sn -PE TARGET_SUBNET
-\`\`\`
+```
 
 - **-sn** performs host discovery without a port scan.
 - **-PE** uses ICMP Echo Requests.
@@ -146,9 +146,9 @@ TCP discovery probes can be useful when ICMP is filtered. A TCP SYN ping sends a
 
 An example command is:
 
-\`\`\`bash
+```bash
 nmap -sn -PS23 TARGET_SUBNET
-\`\`\`
+```
 
 The **-PS23** option sends TCP SYN discovery probes to TCP port 23, commonly used by Telnet. The command is for the authorised lab range only.
 
@@ -164,9 +164,9 @@ Reverse DNS attempts to map an IP address to a hostname using PTR records. It ca
 
 Example:
 
-\`\`\`bash
+```bash
 nmap -sn -R TARGET_SUBNET
-\`\`\`
+```
 
 The **-R** option forces reverse DNS resolution for target addresses. This may add time to a scan and does not guarantee that every address has a PTR record.
 

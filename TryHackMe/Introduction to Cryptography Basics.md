@@ -81,3 +81,39 @@ Do not treat an unreadable string as proof of encryption. Base64, hex, and binar
 ## Key takeaways
 
 Cryptography is not one operation. Encoding changes representation, encryption protects confidentiality, hashing supports integrity checks, and signatures support authenticity and integrity. Use established algorithms, protect keys separately, and verify the entire implementation rather than judging security by the algorithm name alone.
+
+## Expanded cryptography workflow
+
+### 1. Start with the purpose of the operation
+
+When a task presents a string, determine whether it is encoded, hashed, encrypted, or signed. These operations solve different problems. Encoding changes representation; hashing produces a digest; encryption uses a key to recover plaintext; and signatures help verify integrity and origin.
+
+### 2. Classical ciphers
+
+A Caesar cipher shifts letters by a fixed number. Atbash reverses the alphabet mapping. These are useful learning examples but are not secure encryption. For a Caesar cipher, try the shifts indicated by the room's clue and inspect whether the output forms meaningful text. Do not assume every unreadable string is a Caesar cipher.
+
+### 3. Modern symmetric and asymmetric cryptography
+
+Symmetric encryption uses a shared secret key. Asymmetric cryptography uses a public/private key pair. Public-key systems can support key agreement or signatures, but they do not automatically solve key distribution, identity validation, or secure storage.
+
+### 4. Hashes and password storage
+
+A hash is not normally decrypted. Password recovery tools compare candidate inputs against the stored hash. Password storage should use a purpose-built, salted password-hashing algorithm with appropriate work factors rather than a fast general-purpose hash.
+
+### 5. Safe command-line inspection
+
+For an encoded string, preserve the exact input and use a decoder suited to the format. For example, Base64 can be decoded with:
+
+```bash
+printf '%s' 'ENCODED_VALUE' | base64 --decode
+```
+
+For a hash, identify the algorithm and context instead of attempting to decode it. Never publish recovered real passwords or keys.
+
+### 6. Common implementation failures
+
+Weak randomness, reused keys, hard-coded secrets, missing authentication, and encryption without integrity protection can undermine otherwise strong algorithms. Use established libraries, authenticated encryption, secure key storage, and reviewed protocols. Avoid inventing custom cryptographic schemes.
+
+### 7. Answering the room
+
+Use the specific clues and values supplied by the active room. Explain the transformation and verify the result, especially if the output is another encoded string. Do not copy a demonstration ciphertext as a room answer; redact flags as `flag{hidden}` in public notes.

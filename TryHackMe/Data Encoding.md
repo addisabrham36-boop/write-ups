@@ -1,50 +1,92 @@
 # Data Encoding: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/dataencoding
+Official room: https://tryhackme.com/room/dataencoding
 
-Encoding changes the representation of data so it can be stored, transported, or interpreted by another system. It is not designed to keep the data secret. Security challenges often use encoding to make a value less obvious, so the first step is to recognise the format before trying to decode it.
+## Room Overview & Information
 
-## 1. Encoding versus encryption and hashing
+**Category:** Cryptography fundamentals  
+**Difficulty:** Beginner  
+**Focus:** Recognising common data representations, decoding safely, and distinguishing encoding from encryption and hashing.
 
-- **Encoding:** reversible representation change, such as Base64 or URL encoding.
-- **Encryption:** transforms data using a key to protect confidentiality.
-- **Hashing:** produces a digest that is not intended to be reversed.
-- **Compression:** reduces the size of data and may be reversible, but does not provide secrecy.
+Encoding changes how data is represented so it can be stored, transmitted, or interpreted by another system. It is not necessarily a security mechanism. Base64, hexadecimal, URL encoding, and character encodings are common examples. A string that looks random may be encoded, encrypted, compressed, or simply binary data rendered as text; appearance alone is not enough to identify it.
 
-Base64 is not encryption. A hexadecimal string is not necessarily a hash. Identify the format from the context and structure rather than assuming every unreadable value is a cipher.
+## Phase 1: Identify the representation
 
-## 2. Common encodings
+Start by checking the context. Ask where the value came from, which characters it contains, whether its length fits a common format, and whether the room gives a clue about the transformation.
 
-- **Base64:** uses letters, digits, plus, slash, and sometimes equals signs for padding.
-- **Hexadecimal:** represents bytes using characters 0-9 and A-F.
-- **URL encoding:** represents reserved or non-ASCII bytes using percent escapes.
-- **Binary:** represents values as sequences of bits.
-- **ASCII and UTF-8:** character encodings that map text to bytes.
+Useful local tools include:
 
-The same text can be represented in several formats. For example, the word hello can be represented as ordinary text, Base64, hexadecimal bytes, or URL-encoded text. The encoded forms may look very different but decode to the same underlying data.
+```bash
+file sample.txt
+xxd -g 1 sample.txt | head
+strings -n 4 sample.bin | head
+```
 
-## 3. Decode one layer at a time
+- `file` guesses a file type from its content.
+- `xxd -g 1` displays bytes in hexadecimal groups.
+- `strings` extracts readable sequences from a binary file.
 
-Start by copying the exact value from the room. Look at the character set, length, separators, and any padding. Use the tool or command appropriate to the suspected format, then inspect the output before trying another transformation.
+These tools provide clues, not certainty. A file extension or a readable substring does not prove the complete format.
 
-On Linux, common tools include base64 for Base64, xxd for hexadecimal dumps, and Python's standard library for explicit conversions. For example, base64 -d decodes a Base64 input stream. Check the command's help if the installed implementation differs.
+## Phase 2: Base64
 
-Do not repeatedly apply decoders at random. If the output is binary, determine whether it is a file or another encoded layer. If the output is gibberish, it may be compressed, encrypted, or simply decoded using the wrong format.
+Base64 represents binary data using a set of 64 printable characters, commonly including letters, digits, `+`, `/`, and optional `=` padding. It is useful for transport, not secrecy.
 
-## 4. Recognise layered encoding
+Decode a Base64 string from a file:
 
-A challenge may apply multiple reversible transformations. After each step, record the input, the operation, and the output. This makes it easier to reverse the process and explain how the final value was obtained.
+```bash
+base64 --decode encoded.txt
+```
 
-A decoded result may contain another encoding, but it may also contain ordinary text, a file signature, or encrypted content. Verify the next step from the new evidence.
+Encode a short text:
 
-## 5. Work with files safely
+```bash
+printf '%s' 'hello' | base64
+```
 
-If the room provides a file rather than a string, use file to identify its type and calculate a hash before modifying it. Work on a copy and preserve the original. Do not execute unknown files just because their contents become readable after decoding.
+Use `printf` rather than `echo` when you want to avoid an added newline changing the encoded bytes. On systems where the command option differs, check `base64 --help`.
 
-## 6. Working through the room
+A valid-looking Base64 string can decode to binary rather than readable text. If the output is unreadable, inspect it with `file` or `xxd` instead of assuming the decoding failed.
 
-For each question, identify the representation and use the appropriate decoder. Check the exact output and formatting. If the result is a flag or answer string, submit the value shown by the active room. Do not replace it with a guessed result from another guide.
+## Phase 3: Hexadecimal
 
-## What I took from this room
+Hexadecimal represents each byte using two hexadecimal digits. It is common in packet captures, file dumps, hashes, and binary analysis.
 
-Encoding is about representation, not secrecy. The most reliable approach is to identify the format, decode one layer at a time, inspect each result, and keep a record of the transformation.
+Convert a file to a hex view:
+
+```bash
+xxd sample.bin | head
+```
+
+A byte such as decimal 65 is hexadecimal `41`, which corresponds to ASCII `A`. Hex is a representation of bytes, not encryption. A hex string can represent text, machine code, compressed data, or arbitrary binary content.
+
+## Phase 4: URL encoding
+
+URLs have reserved characters that may need percent-encoding. For example, a space is often represented as `%20` in a URL. URL encoding is not a way to protect secrets; the server can decode it.
+
+When examining a suspicious URL, distinguish the actual path and query parameters from their encoded representation. Repeated or nested encoding can make a value harder to read, but it does not automatically make it safe or malicious.
+
+## Phase 5: Character encodings
+
+ASCII maps a limited set of characters to numeric values. UTF-8 is a variable-length encoding for Unicode and is widely used on the web. A byte sequence interpreted with the wrong character encoding may display incorrectly even when the underlying bytes are intact.
+
+If text appears corrupted, preserve the original bytes and identify the expected encoding before converting it. Avoid repeatedly converting a file in place because this can destroy the original evidence.
+
+## Phase 6: Encoding versus encryption versus hashing
+
+- **Encoding:** changes representation and is generally reversible without a secret.
+- **Encryption:** protects confidentiality and requires a key to decrypt.
+- **Hashing:** produces a fixed-length digest designed not to be reversed.
+- **Compression:** reduces data size and may also be reversible, but serves a different purpose.
+
+A Base64 string is not encrypted merely because it is unreadable at first glance. Likewise, a SHA-256 digest cannot be decoded to recover the original file.
+
+## Phase 7: Working through the room
+
+For each challenge, preserve the original string and identify the likely format before applying a decoder. Use one transformation at a time and inspect the output. If a decoded result appears to contain another encoding, record the first result and then analyse the next layer separately.
+
+When a question asks for a specific decoded value, use the exact value supplied by the active room. Do not copy an answer from a different challenge instance or invent a flag.
+
+## Key takeaways
+
+Encoding is about representation, not confidentiality. Identify the likely format from context, use the appropriate tool, preserve the original bytes, and verify the output before interpreting it. This discipline is useful in CTF puzzles, malware triage, web traffic analysis, and digital forensics.

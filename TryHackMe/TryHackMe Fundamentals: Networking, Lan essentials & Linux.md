@@ -228,3 +228,48 @@ tcpdump -r traffic_capture.pcap -nn -X | head -n 30
 1. **Linux System Administration:** A thorough understanding of permissions (`chmod`, `chown`), directory hierarchy (`/proc`, `/etc`, `/var/log`), and SUID execution is essential for both system hardening and privilege escalation.
 2. **Network Protocol Mechanics:** The interaction between Layer 2 (ARP/MAC), Layer 3 (IP/Routing), and Layer 4 (TCP Handshakes/UDP) forms the foundation of all communication across enterprise and lab environments.
 3. **Reconnaissance Methodology:** Always begin with non-intrusive host discovery before advancing to focused port scans, service enumeration, and full packet dissection.
+
+## Practical verification and troubleshooting
+
+### Network interface and route inventory
+
+On a Linux lab host, inspect interfaces and routes:
+
+    ip addr
+    ip route
+    ip neigh
+    ss -lntup
+
+These commands show IP addresses, routing entries, cached neighbour mappings, and listening TCP/UDP sockets. The output changes by host and container. A listening socket is local service evidence; it does not automatically mean the service is reachable from outside the machine.
+
+### DNS and application connectivity
+
+Test name resolution and then test the specific service:
+
+    getent hosts TARGET_HOST
+    curl -i http://TARGET_HOST/
+
+If name resolution fails but the IP works, investigate DNS or host mapping. If the name resolves but the application fails, check the port, route, firewall, TLS, and application logs. Do not treat a failed ping as proof that a host is offline because ICMP may be filtered.
+
+### Linux permissions and safe file operations
+
+Inspect identity and permissions before changing system state:
+
+    whoami
+    id
+    ls -la
+    stat PATH
+
+On Linux, the owner, group, mode bits, ACLs, capabilities, and mount options may all affect access. Avoid broad permissions as a convenience fix. Understand whether the data is inside a container or on the host before editing it.
+
+### A repeatable troubleshooting sequence
+
+1. Confirm the target IP and network prefix.
+2. Verify the interface is up.
+3. Inspect the route to the target.
+4. Resolve the hostname.
+5. Test the service's exact port.
+6. Check application-layer response and logs.
+7. Record what changed after each test.
+
+Use this approach for the room's practical questions and don't copy outputs from another VM. The goal is to connect each result to the appropriate layer: physical/link, IP routing, transport, DNS, application, or operating-system permissions.

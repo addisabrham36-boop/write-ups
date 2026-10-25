@@ -40,6 +40,88 @@ The write-ups are organized logically by platform or topic:
 |:---|:---:|:---|
 | [API Test](./PortSwigger-Web-Security/API%20Test.md) | API Security | API Recon, Exploiting endpoints via documentation, Hidden parameter discovery |
 
+
+## Additional TryHackMe Notes
+
+These pages cover fundamentals, defensive security, web testing, AI security, forensics, and CTF practice. Some are concept notes rather than verified end-to-end machine walkthroughs; I add target-specific commands and results only when they have been checked against the active room.
+
+### Fundamentals and networking
+- [What Is Networking?](./TryHackMe/What%20Is%20Networking.md)
+- [Intro to LAN](./TryHackMe/Intro%20to%20LAN.md)
+- [Networking Concepts](./TryHackMe/Networking%20Concepts.md)
+- [DNS in Detail](./TryHackMe/DNS%20in%20Detail.md)
+- [HTTP in Detail](./TryHackMe/HTTP%20in%20Detail.md)
+- [Wi-Fi Fundamentals](./TryHackMe/WiFi%20Fundamentals.md)
+- [Wi-Fi Fundamentals and Reconnaissance](./TryHackMe/Wi-Fi%20Fundamentals%20and%20Reconnaissance.md)
+- [WiFi Hacking](./TryHackMe/WiFi%20Hacking.md)
+- [Nmap Live Host Discovery](./TryHackMe/Nmap%20Live%20Host%20Discovery.md)
+- [Operating Systems](./TryHackMe/Operating%20Systems.md)
+- [Inside a Computer System](./TryHackMe/Inside%20a%20Computer%20System.md)
+- [Windows Basics](./TryHackMe/Windows%20Basics.md)
+- [Linux Fundamentals Part 1](./TryHackMe/Linux%20Fundamentals%20Part%201.md)
+- [Python Core Concepts](./TryHackMe/Python%20Core%20Concepts.md)
+- [Data Encoding](./TryHackMe/Data%20Encoding.md)
+- [Cryptography for Dummies](./TryHackMe/Cryptography%20for%20Dummies.md)
+- [Cryptography Basics](./TryHackMe/Introduction%20to%20Cryptography%20Basics.md)
+
+### Offensive and web security
+- [Offensive Security Intro](./TryHackMe/Offensive%20Security%20Intro.md)
+- [Pentesting Fundamentals](./TryHackMe/Pentesting%20Fundamentals.md)
+- [The Hacker Methodology](./TryHackMe/The%20Hacker%20Methodology.md)
+- [Passive Reconnaissance](./TryHackMe/Passive%20Reconnaissance.md)
+- [Active Reconnaissance](./TryHackMe/Active%20Reconnaissance.md)
+- [Google Dorking](./TryHackMe/Google%20Dorking.md)
+- [Basic Pentesting](./TryHackMe/Basic%20Pentesting.md)
+- [Metasploit Introduction](./TryHackMe/Metasploit%20Introduction.md)
+- [Hydra](./TryHackMe/Hydra.md)
+- [Crack the Hash](./TryHackMe/Crack%20the%20Hash.md)
+- [OverlayFS CVE-2021-3493](./TryHackMe/OverlayFS%20CVE-2021-3493.md)
+- [MD2PDF](./TryHackMe/MD2PDF.md)
+- [Guided Pentest: Web](./TryHackMe/Guided%20Pentest%20Web.md)
+- [Guided Pentest: Infrastructure](./TryHackMe/Guided%20Pentest%20Infrastructure.md)
+- [Internal](./TryHackMe/Internal.md)
+- [Road](./TryHackMe/Road.md)
+- [Gaming Server](./TryHackMe/Gaming%20Server.md)
+- [Psycho Break](./TryHackMe/Psycho%20Break.md)
+- [TryHack3M: Bricks Heist](./TryHackMe/TryHack3M%20Bricks%20Heist.md)
+- [RA: Oh My WebServer](./TryHackMe/RA%20Oh%20My%20WebServer.md)
+
+### Defensive security, forensics, and phishing
+- [Defensive Security Intro](./TryHackMe/Defensive%20Security%20Intro.md)
+- [Introduction to SIEM](./TryHackMe/Introduction%20to%20SIEM.md)
+- [SOC Role in the Blue Team](./TryHackMe/SOC%20Role%20in%20Blue%20Team.md)
+- [DFIR: An Introduction](./TryHackMe/DFIR%20An%20Introduction.md)
+- [Snort](./TryHackMe/Snort.md)
+- [Junior Security Analyst Intro](./TryHackMe/Junior%20Security%20Analyst%20Intro.md)
+- [Phishing Basics](./TryHackMe/Phishing%20Basics.md)
+- [Phishing: Merry Clickmas](./TryHackMe/Phishing%20Merry%20Clickmas.md)
+- [Phishing with HiddenEye](./TryHackMe/Phishing%20HiddenEye.md)
+- [Malware Introductory](./TryHackMe/Malware%20Introductory.md)
+- [Malware Researching](./TryHackMe/Malware%20Researching.md)
+- [Android Malware Analysis](./TryHackMe/Android%20Malware%20Analysis.md)
+
+### AI security and newer challenges
+- [The Building Blocks of AI](./TryHackMe/The%20Building%20Blocks%20of%20AI.md)
+- [AI Models and Data](./TryHackMe/AI%20Models%20and%20Data.md)
+- [Prompt Engineering](./TryHackMe/Prompt%20Engineering.md)
+- [AI Threat Modelling](./TryHackMe/AI%20Threat%20Modelling.md)
+- [AI Security Threats](./TryHackMe/AI%20Security%20Threats.md)
+- [Securing AI Systems](./TryHackMe/Securing%20AI%20Systems.md)
+- [LLM Security](./TryHackMe/LLM%20Security.md)
+- [AI Forensics](./TryHackMe/AI%20Forensics.md)
+- [Cypheron](./TryHackMe/Cypheron.md)
+- [Phantom Fob](./TryHackMe/Phantom%20Fob.md)
+- [The Brochure](./TryHackMe/The%20Brochure.md)
+
+### Other challenge notes
+- [Search Skills](./TryHackMe/Search%20Skills.md)
+- [Ninja Skills](./TryHackMe/Ninja%20Skills.md)
+- [Cyber Heroes](./TryHackMe/Cyber%20Heroes.md)
+- [Advent of Cyber 2022](./TryHackMe/Advent%20of%20Cyber%202022.md)
+- [Advent of Cyber 2023](./TryHackMe/Advent%20of%20Cyber%202023.md)
+- [Advanced SQL Injection: Advent of Cyber 2024](./TryHackMe/Advanced%20SQL%20Injection%20Advent%20of%20Cyber%202024.md)
+- [Advent of Cyber Prep Track](./TryHackMe/Advent%20of%20Cyber%20Prep%20Track.md)
+
 ---
 
 ### note

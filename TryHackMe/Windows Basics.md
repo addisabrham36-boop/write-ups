@@ -1,31 +1,57 @@
-# Windows Basics — TryHackMe
+# Windows Basics: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/windowsfundamentals1xbxzy
+Room: https://tryhackme.com/room/windowsbasics
 
-Windows provides a graphical desktop as well as command-line tools and administrative interfaces. For security work, I need to understand how users, services, processes, files, and logs fit together.
+Windows is widely used on personal computers and in enterprise environments. For security work, it is useful to understand the filesystem, user accounts, processes, services, networking, and event logs. These are the places an analyst often checks when investigating a host.
 
-## Useful built-in tools
+## 1. Windows filesystem
 
-Task Manager shows running applications and processes. Services management shows background services and their status. Event Viewer stores logs from Windows components and applications. These tools help me understand what a machine is doing, but I should not assume that every unfamiliar process is malicious.
+Windows commonly uses drive letters such as C: and directories such as C:\Windows, C:\Users, and C:\Program Files. User profile directories store settings and user data. Application binaries and configuration may be placed in different locations depending on the installer and system policy.
 
-The Command Prompt and PowerShell can also provide useful information. For example:
+In File Explorer, enable the view options required to inspect hidden files when investigating a system. Hidden files are not encrypted or protected merely because they are hidden. Access is controlled by permissions.
 
-```powershell
-whoami
-ipconfig
-tasklist
-```
+## 2. Users and permissions
 
-`whoami` shows the current identity, `ipconfig` displays network configuration, and `tasklist` lists running processes. I should run commands in the environment provided by the room and compare the output with the task's instructions.
+Windows accounts may be local or managed through a domain. Group membership affects what actions a user can perform. Administrator privileges should be limited because a compromised administrator account can affect the whole machine.
 
-## Files, users, and updates
+In PowerShell, useful identity commands include whoami, whoami /groups, and Get-LocalUser. Use them to inspect the current account and local accounts in an authorised environment. The output depends on the machine and permissions.
 
-Windows uses access controls to decide which users can read or change files and perform administrative actions. Keeping the operating system and applications updated helps reduce exposure to known vulnerabilities. Services that are not needed should be reviewed, but disabling system components without understanding their role can break things.
+## 3. Processes and services
 
-## Event logs
+A process is a running program. A service is a background component that can start automatically or on demand. Unexpected processes, unfamiliar executable paths, and services configured to run with excessive privileges can be useful investigation leads.
 
-Windows records many system and security events. The Security log can contain events related to logons and account activity, depending on audit policy. System and Application logs provide other useful context. Log availability depends on configuration and retention, so the absence of an event is not always proof that something did not happen.
+Useful PowerShell commands include Get-Process and Get-Service. Task Manager provides a graphical view of processes and startup activity. Do not terminate an unfamiliar process until you understand what it does; it may be a critical system component or evidence in an incident.
+
+## 4. Command Prompt and PowerShell
+
+Command Prompt and PowerShell are command-line environments, but they have different syntax and capabilities. PowerShell works with structured objects and provides cmdlets for system administration.
+
+Examples of basic commands:
+- whoami: show the current identity.
+- ipconfig /all: display network configuration.
+- netstat -ano: show network connections and associated process IDs.
+- Get-Process: list running processes in PowerShell.
+- Get-Service: list services in PowerShell.
+- Get-EventLog or Get-WinEvent: query event logs, subject to permissions and available logs.
+
+Run commands in the appropriate shell. A Command Prompt command may not work unchanged in PowerShell, and a PowerShell cmdlet is not a standard executable in every shell.
+
+## 5. Networking
+
+ipconfig /all shows interface addresses, gateways, DNS servers, and related configuration. Test a connection with an approved diagnostic tool and separate name resolution from network reachability. A failed ping does not prove a host is offline because ICMP may be blocked.
+
+netstat -ano can show listening ports and active connections, including the process ID. Correlate that ID with a process listing before drawing conclusions.
+
+## 6. Event logs
+
+Windows Event Viewer organises records into logs such as System, Application, and Security. Security logs can include logon events, account changes, and privilege-related activity when auditing is configured. PowerShell can query logs, but access depends on privileges and policy.
+
+During an investigation, record the event ID, timestamp, account, host, and message. One event rarely proves an entire attack chain. Correlate authentication events with process, network, and endpoint records.
+
+## 7. Working through the room
+
+Follow the task's exact environment and identify whether it asks about a path, command, account, service, process, or log. Use the tool shown in the task and read the actual output. Do not assume your personal Windows machine has the same users or files as the room's machine.
 
 ## What I took from this room
 
-I need to be comfortable navigating Windows, checking basic network information, reviewing processes and services, and finding logs. These are everyday skills for both system administration and security investigations. The important part is knowing what each tool can show and what its output cannot prove by itself.
+Windows security work starts with knowing where to find accounts, processes, services, network configuration, and event logs. Understanding these basics makes it easier to investigate alerts and recognise suspicious changes.

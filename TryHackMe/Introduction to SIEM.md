@@ -1,66 +1,128 @@
 # Introduction to SIEM: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/introtosiem
+Official room: https://tryhackme.com/room/introtosiem
 
-A Security Information and Event Management system collects logs from different sources, normalises them, and helps analysts search for suspicious activity. It provides a shared view of events that would otherwise be scattered across endpoints, servers, identity providers, firewalls, and applications.
+## Room Overview & Information
 
-## 1. Understand event sources
+**Category:** Defensive security / SOC  
+**Difficulty:** Beginner  
+**Focus:** Log sources, centralisation, parsing and normalisation, correlation, detection rules, alert investigation, and analyst decisions.
 
-Common SIEM sources include:
+A Security Information and Event Management (SIEM) platform collects logs from different systems, normalises their fields, correlates related events, and helps analysts detect and investigate suspicious behaviour. This room includes a static lab dashboard. Values such as process names, usernames, and hostnames must be read from the active dashboard rather than guessed.
 
-- Authentication logs: logins, failures, MFA events, and account changes.
-- Endpoint logs: process creation, file activity, and security detections.
-- Network logs: DNS queries, connections, firewall decisions, and proxy requests.
-- Cloud audit logs: changes to resources, permissions, and service configurations.
-- Application logs: requests, errors, and access to sensitive functions.
+## Task 1: Introduction
 
-Each source has blind spots. A firewall log may show a connection but not what a user did inside an application. An endpoint log may show a process but not every network event. Correlation is useful because it connects these partial views.
+**Question: “What does SIEM stand for?”**
 
-## 2. Know the important fields
+Answer: **Security Information and Event Management**.
 
-A log event commonly includes a timestamp, source, event type, user or process, host, source and destination addresses, and a message or result. Field names differ by product. Before writing a query, inspect the available fields and a few representative events.
+SIEM platforms are used by SOC analysts to investigate activity across endpoints, servers, network devices, identity systems, cloud services, and applications. A SIEM is only as useful as its log coverage, parsing, detection logic, retention, and analyst workflow.
 
-Timestamps require care. Confirm the timezone and whether the platform has normalised event time or ingestion time. A late-arriving event may appear in the SIEM after the activity actually happened.
+## Task 2: Logs Everywhere, Answers Nowhere
 
-## 3. Search and filter
+Different devices generate different logs. A firewall records network decisions, a Windows endpoint records operating-system events, a Linux server records authentication and service events, and a web application may record HTTP requests. Each source provides only part of the story.
 
-Start with a narrow time range and one useful field. For example, search for failed authentication events for a particular account, then expand the window to find successful logins, new devices, or privilege changes around the same time.
+Analysing each system separately creates several problems:
+- There may be too many events for manual review.
+- Logs use different formats and field names.
+- Investigators lose time connecting to individual hosts.
+- An isolated event may look normal while a sequence of related events is suspicious.
+- Retention may differ between systems, leaving gaps in the timeline.
 
-The exact query syntax depends on the SIEM. Do not copy syntax from Splunk, Elastic, Sentinel, or another platform without checking which one the room uses. The general approach is to filter by time, event type, user, host, and relevant indicator, then compare related records.
+Centralisation gives analysts a searchable timeline across these sources.
 
-## 4. Correlate events into a timeline
+## Task 3: Why SIEM?
 
-One event rarely tells the whole story. A suspicious login may be followed by MFA changes, a new process, access to sensitive files, or unusual outbound connections. Correlation links those events into a possible attack chain.
+A SIEM typically provides:
+- **Collection:** receives logs through agents, APIs, collectors, or network integrations.
+- **Parsing:** extracts fields from raw records.
+- **Normalisation:** maps different sources into a consistent schema.
+- **Correlation:** links events based on shared fields or time.
+- **Detection:** evaluates rules and analytics against event data.
+- **Alerting:** notifies analysts when a rule matches.
+- **Dashboards and reporting:** summarises event volume, alerts, trends, and system health.
+- **Retention and search:** supports investigations and compliance needs.
 
-For each event, ask:
-1. Is the timestamp consistent with the other records?
-2. Is the source host or identity expected?
-3. Does the event have a related parent or follow-on action?
-4. Is the behaviour common for this user or host?
-5. What additional evidence would confirm or refute the hypothesis?
+Example detection logic: if a user has five failed logins in ten seconds and then a successful login, generate an alert for possible password guessing. The rule is a hypothesis about suspicious behaviour, not proof that an attacker succeeded.
 
-Avoid assuming that correlation proves causation. The timeline supports an interpretation, but alternative explanations should be considered.
+## Task 4: Log Sources and Ingestion
 
-## 5. Indicators, detections, and false positives
+Windows logs are available through Event Viewer and can be forwarded to the SIEM. Windows event IDs identify categories of events; for example, event ID 4688 can record process creation when the relevant audit policy is enabled. Event ID 104 can indicate an event log was cleared in the Windows Event Log service context.
 
-An IOC can be an IP address, domain, hash, filename, or other observable clue. Detection rules combine indicators and behaviour into alerts. A match is a reason to investigate, not proof by itself. Shared hosting, legitimate administrative activity, software updates, and testing tools can produce events that look suspicious.
+Linux systems commonly use systemd journal and files under `/var/log`, depending on the distribution and service. Useful inspection commands on a system you administer include:
 
-A good detection rule should be tested against known malicious and benign examples. Analysts should document why an alert was closed or escalated and provide feedback when a rule is too noisy or misses relevant activity.
+```bash
+journalctl --since "1 hour ago"
+journalctl -u sshd
+sudo tail -n 100 /var/log/auth.log
+```
 
-## 6. Practical triage steps
+The exact log path varies by distribution. These are examples for learning and administration, not commands that must be run against the room's static dashboard.
 
-1. Open the alert and identify the rule that fired.
-2. Set the relevant time window and inspect the raw event.
-3. Identify the affected identity, endpoint, and network locations.
-4. Search related events before and after the alert.
-5. Compare the activity with a known baseline or approved change.
-6. Decide whether to close, monitor, or escalate according to policy.
-7. Preserve the query and evidence so another analyst can reproduce the conclusion.
+Ingestion must preserve timestamps and parse important fields correctly. If the source timezone is wrong or the user field is parsed incorrectly, correlation rules can produce misleading results.
 
-## 7. Working through the room
+## Task 5: Alerting Process and Analysis
 
-Use the platform and dataset supplied by the room. Read the task question carefully, identify which field or event type it refers to, and narrow the search before interpreting the result. If a question asks for a value from a log, copy the value from the displayed record rather than inventing an example.
+A detection rule checks event fields and conditions. Examples include:
+- A high number of failed logins from one source.
+- A successful login shortly after repeated failures.
+- A process that clears event logs.
+- A suspicious executable launched by a web server.
+- Unexpected outbound traffic from a sensitive host.
 
-## What I took from this room
+The room describes an event-log-clearing rule using source `WinEventLog` and event ID `104`. It also describes a process-creation rule using event ID `4688` and a process name containing `whoami`. These are examples of detection logic; their effectiveness depends on logging configuration, field parsing, and the environment's baseline.
 
-A SIEM is useful because it brings events together, but the analyst still has to ask the right questions. Reliable triage depends on understanding fields, timestamps, context, and the limits of each log source.
+A good analyst checks which conditions matched, reviews the raw event, searches for related activity, and decides whether the alert is a true positive or false positive. A true positive means the detection correctly identified activity that meets the rule's suspicious or malicious condition. A false positive means the alert fired on benign activity. A true positive is not always proof of a successful compromise; it confirms the activity represented by the alert.
+
+## Task 6: Lab Work
+
+Open the room's **View Site** dashboard. Click **Start Suspicious Activity** and inspect the alert and associated event data.
+
+### Question 1: “After clicking on the Start Suspicious Activity button, which process caused the alert?”
+
+1. Trigger the activity in the dashboard.
+2. Open the resulting alert.
+3. Inspect the event or process details linked to the alert.
+4. Read the process name that matched the detection.
+5. Submit the exact process name shown by the lab.
+
+Do not infer the process from the alert title alone; confirm it in the event record.
+
+### Question 2: “Find the event that caused the alert and identify the user responsible for the process execution.”
+
+1. Open the event linked to the alert.
+2. Locate the user/account field associated with the process event.
+3. Confirm that you are reading the event that caused this alert, not a neighbouring event.
+4. Submit the exact username.
+
+### Question 3: “What is the hostname of the suspect user?”
+
+Use the same process event and inspect its hostname or computer field. Do not confuse the username with the hostname. Copy the hostname exactly as displayed.
+
+### Question 4: “Examine the rule and the suspicious process; which term matched the rule that caused the alert?”
+
+Open the detection rule and inspect the condition that matched. Compare the process details with the rule's field and value. The answer is the term in the rule that actually matched the event. Do not guess based on the process name if the rule is matching a different field.
+
+### Question 5: “Which option best represents the event? Choose from the following: False Positive / True Positive”
+
+Compare the event with the rule's intended detection. If the suspicious activity was deliberately generated by the lab and matches the malicious behaviour the rule is designed to detect, select **True Positive**. If the event were benign but matched accidentally, it would be a false positive. Confirm using the lab's actual event details.
+
+### Question 6: “Selecting the right ACTION will display the FLAG. What is the FLAG?”
+
+Choose the action indicated by the task's evidence and submit it. The simulator displays the flag after the correct action. Obtain the flag from the live dashboard and redact it as `flag{hidden}` in a public write-up; do not invent a value.
+
+## Phase 7: Investigation checklist
+
+For each alert, record:
+- Detection name and rule ID.
+- Event timestamp and timezone.
+- User, host, process, source, and destination.
+- The exact rule condition that matched.
+- Related events before and after the alert.
+- True-positive or false-positive assessment and rationale.
+- Containment or escalation decision.
+- Remaining uncertainty and next steps.
+
+## Phase 8: Key takeaways and remediation
+
+A SIEM does not magically know which activity is malicious. It depends on telemetry, normalised fields, well-designed rules, and analyst validation. Improve detection by ensuring relevant logs are enabled, clocks are synchronised, fields are parsed consistently, and rules are tested against both malicious and benign cases. Keep a record of tuning changes and avoid discarding alerts simply because they are noisy.

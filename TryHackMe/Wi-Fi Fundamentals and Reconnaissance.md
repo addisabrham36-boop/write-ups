@@ -1,53 +1,90 @@
 # Wi-Fi Fundamentals and Reconnaissance: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/wififundamentals
+Official room: https://tryhackme.com/room/wififundamentalsandrecon
 
-This note combines the fundamentals needed to interpret wireless reconnaissance. Wi-Fi uses radio communication to connect clients to an access point, but security depends on more than the SSID or signal strength. Authentication, encryption, client validation, and network segmentation all matter.
+## Room Overview & Information
 
-## 1. Identify a wireless network
+**Category:** Wireless security / reconnaissance  
+**Difficulty:** Beginner to intermediate  
+**Focus:** 802.11 basics, SSIDs and BSSIDs, channels, encryption, client associations, monitor mode, and airodump-ng.
 
-An SSID is the network name presented to users. A BSSID identifies a specific access point radio, often represented by a MAC address. One SSID can be provided by multiple access points, so the SSID alone does not uniquely identify the radio.
+Wireless networks extend an organisation's attack surface beyond the walls of its building. Radio signals can be received outside the physical office, and clients may automatically attempt to reconnect to previously used networks. Reconnaissance helps an authorised assessor understand which networks are present and how they are configured.
 
-A wireless scan may reveal SSIDs, BSSIDs, channels, supported security modes, and signal strength. These are observations, not proof that the network is vulnerable. Use only the lab network and values provided by TryHackMe.
+Use only the room's provided wireless lab or equipment you own and are authorised to test. Do not capture traffic from other people's networks.
 
-## 2. Understand the bands
+## Phase 1: Wireless terminology
 
-Wi-Fi commonly uses 2.4 GHz and 5 GHz, with 6 GHz supported by newer equipment in regions where it is permitted. The 2.4 GHz band often has more range but is more crowded. Higher-frequency bands may offer more capacity but can have less range through walls.
+- **SSID:** the network name presented to users.
+- **BSSID:** usually the MAC address of a particular access point radio.
+- **Channel:** the portion of spectrum used by the network.
+- **Client/station:** a device associated with an access point.
+- **Beacon:** a management frame used by an access point to advertise network information.
+- **Authentication and encryption:** controls that determine who can join and how wireless traffic is protected.
 
-Channel use and interference affect performance. A strong signal does not guarantee a reliable connection, and a visible network name does not tell you whether the authentication configuration is secure.
+An SSID can be hidden from normal display, but that does not make the network invisible. Other management frames and client behaviour may reveal it.
 
-## 3. Authentication and encryption
+## Phase 2: Understand wireless security
 
-WEP is obsolete and insecure. WPA2 with AES-CCMP and WPA3 are modern options, depending on device compatibility and configuration. Enterprise Wi-Fi may use 802.1X and a central authentication service, while personal Wi-Fi often uses a shared passphrase.
+Open networks provide no Wi-Fi link-layer encryption. WEP is obsolete and insecure. WPA2-Personal commonly uses a pre-shared passphrase, while WPA3-Personal uses a more modern authentication exchange. Enterprise networks commonly use 802.1X/EAP with an authentication server.
 
-A long unique passphrase helps protect personal networks. Enterprise clients should validate authentication-server certificates; otherwise, a malicious access point may be able to impersonate a trusted network.
+A strong passphrase helps protect WPA2-Personal, but it must be unique and not reused across services. Enterprise deployments need proper certificate validation and identity configuration to avoid credential theft through rogue access points.
 
-## 4. Passive observation
+## Phase 3: Prepare the lab adapter
 
-Passive wireless reconnaissance listens for frames without deliberately disrupting clients. Management frames help devices discover and associate with access points; control frames help coordinate wireless communication; data frames carry higher-layer traffic.
+The room provides a controlled environment. Follow its instructions for selecting the wireless interface. On Linux, interface names vary, so inspect the actual system:
 
-A capture may show network metadata even when payloads are encrypted. Do not assume that capturing a frame reveals the application data. Interpret the frame type and the security mode before drawing conclusions.
+```bash
+ip link
+iw dev
+```
 
-## 5. Active testing and scope
+- `ip link` lists network interfaces.
+- `iw dev` lists wireless devices and their interface names.
 
-Active testing transmits frames or interacts with the network and may disconnect clients or change state. Only perform active tests specifically authorised by the room. Never use a real nearby network as a substitute for the training target.
+Monitor mode allows a compatible wireless adapter to receive management and data frames that ordinary managed mode may not expose. Not all adapters and drivers support monitor mode or packet injection. Do not assume an interface name from another system.
 
-If the lab provides a wireless interface, follow its instructions to select the correct device and channel. Adapter and driver support vary, so an unavailable feature may be a hardware limitation rather than a mistake in the command.
+## Phase 4: Use airodump-ng for reconnaissance
 
-## 6. Defensive checks
+In the lab, use the interface and command provided by the room. A typical reconnaissance pattern is:
 
-- Use WPA2-AES or WPA3 and disable obsolete modes.
-- Set a unique, strong passphrase or use enterprise authentication.
-- Validate certificates for enterprise Wi-Fi.
-- Update access-point firmware and change administrative defaults.
-- Separate guest clients from trusted internal devices.
-- Monitor for rogue access points and unusual association attempts.
-- Avoid exposing router administration to untrusted networks.
+```bash
+sudo airodump-ng INTERFACE
+```
 
-## 7. Working through the room
+Replace `INTERFACE` with the wireless interface identified by the lab. Airodump-ng lists nearby access points and may show BSSID, channel, encryption, authentication, power, and SSID. Associated clients may appear in a separate section.
 
-Read the task and identify whether it asks for an SSID, BSSID, channel, frequency, security protocol, or observation from a capture. Use the exact values displayed in the active lab. If the task asks you to infer a weakness, explain which configuration or behaviour supports that conclusion.
+The output is a snapshot. Signal strength varies with location and antenna, and a network may not appear if the adapter is on the wrong channel or does not support the required mode.
 
-## What I took from this room
+To focus on a lab access point, use the BSSID and channel supplied by the task with the room's instructed options. Avoid broad collection beyond the assigned environment.
 
-Wireless reconnaissance provides useful clues, but each clue needs context. The network name, radio identifier, frame type, authentication method, and encryption configuration answer different questions and should not be treated as interchangeable.
+## Phase 5: Identify hidden SSIDs and client behaviour
+
+A hidden SSID suppresses the name in some beacon frames, but clients and access points may reveal the name during other management exchanges. In the lab, compare the AP and client information shown by the capture tool and follow the room's instructions to identify the requested network.
+
+Do not infer a hidden SSID from a random nearby network. Confirm that the BSSID and client association correspond to the lab target.
+
+## Phase 6: Answering the practical questions
+
+For any question asking for an SSID, BSSID, channel, encryption type, or client, inspect the current airodump-ng output:
+1. Confirm the correct interface is being monitored.
+2. Locate the target access point by the details supplied by the room.
+3. Read the requested column rather than a neighbouring one.
+4. If the SSID is hidden, follow the lab's client/management-frame exercise.
+5. Record the value exactly as displayed.
+
+The target values depend on the lab's wireless environment. This write-up explains the workflow rather than inventing BSSIDs, client MACs, or hidden network names.
+
+## Phase 7: Defensive recommendations
+
+- Use WPA3 or WPA2 with a strong, unique passphrase where appropriate.
+- Prefer enterprise authentication with correctly validated certificates for managed organisations.
+- Disable WEP and other obsolete security modes.
+- Keep access-point firmware updated.
+- Segment guest Wi-Fi from internal resources.
+- Monitor for rogue access points and unexpected clients.
+- Avoid relying on hidden SSIDs or MAC allowlists as security controls.
+- Review client auto-join settings and remove unused saved networks.
+
+## Key takeaways
+
+Wireless reconnaissance is about understanding what the radio environment reveals. Airodump-ng helps map access points and clients, but each observation must be tied to the authorised lab target. Hidden SSIDs and MAC filtering are not substitutes for strong authentication and encryption.

@@ -1,90 +1,72 @@
-# Software Development Lifecycle: TryHackMe Walkthrough
+# Software Development Lifecycle: Complete TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/sdlc
+Official room: https://tryhackme.com/room/sdlc
 
-The Software Development Life Cycle (SDLC) describes the stages used to plan, build, test, deploy, and maintain software. Security is more effective when it is included throughout the lifecycle instead of being added only after a vulnerability is discovered.
+## Room Overview & Information
 
-## 1. Common lifecycle stages
+**Category:** Software development and security  
+**Difficulty:** Beginner  
+**Objective:** Understand how software progresses from requirements and design through implementation, testing, deployment, maintenance, and retirement.
 
-Different organisations use different names, but the stages commonly include:
+This is a conceptual room rather than a live exploitation target. Reconnaissance, initial access, and privilege escalation are not applicable to the standard SDLC lessons. Instead, the phases below map the same disciplined approach to the lifecycle of a software system.
 
-1. **Planning and requirements:** define users, business goals, constraints, and security requirements.
-2. **Design:** choose the architecture, data flows, trust boundaries, and technologies.
-3. **Implementation:** write code and review dependencies.
-4. **Testing:** verify functionality, security, performance, and expected failure handling.
-5. **Deployment:** release the application with secure configuration and controlled access.
-6. **Maintenance:** patch dependencies, monitor behaviour, respond to incidents, and retire unsupported components.
+## Phase 1: Requirements & System Enumeration
 
-Some teams use sequential phases; others use iterative or continuous delivery. The underlying security activities still apply.
+### 1. Identify users, assets, and requirements
 
-## 2. Security in requirements and design
+Planning defines the business problem, user needs, constraints, and success criteria. Security requirements should be explicit and testable. Identify what data the system handles, who may access it, which actions are high impact, and what availability or privacy requirements apply.
 
-Requirements should specify which data is sensitive, who may access it, how users authenticate, what the system must log, and how failures should be handled. During design, identify trust boundaries, external services, and high-impact actions.
+A requirement such as “secure login” is too vague. Better requirements state how authentication is performed, how sessions expire, how access is authorised, what failed-login behaviour is expected, and which events are logged.
 
-Threat modelling is especially useful before implementation because it can reveal missing authorisation checks or unsafe data flows while changes are still relatively cheap.
+### 2. Inventory dependencies and trust boundaries
 
-## 3. Secure implementation
+List external services, data stores, libraries, build systems, APIs, service accounts, and third-party components. Identify where data crosses a trust boundary and which component is responsible for validating it. This inventory becomes the baseline for threat modelling, testing, and dependency management.
 
-Developers should validate input, use safe APIs, avoid hardcoded secrets, and follow language-specific secure coding guidance. Dependencies should come from trusted sources and be kept updated. Code review can catch logic errors that automated tools miss.
+## Phase 2: Design & Secure Implementation
 
-Input validation is not a universal replacement for contextual encoding or parameterised APIs. For example, SQL queries should use parameters rather than concatenating user input, and HTML output should be encoded for its context.
+### 3. Design before coding
 
-## 4. Testing and verification
+Design defines architecture, data flow, component responsibilities, permissions, failure modes, and security controls. Threat modelling asks who may abuse the system, what asset is at risk, which preconditions are necessary, and which controls prevent the attack path.
 
-Testing can include unit tests, integration tests, static analysis, dependency scanning, dynamic application testing, and manual security review. Each technique finds different classes of issues.
+### 4. Implement secure code
 
-A test should have a clear expected result. When a vulnerability is fixed, add a regression test so the same failure is less likely to return. Passing a test suite does not prove the application is free of vulnerabilities, but it provides evidence about the cases that were checked.
+Use safe APIs, parameterized database queries, context-appropriate output encoding, proper authorization checks, and secure secret handling. Validate external input, but do not rely on validation alone when a safer API can preserve data/code separation. Keep secrets out of source files, public repositories, and build logs.
 
-## 5. Secure deployment
+Use maintained dependencies from trusted sources. Pin and review changes where appropriate, and understand that a dependency update can change application behaviour as well as fix bugs.
 
-Production configuration should minimise exposed services, protect secrets, use appropriate TLS settings, and grant only the permissions the application needs. Build and deployment pipelines should restrict who can modify releases and should preserve traceability from source commit to deployed artifact.
+## Phase 3: Testing & Verification
 
-Secrets should not be stored in public repositories or copied into build logs. Use managed secret storage and rotate credentials if exposure is suspected.
+### 5. Choose appropriate test methods
 
-## 6. Maintenance and end of life
+- **Unit tests:** check small pieces of behaviour.
+- **Integration tests:** check interactions between services and components.
+- **Static analysis:** identifies classes of risky source patterns.
+- **Dependency scanning:** checks packages against known vulnerability data.
+- **Dynamic tests:** exercise a running application.
+- **Manual security review:** examines business logic and trust assumptions that automated tools may miss.
 
-Software remains exposed after release. Teams need a process for monitoring advisories, patching dependencies, reviewing access, rotating secrets, and responding to new threats. Unsupported software should be upgraded, isolated, or retired.
+Each test should have a defined expected result. A security finding should be reproduced safely and documented with the relevant input, output, impact, and limitation.
 
-When a system is decommissioned, revoke credentials, remove public endpoints, and handle stored data according to retention requirements.
+### 6. Add regression coverage
 
-## 7. Working through the room
+When a vulnerability is fixed, write a test that fails for the old behaviour and passes for the corrected behaviour. Run it during future changes so the same class of flaw is less likely to return. A passing test suite is evidence about tested cases, not proof that no vulnerabilities exist.
 
-For each question, identify which lifecycle phase is being described and what security activity belongs there. Requirements define the needed protections; design maps architecture and trust boundaries; implementation applies secure coding; testing verifies behaviour; deployment configures the live service; and maintenance keeps it secure over time.
+## Phase 4: Deployment, Operation & Incident Response
 
-## What I took from this room
+### 7. Release securely
 
-Security is not a final checklist at the end of development. It is a set of activities that begin with requirements and continue through deployment, monitoring, patching, and retirement.
+Production configuration should minimise exposed services, protect secrets, use supported TLS settings, and grant only necessary permissions. Restrict who can change build pipelines and deployments. Preserve traceability from source commit to release artifact.
 
-## Expanded secure SDLC workflow
+### 8. Monitor and maintain
 
-### 1. Requirements and design
+After release, monitor logs and alerts, patch dependencies, review privileged access, rotate exposed secrets, and test backup restoration. During an incident, preserve evidence, scope the affected assets, contain the activity, recover from trusted sources, and document lessons learned.
 
-Define functional requirements alongside security, privacy, availability, and audit requirements. Identify assets, users, trust boundaries, misuse cases, and operational constraints before implementation. Security requirements should be testable, not limited to "the system must be secure."
+### 9. Retire software safely
 
-### 2. Implementation
+Decommissioning should revoke credentials, remove public endpoints, remove obsolete DNS and access grants, and handle retained data according to policy. Unmaintained software should be upgraded, isolated, or retired; leaving it online indefinitely increases risk.
 
-Follow secure coding standards, use parameterized database access, validate inputs, encode outputs for their context, and keep secrets out of source control. Review dependencies and choose maintained libraries. Code review should examine authorization and error handling, not only style.
+## Phase 5: Room Questions & Key Takeaways
 
-### 3. Testing
+For each task, identify which lifecycle phase is being described. Requirements define what the system must do; design describes architecture and trust boundaries; implementation turns the design into code; testing verifies behaviour; deployment releases the system; maintenance keeps it secure; retirement removes it safely.
 
-Use unit and integration tests for business rules, static analysis for risky code patterns, dependency scanning for known vulnerable packages, and dynamic testing for runtime behaviour. Integrate security testing throughout development rather than postponing it until release day.
-
-### 4. Build and deployment
-
-Protect CI/CD credentials, restrict who can modify build pipelines, pin dependencies where appropriate, produce traceable artifacts, and prevent unreviewed changes from reaching production. Separate development, test, and production environments and credentials.
-
-### 5. Operations and maintenance
-
-Monitor logs and alerts, patch vulnerabilities, rotate exposed credentials, review access, and test backups and recovery. Retirement should include revoking secrets, deleting unneeded data safely, and removing obsolete DNS entries or services.
-
-### 6. Threat modelling and risk
-
-For each feature, ask who can abuse it, which asset is at risk, how the abuse path works, and which control prevents it. Prioritize by likelihood and impact; document exceptions and reassess when the design changes.
-
-### 7. Room tasks
-
-Map questions to the lifecycle phase or security activity they describe. Use the room's exact terminology and distinguish testing from deployment, monitoring, and maintenance.
-
-### 8. Key takeaway
-
-A secure SDLC makes security a continuous responsibility from requirements through retirement. Automation helps, but ownership, review, evidence, and the ability to fix findings are what make the process effective.
+No question or flag should be guessed if it depends on a live quiz interface. Use the exact wording and answer options displayed by the current room. The key lesson is that security is continuous, beginning with requirements and ending only when the system and its credentials are safely retired.

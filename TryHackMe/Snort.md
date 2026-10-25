@@ -173,3 +173,67 @@ Back up configuration files before edits. Test new rules against the supplied PC
 ## Key takeaways
 
 Snort has distinct sniffing, logging, alerting, and PCAP-analysis workflows. Flags control what traffic is displayed or recorded, rules determine what matches, and deployment mode determines whether traffic can be blocked. The task-specific answers must be read from the provided captures and generated logs; do not invent packet fields or counts.
+
+## Expanded Snort workflow
+
+### 1. Understand the task mode
+
+Snort can operate as a packet sniffer, packet logger, or network intrusion detection system. Read the room task to determine which mode is expected. Snort versions and command-line options differ, so use the installed version and the exact rules or PCAP supplied by the lab.
+
+Check the version and available options:
+
+```bash
+snort -V
+snort -h
+```
+
+The version matters because Snort 2 and Snort 3 have different configuration conventions and some command-line options are not interchangeable.
+
+### 2. Inspect the packet capture
+
+If the task supplies a PCAP, preserve it and inspect its type and hash:
+
+```bash
+file capture.pcap
+sha256sum capture.pcap
+```
+
+Use Wireshark or tcpdump to understand the traffic before writing a detection rule. For example:
+
+```bash
+tcpdump -nn -r capture.pcap
+```
+
+The `-r` option reads an existing capture, `-nn` prevents hostname and service-name resolution, and the output provides a first overview. Apply a filter when the file is large, and record why the selected packets matter.
+
+### 3. Understand Snort rules
+
+A typical Snort 2 rule has an action, protocol, source address and port, direction operator, destination address and port, followed by options in parentheses. The action may alert, log, pass, or perform another configured response. Rule options can match content, flags, flow state, and metadata.
+
+A rule's header defines where to look; the options define what pattern or state should match. Check the rule's direction and address variables carefully. A correct content string in a rule with the wrong source/destination orientation may never match.
+
+### 4. Test against the supplied capture
+
+Use the configuration and command form specified by the room. A common Snort 2 offline pattern is:
+
+```bash
+snort -c /etc/snort/snort.conf -r capture.pcap -A console
+```
+
+Here, `-c` selects the configuration, `-r` reads a PCAP, and `-A console` prints alerts to the terminal. The exact paths and switches depend on the installed Snort version and room environment; check `snort -h` before running it.
+
+Read the alert message, rule identifier, timestamp, and packet context. An alert means the rule matched, not necessarily that the activity was malicious. Validate the match against the traffic and the rule's intended purpose.
+
+### 5. Troubleshooting
+
+- Configuration errors often mean the file path or syntax does not match the installed version.
+- No alerts may mean the wrong PCAP, interface, address variable, direction, or rule was selected.
+- An overly broad content match may trigger on benign traffic.
+- A rule that works in one sample may fail on a different packet layout or encoding.
+- Running live capture may require elevated privileges and an explicitly authorized interface.
+
+### 6. Detection engineering and remediation
+
+Write rules for observable behaviour and test them against both malicious and benign examples. Use metadata that helps analysts triage alerts, document assumptions, and tune thresholds. Avoid treating signatures as a replacement for patching, segmentation, or incident response.
+
+For each room question, identify the exact packet, field, rule, or alert the task asks about and verify it in the provided data. Do not invent alert output or flags; redact flags in public notes as `flag{hidden}`.

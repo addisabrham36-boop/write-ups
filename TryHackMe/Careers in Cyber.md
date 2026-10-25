@@ -95,3 +95,47 @@ Keep a learning log with the problem, tools used, evidence, conclusion, and what
 ## Key takeaways
 
 Cybersecurity is not one job with one required background. The field needs a range of technical, analytical, and communication skills. The room's answers reinforce that the profession spans multiple industries and roles, and that a practical learning path should be built around the work you want to do.
+
+## Expanded task-by-task study method
+
+This is a career-research room rather than a boot-to-root target, so Nmap, exploitation, and privilege escalation are not appropriate unless the room explicitly asks for a technical exercise. The useful output is a verified understanding of cybersecurity roles, the work each role performs, and the skills or certifications associated with it.
+
+### 1. Separate offensive, defensive, and governance roles
+
+Offensive security roles test systems to find weaknesses before criminals do. Examples include penetration tester, red-team operator, application security tester, and vulnerability researcher. Their work includes scoping, reconnaissance, validation, impact assessment, and clear reporting. A professional test is authorized and bounded by a written scope.
+
+Defensive roles detect, investigate, and contain threats. Security operations centre analysts monitor alerts, correlate logs, investigate suspicious activity, and escalate incidents. Incident responders coordinate containment and recovery, while threat hunters search for activity that existing alerts may have missed.
+
+Governance, risk, and compliance roles translate business requirements into security controls, assess risk, maintain policies, and collect evidence for audits. Security engineering builds and operates the controls, such as identity systems, network segmentation, endpoint protection, and monitoring pipelines.
+
+### 2. Map responsibilities to skills
+
+A SOC analyst needs networking fundamentals, Windows and Linux basics, log analysis, incident triage, and clear documentation. A penetration tester needs the same foundations plus web application testing, scripting, exploitation methodology, and report writing. A cloud security engineer needs identity and access management, network design, logging, infrastructure-as-code, and cloud-specific controls.
+
+Do not treat a certificate as a substitute for skills. Build small projects, write up what was tested, explain the evidence, and be honest about what was learned versus what was independently verified.
+
+### 3. Research a role systematically
+
+For each career described in the room, record:
+- The role's primary mission.
+- Typical daily tasks.
+- Tools and technical foundations.
+- Communication and documentation expectations.
+- Entry-level pathways and realistic next steps.
+- The difference between a certification and demonstrated practical skill.
+
+Use the sources linked by the room. Job titles vary between companies, so compare responsibilities rather than assuming every employer uses the same title.
+
+### 4. Build a practical learning plan
+
+A reasonable beginner sequence is networking, Linux and Windows administration, scripting, web fundamentals, security concepts, then a focused track. Create a lab portfolio that includes a documented network scan, a log-analysis exercise, a small secure web application, and one authorized CTF walkthrough. For each project, explain the objective, environment, steps, evidence, result, and remediation.
+
+### 5. Answer the room questions
+
+Read each question carefully and locate the named role, responsibility, or learning resource in the official room material. Preserve exact names when the answer expects a job title, framework, or certification. Do not infer a room's answer from a generic career article if the task points to a specific source.
+
+### 6. Professional practice
+
+Cybersecurity work requires permission, discretion, reproducibility, and communication. Keep test data separate from real data, avoid publishing credentials, and write reports for the intended audience. A good technical finding explains business impact and how to fix the underlying problem.
+
+The room's exact answers should be confirmed from the active tasks. This write-up explains the method; it does not invent task wording or claim that a specific career is universally the best choice.

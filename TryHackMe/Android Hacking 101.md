@@ -108,3 +108,61 @@ Request minimal permissions, protect local data using platform-supported storage
 ## Key takeaways
 
 Android testing combines package inspection with runtime observation. Use the emulator, inspect the manifest and code, verify the actual behaviour, and record evidence. Never assume a decompiled code fragment proves exploitability without confirming the execution path and its security impact.
+
+## Expanded technical workflow: Android assessment
+
+### Lab boundaries and device inventory
+
+Use only the emulator or device supplied by the room. Record the Android version, API level, architecture, package name, and whether the device is rooted. In Android testing, these details matter because API behaviour, available commands, and security controls vary by version.
+
+With ADB installed and the lab device connected, check the connection and device details:
+
+```bash
+adb devices -l
+adb shell getprop ro.build.version.release
+adb shell getprop ro.build.version.sdk
+adb shell getprop ro.product.cpu.abi
+adb shell id
+```
+
+`adb devices -l` lists connected devices; the `getprop` calls query Android system properties; `id` shows the shell's current identity. If multiple devices appear, use `adb -s SERIAL` to select the intended emulator. Do not continue if the connected device is not the lab target.
+
+### Package and component enumeration
+
+List installed packages and identify the target package from the room:
+
+```bash
+adb shell pm list packages
+adb shell dumpsys package PACKAGE_NAME
+```
+
+The package dump can reveal version information, requested permissions, activities, services, receivers, and providers. It is a large output, so save it and search locally rather than relying on a few visible lines:
+
+```bash
+adb shell dumpsys package PACKAGE_NAME > package-dump.txt
+grep -iE 'permission|activity|service|receiver|provider|version' package-dump.txt
+```
+
+Use the exact package name from the app under test. A declared permission is not proof that the app uses it unsafely; determine which feature requests it and whether the permission is justified.
+
+### Inspect the APK safely
+
+If the room provides an APK, preserve the original and calculate its hash before analysis. Use a static-analysis tool such as JADX to inspect decompiled code and AndroidManifest.xml. Look for exported components, deep links, hard-coded endpoints, insecure storage, WebView settings, and trust decisions made only on the client. Decompilation is an aid to analysis, not a perfect reconstruction of the original source.
+
+For dynamic analysis, launch the app in the lab and observe its network and file behaviour. Do not enter real credentials or private information into a test app. If the task requires an intercepting proxy, install and trust its certificate only in the isolated test environment and follow the room's certificate-pinning guidance.
+
+### Validate findings
+
+For every suspected issue, record the component, input, expected access policy, observed behaviour, and evidence. An exported activity is not automatically exploitable if it performs proper authorization checks. A hard-coded string is not automatically a secret unless it grants access or exposes sensitive information. Confirm the impact with the smallest safe test and revert any lab changes afterward.
+
+### Common troubleshooting
+
+- If ADB reports no device, check that the emulator is running and that the correct ADB server is active.
+- If a package cannot be found, verify the package identifier rather than the visible app label.
+- If an activity refuses to launch, it may require authentication or an expected intent extra.
+- If proxy traffic is missing, confirm the app's proxy behaviour and the emulator's network route.
+- If static analysis reveals a suspicious function, trace callers and server-side checks before declaring a vulnerability.
+
+### Reporting and remediation
+
+Recommend least-privilege permissions, non-exported components unless cross-app access is required, explicit authorization for sensitive operations, secure storage for tokens, TLS with correct certificate validation, and server-side enforcement of business rules. Avoid exposing production secrets in APK resources or logs. Use the room's live task to obtain exact answer values and redact flags as `flag{hidden}` in public notes.

@@ -244,3 +244,43 @@ This is the room's final acknowledgement. Submit it as the task requests after c
 ## Key takeaways
 
 Enumeration reduces uncertainty for an attacker; predictable reset tokens turn a recovery feature into an authentication bypass; and Basic Authentication is only as strong as the credentials and transport protection around it. The analyst should prove each weakness from the actual response, verify the successful path, and recommend a fix that removes the underlying design flaw.
+
+## Expanded assessment workflow
+
+### 1. Enumerate before attempting credentials
+
+Start with the service and application surface the room provides. Confirm open ports, identify the service, and establish which authentication method is in use. An initial scan can be saved as:
+
+```bash
+nmap -sC -sV -oN enum-baseline.txt TARGET_IP
+```
+
+This uses default Nmap scripts, service-version detection, and readable output. Continue only with service-specific enumeration justified by the scan.
+
+### 2. Distinguish discovery from guessing
+
+Enumeration gathers information such as usernames, paths, service banners, and allowed methods. Brute force or password spraying tests credential guesses. These are different activities and should not be conflated. Prefer a known lab username and the supplied wordlist over broad guessing, and follow any explicit rate limits in the task.
+
+### 3. Understand the authentication path
+
+For web forms, capture the genuine request and identify the username field, password field, CSRF token, session cookie, and failure condition. If the task concerns SSH or FTP, verify the service and port before choosing a corresponding module. A tool configured for the wrong protocol or response condition can report misleading failures.
+
+### 4. Use controlled tests
+
+Run only the credential test explicitly authorized by the room. Limit the candidate set and concurrency to the exercise's instructions. Stop after confirming the intended finding. Avoid account lockouts, excessive load, or reuse of any discovered credentials on other services.
+
+### 5. Verify credentials and access
+
+A candidate printed by a tool should be verified through the intended lab service. Once logged in, confirm the identity and permissions; do not infer elevated access from authentication success. Record the evidence while redacting the password itself.
+
+### 6. Explain likely root causes
+
+Weak or reused passwords, default accounts, missing rate limits, and insufficient monitoring can enable online guessing. A web form that reveals different messages for unknown users and wrong passwords may also permit account enumeration. The exact issue must match the observed application behaviour.
+
+### 7. Remediation
+
+Use long unique passwords, MFA, rate limiting, progressive delays, monitoring, generic failure responses, and protection against account enumeration. Keep privileged accounts separate and avoid enabling unnecessary remote-login services.
+
+### 8. Room questions
+
+Answer from the current lab's service output and successful validation. Record the tool command and why its flags were selected. Do not invent a username, password, or result; redact public flags as `flag{hidden}`.

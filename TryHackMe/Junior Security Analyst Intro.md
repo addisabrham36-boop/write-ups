@@ -1,48 +1,69 @@
 # Junior Security Analyst Intro: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/jrsecanalystintrouxo
+Official room: https://tryhackme.com/room/securityanalystintroda
 
-A junior security analyst often begins with alert triage: determine what triggered an alert, gather context, decide whether it is benign or suspicious, and escalate according to procedure. The role requires careful reasoning and clear notes, not just knowing tool names.
+## Room Overview & Information
 
-## 1. Understand the SOC workflow
+**Category:** SOC / defensive security  
+**Difficulty:** Beginner  
+**Focus:** The daily duties of a Level 1 security analyst, alert triage, incident investigation, collaboration, and continuous learning.
 
-A Security Operations Centre receives telemetry from endpoints, identity systems, network devices, cloud platforms, and applications. Detection rules use that telemetry to generate alerts. Analysts investigate alerts and create cases when the evidence suggests a genuine threat.
+A Junior Security Analyst is often a first-line triage analyst in a Security Operations Centre (SOC). The job is not simply to click every alert or label every event malicious. It involves reviewing evidence, prioritising risk, checking context, documenting decisions, and escalating incidents that need deeper investigation.
 
-A common workflow is:
-1. Read the alert and identify its detection logic.
-2. Confirm the time, host, user, and indicator.
-3. Inspect the raw event.
-4. Search for related events.
-5. Compare the behaviour with normal activity.
-6. Decide whether to close, monitor, or escalate.
-7. Record evidence and reasoning.
+## Task 1: Junior Security Analyst Journey
 
-## 2. Identify common evidence sources
+The room frames the analyst's day around current security news and the evolving threat landscape. News can provide context about campaigns, vulnerabilities, ransomware, supply-chain compromise, and data breaches. However, a news article is not a substitute for evidence from the organisation's own environment.
 
-Authentication logs can show successful and failed logins, MFA events, and account changes. Endpoint telemetry can show process execution, file activity, and security detections. DNS, firewall, and proxy logs can show attempted communication. Cloud audit logs can show permission or resource changes.
+### Daily responsibilities
 
-Each source has limits. A network event may show a connection but not the data exchanged. A process event may show an executable but not whether it was malicious. Correlate multiple sources before making a strong claim.
+A Level 1 analyst commonly:
+- Monitors and triages security alerts.
+- Checks whether activity matches known normal behaviour.
+- Collects relevant host, identity, and network evidence.
+- Escalates suspicious events according to a runbook.
+- Communicates clearly with other security and IT teams.
+- Documents actions and maintains an accurate case timeline.
+- Continues learning about new attack techniques and defensive controls.
 
-## 3. Use indicators carefully
+## How to approach the room's analyst scenarios
 
-Indicators of compromise include suspicious domains, IP addresses, hashes, filenames, or behaviours. An indicator can be shared by legitimate and malicious activity, and attackers can change infrastructure. Threat intelligence provides context but should not replace local evidence.
+For each interactive task, identify the alert or evidence source the question names. Read the actual event details before selecting an answer. In a real SIEM, the fields commonly worth checking include event timestamp, user or account, source and destination IPs, hostname, process, event type, action, and outcome.
 
-When an alert includes an indicator, check its age, source, confidence, and relevance to the observed event. Record whether the indicator was directly observed or only returned by a third-party source.
+Use this triage sequence:
 
-## 4. Prioritise an alert
+1. **Validate the signal.** Confirm that the alert is based on an actual event and identify the detection rule that fired.
+2. **Add context.** Check whether the account, device, source address, and time are expected.
+3. **Scope the activity.** Search for related events from the same identity, host, process, or source.
+4. **Assess impact.** Determine whether access succeeded and whether sensitive resources were reached.
+5. **Contain or escalate.** Follow the organisation's runbook and authority limits.
+6. **Document.** Record the evidence, decision, and next action.
 
-Consider the asset's importance, the privileges of the affected identity, whether the activity succeeded, the sensitivity of accessed data, and whether the behaviour is ongoing. A failed login from an unfamiliar IP and a successful privileged login followed by suspicious file access should not receive identical treatment.
+## Useful investigation concepts
 
-Use the organisation's severity and escalation criteria. Do not lower severity merely because the alert is unfamiliar, and do not declare an incident based on a single weak signal.
+### False positive and false negative
 
-## 5. Write a useful case note
+A false positive is benign activity incorrectly flagged as suspicious. A false negative is malicious activity that was not detected. Analysts must reduce both, but they should not dismiss a high-risk alert simply because some alerts are noisy.
 
-A case note should state what triggered the alert, what evidence was reviewed, what the analyst concluded, and what happens next. Include relevant timestamps, host and user identifiers, event references, and queries used. Avoid unsupported claims and unnecessary sensitive data.
+### Indicator versus conclusion
 
-## 6. Working through the room
+An IP address, domain, file hash, or username is an indicator. The conclusion that an incident occurred requires context and corroborating evidence. For example, a connection to a suspicious IP may be blocked before it succeeds; that is different from proving data was stolen.
 
-Follow the scenario and identify the analyst's next best action. If the task presents logs, read the actual event fields and compare related records. If it asks about a role or tool, match the responsibility to the task: triage is different from containment, forensics, threat hunting, and detection engineering.
+### Escalation
 
-## What I took from this room
+Escalate when the event exceeds the analyst's authority, requires specialist expertise, involves high-impact assets, or has evidence of successful compromise. Include the timeline, affected identities and hosts, relevant log excerpts, actions already taken, and unanswered questions.
 
-Good SOC work is evidence-driven. A junior analyst should know how to read an alert, gather context, recognise uncertainty, escalate correctly, and document the reasoning so another analyst can continue the investigation.
+## Working through the interactive tasks
+
+The exact values in the room's dashboard or scenarios are environment-specific. For each question:
+1. Open the relevant dashboard or scenario from the room.
+2. Read the alert and expand its details.
+3. Locate the field requested by the question.
+4. Compare the value with the surrounding context.
+5. Submit the value shown by the current room.
+6. Record the reasoning without publishing sensitive operational data.
+
+Do not use a random IP, username, or flag from another learner's write-up. If the task asks for a specific event field, the authoritative answer is the evidence displayed by the active room.
+
+## Key takeaways
+
+A junior analyst adds value by being methodical. Validate the alert, correlate evidence, assess impact, follow the playbook, and communicate the result. Speed matters in a SOC, but an unsupported conclusion can cause as much trouble as a missed alert.

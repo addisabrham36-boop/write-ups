@@ -110,3 +110,54 @@ Open the practical, enter or ping `8.8.8.8` as instructed, and copy the flag sho
 ## Key takeaways
 
 IP addresses support logical addressing and routing; MAC addresses support local-link delivery; and ICMP ping checks a limited form of reachability. The practical demonstrates why trusting a spoofable MAC address is not a strong authentication mechanism.
+
+## Expanded networking workflow
+
+### 1. Identify the network components
+
+A network connects devices so they can exchange data. Hosts use network interfaces, switches forward frames within a local network, routers forward IP packets between networks, and services listen for application traffic. A firewall enforces traffic policy between or on hosts.
+
+### 2. MAC and IP addressing
+
+A MAC address identifies a network interface on a local link. An IP address provides logical addressing and routing. IPv4 addresses contain 32 bits; IPv6 addresses contain 128 bits. The address and subnet prefix together determine which destinations are considered local.
+
+On Linux, inspect the current configuration:
+
+```bash
+ip addr
+ip route
+ip neigh
+```
+
+These commands display interface addresses, routing entries, and cached neighbour mappings. The output depends on the actual machine, so use the lab's values rather than copying an example address.
+
+### 3. TCP, UDP, and ports
+
+TCP establishes a connection and provides reliable, ordered delivery. UDP sends datagrams without TCP's connection and retransmission guarantees. A port identifies an application endpoint on a host. Common conventions include TCP 22 for SSH, TCP 80 for HTTP, TCP 443 for HTTPS, and UDP/TCP 53 for DNS, but services can run on nonstandard ports.
+
+A listening port is evidence that something accepts connections; it does not prove that the service is vulnerable. Identify the service and version, then investigate only if the room task calls for it.
+
+### 4. DNS and HTTP
+
+DNS translates names into records, while HTTP carries web requests and responses. A website can be reachable by IP but fail by name if DNS or the Host header is wrong. HTTPS adds TLS to protect traffic in transit and authenticate the server according to certificate validation.
+
+### 5. Basic troubleshooting
+
+Use a layered approach:
+1. Confirm the interface is up and has an address.
+2. Inspect the subnet and default route.
+3. Test the gateway if permitted.
+4. Test a known destination IP.
+5. Resolve the hostname.
+6. Test the specific application service.
+7. Inspect firewalls and application logs if earlier layers work.
+
+A failed ping is not conclusive because ICMP may be filtered. Use a test appropriate to the service being investigated.
+
+### 6. Complete the room questions
+
+Match the question to the relevant concept: local-link addressing, IP routing, transport, ports, DNS, or application protocols. Use the exact terms and values shown by the room. Do not treat port numbers as proof of a service or assume all networks use the same private address range.
+
+### 7. Security lessons
+
+Segment networks, restrict inbound and outbound traffic, inventory exposed services, patch systems, use secure protocols, and log relevant connections. Networking fundamentals are also the foundation of effective incident investigation because they explain where traffic originated and how it reached a service.

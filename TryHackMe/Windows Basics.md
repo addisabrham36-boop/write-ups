@@ -5,101 +5,113 @@ Official room: https://tryhackme.com/room/windowsbasics
 ## Room Overview & Information
 
 **Category:** Operating-system fundamentals  
-**Difficulty:** Beginner  
-**Focus:** Windows interface, filesystem, users, processes, services, and basic administrative tools.
+**Difficulty:** Easy  
+**Focus:** Windows workspace, system specifications, configuration, Defender, and basic endpoint security.
 
-Windows is widely used on personal devices and enterprise networks. Security analysts need to understand how users log in, where files live, how programs run, how services start, and where system events are recorded.
+The room places the learner in a simulated Windows Server 2019 Datacenter workstation. The tasks use the Windows Settings app, an onboarding folder, Task Manager, and Microsoft Defender. Values such as device name and region should be read from the active virtual machine.
 
-## Phase 1: Navigate the interface and filesystem
+## Task 1: Introduction
 
-Windows commonly uses drive letters such as `C:\`. The system directory is often `C:\Windows`, and user profiles are commonly stored under `C:\Users\USERNAME`. Paths and installed applications vary by machine.
+Read the learning objectives and start the provided Windows machine.
 
-In Command Prompt, use:
+**Question: “I understand the learning objectives and am ready to learn about Windows!”**
 
-```cmd
-whoami
-cd
-dir
-dir /a
-type notes.txt
-```
+Answer: **No answer needed.**
 
-- `whoami` prints the current identity.
-- `cd` shows or changes the current directory.
-- `dir` lists directory entries.
-- `dir /a` includes hidden and system entries.
-- `type` prints a text file.
+## Task 2: Exploring the Windows Workspace
 
-In PowerShell, similar commands include `Get-Location`, `Get-ChildItem -Force`, and `Get-Content notes.txt`.
+### Question: “After opening About your PC, navigate to the Device specifications section. What is the Device name specified?”
 
-## Phase 2: Users and groups
+1. Open the Start menu.
+2. Open **Settings**.
+3. Navigate to **System → About** or open **About your PC**, depending on the interface.
+4. Find **Device specifications**.
+5. Read the **Device name** field.
 
-A user account represents an identity. Groups help assign permissions to multiple users. Membership in the local Administrators group gives elevated rights and should be limited to accounts that need them.
+**Room answer:** `TryHatMe`.
 
-Inspect identity and group membership:
+The device name identifies the workstation on the network. In an enterprise, hostnames are useful for correlating endpoint alerts and inventory records, but they should not be treated as a secret or as proof of a device's identity.
 
-```cmd
-whoami /all
-net user
-net localgroup
-```
+### Question: “Continue looking through the Device specifications. How much RAM is installed on your new work PC?”
 
-`whoami /all` shows the current identity, groups, and privileges. `net user` lists local user accounts, and `net localgroup` lists local groups. Some information may require administrative permissions.
+**Room answer:** **4.00 GB**.
 
-Do not assume a user is an administrator because their username looks important. Check the group membership and effective privileges.
+Read the installed RAM field in the same Device specifications section.
 
-## Phase 3: Processes and services
+### Question: “Scroll down to the Windows specifications section. Which Version of Windows Server 2019 Datacenter is installed?”
 
-A process is a running program. A service is a background component that can start automatically and provide functions such as networking, logging, or application hosting.
+**Room answer:** **1809**.
 
-In PowerShell:
+The version is displayed under **Windows specifications**. Record the version shown by the virtual machine rather than relying on the room's title alone.
 
-```powershell
-Get-Process
-Get-Service
-Get-EventLog -LogName System -Newest 20
-```
+### Question: “Explore the TryHatMe Onboarding folder located on your computer's Desktop. What is the flag value found within Welcome.txt?”
 
-The first command lists processes, the second lists services, and the third shows recent events from the legacy System event log interface where supported. Modern systems may use other PowerShell event-log cmdlets and providers.
+1. Open File Explorer.
+2. Navigate to the Desktop.
+3. Open the **TryHatMe Onboarding** folder.
+4. Open **Welcome.txt** in a text editor.
+5. Submit the flag shown in the file.
 
-In Task Manager, inspect the process name, resource usage, and details. A suspicious name alone is not enough to prove malware. Check the executable path, publisher, parent process, user, and network activity where available.
+The flag is redacted here as `THM{hidden}`.
 
-## Phase 4: Windows Event Viewer
+## Task 3: Configuring and Securing Windows
 
-Event Viewer organises logs into categories such as Application, Security, and System. Security events can show authentication and account activity when the relevant audit policy is enabled. System events can show service and driver issues. Application logs may show errors from software.
+### Question: “Use the TryHatMeWelcome installer located within the TryHatMe Onboarding folder. What is the flag value you receive after installing and running the application?”
 
-When investigating an event, record the timestamp, event ID, source, account, computer, and message. Event IDs are useful, but the same number can mean different things across providers. Read the event source and details rather than relying on the ID alone.
+1. Open the **TryHatMe Onboarding** folder.
+2. Run the **TryHatMeWelcome** installer supplied by the room.
+3. Follow the installer prompts, confirm the installation, and launch the application.
+4. Read the message displayed by the installed application.
+5. Submit the flag shown by the active machine.
 
-## Phase 5: Basic network inspection
+The flag is redacted as `THM{hidden}`. Install only the software supplied by the authorised room.
 
-```cmd
-ipconfig /all
-route print
-netstat -ano
-nslookup example.com
-```
+### Question: “Investigate the Time & Language section of the Windows Settings app. Which country or region is your computer currently set to?”
 
-- `ipconfig /all` shows interface addresses, DNS configuration, and other network details.
-- `route print` displays the routing table.
-- `netstat -ano` lists connections/listeners, numeric addresses, and associated process IDs.
-- `nslookup` queries DNS.
+1. Open **Settings**.
+2. Select **Time & Language**.
+3. Open **Language & Region** or the equivalent region settings page.
+4. Read the **Country or region** value.
 
-These commands help distinguish a name-resolution issue from a routing or service problem. Do not expose full network configuration publicly if it includes sensitive internal information.
+**Room answer:** **United States**.
 
-## Phase 6: Working through the room
+Regional settings affect date, time, language, and formatting. They do not by themselves establish the physical location of a computer.
 
-For each question, use the interface or command specified by the task and read the value from the lab. If the task asks for a hidden file, inspect hidden entries; if it asks for a user or process, verify it using the appropriate tool. Do not copy account names, file paths, or output from a different Windows instance.
+### Question: “Open the Task Manager on your workstation's Desktop and navigate to the Users tab. Which account is currently logged in?”
 
-## Phase 7: Security lessons
+1. Open Task Manager using the Desktop shortcut or Ctrl+Shift+Esc.
+2. Select the **Users** tab.
+3. Identify the active logged-in account.
 
-- Use standard user accounts for daily work and elevate only when required.
-- Keep Windows and applications patched.
-- Enable useful audit policies and forward logs centrally.
-- Restrict remote administration and exposed services.
-- Review service permissions and startup entries.
-- Use endpoint protection and investigate suspicious process behaviour.
-- Protect backups and credentials.
+**Room answer:** **Administrator**.
+
+A Windows account name does not prove that every process is running with elevated privileges. For security work, inspect the process token and group membership when privilege level matters.
+
+### Question: “After performing your custom scan, click Virus:DOS/EICAR_Test_File and select See details. What is the file name shown in the Affected items section?”
+
+1. Open Microsoft Defender or Windows Security as the room instructs.
+2. Run the custom scan from the provided onboarding folder.
+3. Open the detection named **Virus:DOS/EICAR_Test_File**.
+4. Select **See details**.
+5. Read the **Affected items** section and copy the filename.
+
+**Room answer:** `tryhatmemaldoc.txt`.
+
+The EICAR test file is a harmless standard test string used to verify antivirus detection. It is not real malware. Windows may quarantine the test file before the scan starts; if so, open **Threat history**, locate the quarantined item, and inspect its details as the room instructs.
+
+## Task 4: Conclusion
+
+Complete the tasks and submit any flags shown by the active room. No additional technical answer is required for the conclusion task.
+
+## Security lessons
+
+- Keep Windows and applications updated.
+- Use least privilege and avoid using an administrator account for routine work.
+- Enable endpoint protection and review detections rather than assuming a scan is complete.
+- Verify the source of installers before running them.
+- Monitor endpoint events and preserve relevant logs.
+- Treat hostnames and system specifications as inventory data, not authentication factors.
 
 ## Key takeaways
 
-Windows administration and security investigation rely on understanding identity, permissions, processes, services, logs, and networking. The best first step is to inspect the actual system state and use evidence, rather than assuming that every Windows machine has the same configuration.
+The room teaches practical navigation of Windows Settings, the filesystem, Task Manager, and Microsoft Defender. The exact flags are obtained from the onboarding file and application in the live VM; they are redacted in this public write-up.

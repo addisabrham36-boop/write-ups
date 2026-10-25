@@ -63,3 +63,33 @@ For each task, identify whether it concerns organisational roles, analyst workfl
 ## Key takeaways
 
 The SOC is a coordinated function within the broader Blue Team. Analysts validate alerts, gather context, and escalate appropriately; specialised teams investigate complex activity, build detections, and improve controls. Strong operations depend on useful telemetry, documented playbooks, and clear communication.
+
+## Expanded SOC operating workflow
+
+### 1. Understand the SOC mission
+
+A Security Operations Center monitors security telemetry, investigates alerts, coordinates response, and improves detections. Roles and escalation rules vary. Analysts should know what they may change themselves and which actions require an incident commander or system owner.
+
+### 2. Triage alerts
+
+Start with the alert source, rule logic, timestamp, severity, asset, user, and evidence fields. Validate the event in raw telemetry before deciding whether it is malicious. Correlate authentication, endpoint, DNS, network, and cloud events to build context.
+
+### 3. Investigate and build a timeline
+
+Normalize timestamps, track affected assets and identities, and look for a sequence of actions rather than one isolated indicator. Consider benign explanations and document why they are accepted or rejected. Preserve the query and evidence so another analyst can reproduce the finding.
+
+### 4. Escalation and containment
+
+Escalate according to severity, uncertainty, and potential impact. Host isolation, account disablement, or network blocking can interrupt business; follow the response plan and preserve evidence where practical. Do not exceed authorization merely to close an alert quickly.
+
+### 5. Detection engineering and feedback
+
+When an alert is a false positive, identify which condition caused the noise. When an incident is missed, determine what telemetry or rule was absent. Improve the detection without overfitting to a single sample and test against benign and suspicious cases.
+
+### 6. Operational metrics
+
+Time to detect, time to triage, and time to contain can help measure operations, but metrics need context. A low alert count may reflect strong security or poor coverage; a high count may reflect increased activity or noisy rules. Measure outcomes, not just volume.
+
+### 7. Room questions
+
+For each question, identify the role or process being tested and answer from the actual room scenario. Distinguish monitoring, investigation, response, and threat hunting. Record supporting evidence and redact flags as flag{hidden}.

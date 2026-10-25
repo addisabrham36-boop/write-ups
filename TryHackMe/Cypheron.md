@@ -99,3 +99,54 @@ The second challenge has user and root flags. Obtain both from the live target a
 ## Overall lessons
 
 Cypheron combines AI supply-chain security with a conventional application-to-host attack path. Model provenance, safe deserialisation, authenticated update mechanisms, strict file-processing boundaries, and least privilege are all essential. The investigation should connect each conclusion to observed evidence rather than treating the mission story as proof.
+
+## Phase 4: Exact question mapping and evidence requirements
+
+The official room lists five flags across the two deployable challenges. It does not expose their values on the public task page; they are generated or revealed by the active labs. Do not insert guessed flag strings into a public write-up.
+
+### Task 1: Trojaned Model — Neural C2 Beacon
+
+The official questions are:
+
+1. “What's the first flag?”
+2. “What's the second flag?”
+3. “What's the third flag?”
+
+For each flag, record the exact artefact, request, or runtime behaviour that reveals it. Keep the three flags mapped to separate observations rather than assuming they come from one output. The intended analysis combines the supplied model artifact, the vendor update mechanism, evidence of a trigger-based model backdoor, and the risk of unsafe deserialization.
+
+### Task 3: AI Security and Red Team Nightmare
+
+The official questions are:
+
+1. “Whats the user flag?”
+2. “Whats the root flag?”
+
+Start at the public intake endpoint specified by the task, `/form/file-processor`. Trace the request through file validation and the processing workflow. Identify the first trust boundary that can be crossed, verify the execution context, and then investigate the separate privilege boundary. A successful upload is not proof of code execution, and a shell as the application account is not proof of root.
+
+### Verify the artifact safely
+
+For the PyTorch artifact, preserve the original and record a hash before analysis:
+
+```bash
+file signal_classifier.pt
+sha256sum signal_classifier.pt
+unzip -l signal_classifier.pt
+strings -n 6 signal_classifier.pt | head -n 80
+```
+
+Some PyTorch checkpoints are ZIP containers, while other serialized formats differ. If archive listing fails, do not assume the file is corrupt; identify its format first. Never use unrestricted pickle-based loading of an untrusted checkpoint on a personal workstation. Use the isolated room environment and a safe inspection method.
+
+The evidence log should separate:
+- Static artifacts such as configuration, strings, model metadata, and source code.
+- Behaviour observed when the model is loaded or queried in the lab.
+- Network evidence that proves a real connection or beacon attempt.
+- Privilege evidence that proves which account executed a process.
+
+A model that outputs a strange label is not proof of a C2 beacon. Likewise, a deserialization weakness is distinct from a trigger-based backdoor, even if both appear in the same scenario.
+
+### Remediation by root cause
+
+For model supply-chain risk, use signed artifacts, trusted registries, version pinning, secure build provenance, and approval controls for updates. Avoid unsafe object deserialization and use safer weights-only formats where supported. For the file processor, validate content and metadata, store uploads outside executable web paths, sandbox the converter, restrict egress, use a least-privilege service account, and authenticate internal workflow endpoints.
+
+Record tool versions, exact requests, model hashes, observed identities, and task output. Redact the flags as `flag{hidden}` in public notes, and do not claim a flag was recovered unless the live task shows it.
+

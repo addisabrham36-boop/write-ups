@@ -1,100 +1,127 @@
-# OhSINT Try Hack Me ROOM:
+# OhSINT: Complete TryHackMe Walkthrough
 
-in this room i will try to understand and work on the fuandamental of OSINT first **what is OSINT ?**
+Official room: https://tryhackme.com/room/ohsint
 
-**OSINT (open-source intellegence ) i**s the process of **gathering, analyzing, and disseminating information from publicly available sources** to produce actionable intelligence. Unlike classified methods, OSINT relies exclusively on open data such as **social media**, **public records**, **news media**, **commercial databases**, and **government publications**.
+## Room Overview & Information
 
-so if we know this much about osint lets start with the room
+**Difficulty:** Beginner  
+**Category:** Open-source intelligence (OSINT)  
+**Objective:** Investigate one supplied image and correlate publicly available information from image metadata, social profiles, Wi-Fi mapping, a personal blog, GitHub, and HTML source.
 
-*   the first thing to do is to download the task file in this case i used the attack box because the file is already exist there in the following directory /Rooms/OhSINT , and i recommond using the attack box for the tools too if we got all of the we are good to go:
-    
-*   so before we start the questions lets start with accessing the meta data of the picture
-    
+OSINT does not require breaking into a system. The challenge is to combine public clues while checking that each conclusion is supported by the source. The task values below are from the commonly documented room version; the room may update its supplied artifact, so verify them against the file you actually receive.
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/91afd2dc-a3be-417c-ab74-959a298d8023.jpg align="center")
+## Phase 1: Evidence acquisition and passive reconnaissance
 
-this is the given picture or shared by the user we are trying to find so to find the meta data we can use the attack box terminal
+### 1. Start the room and locate the image
 
-*   on the terminal we use this command to open the file on a tool called exif tools (is a tool used for to check the meta data of a picture)
-    
+Start the AttackBox or connect through the supported lab VPN. Open the supplied room directory and identify the image file:
 
-```python
-exiftool /root/Rooms/OhSINT/WindowsXP.jpg
-```
+    pwd
+    ls -la
+    file WindowsXP.jpg
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/f716fc14-a9dd-4150-bf20-40922c0e470e.png align="center")
+The first two commands establish the working directory and list files. The file command checks the actual file format rather than trusting the extension. The room's file name may include an instance-specific suffix, so use the exact local name shown by ls.
 
-the out put for the command is this and this is also the meta data of the pic so we can continue :
+### Question 1: “What is this user’s avatar of?”
 
-the first question is : ***What is this user's avatar of?***
+Open the image in the lab and inspect it:
 
-*   the first step is to find who is the owner of this file and we can see a name under the copyright so lets get than name and start the search, we can easly start by searching the name\*\*(OWoodflint)\*\* on google
-    
+    xdg-open WindowsXP.jpg
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/c032ccde-f3c7-4ca5-b0c7-c34616e67f34.png align="center")
+The image depicts the classic Windows XP “Bliss” wallpaper, while the avatar associated with the identified social profile is a cat. The exact room question refers to the user's avatar, not merely the wallpaper in the initial image. The answer in the documented room version is **cat**.
 
-good we got 2 links connected to the name so lets explore them one by one
+## Phase 2: Image metadata and identity correlation
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/9a970693-c937-4c7e-a321-4602a3841b66.png align="center")
+### 2. Inspect image metadata
 
-on the first link i find his x account and there is some infos but for now we can see that the avatar is a cat lets see the second one
+Use ExifTool:
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/23cad4f2-3428-4525-8bf0-a343f7a6202f.png align="center")
+    exiftool WindowsXP.jpg
 
-this one is his github account and the avatar is random so the answer for the first one will be ***"cat"***
+ExifTool can display file type, dimensions, timestamps, camera metadata, GPS coordinates, and copyright fields. In the room's image, the copyright field contains the identifier **OWoodflint**. This is a lead, not by itself proof of the person's real identity.
 
-\*\**2nd question:What city is this person in?*
+If ExifTool is not installed, install it through your distribution's trusted package manager or use the platform's preconfigured tool. Do not upload private photographs to a public analysis service without permission.
 
-*   this one is an easy one we can see that on the persons github he wrote that he is from ***"london"*** so that will be the answer
-    
+### 3. Search the public identifier
 
-***3rd question:What is the SSID of the WAP he connected to?***
+Search the exact identifier on a search engine and inspect results that appear to match. The room uses a public X/Twitter profile, a GitHub account, and a WordPress blog. Verify the context of each result instead of assuming a similar username belongs to the same person.
 
-*   while we were on his x account we can see that he tweeted his BSSID (B4:5D:50:AA:86:41) in this case i used a website called [`wigle.net`](http://wigle.net)
-    
-*   wigle (Wireless Geographic Logging Engine) is a powerfull database that maps Wi-Fi networks worldwide. It collects and organizes BSSIDs, SSIDs, and their approximate locations from various sources. By searching for the BSSID on Wigle, we can uncover the SSID and get closer to out answer.
-    
+Keep a small evidence table:
 
-Once you’re set, enter the BSSID you found into the **BSSID** search parameter and click on **Filter**. After the query updates, zoom out completely to reveal the world map.Since we already know he is in London, navigate over to that area. You should see a **red ring** marking the location of the access point.Press enter or click to view image in full size
+| Clue | Source | What it supports |
+|---|---|---|
+| Copyright field | Local image metadata | A possible username |
+| Avatar | Matching public profile | The avatar description |
+| BSSID | Public social post | A network mapping lead |
+| Email | Public GitHub page | An address and publishing platform |
+| Holiday | Public blog | The destination stated in the post |
+| Password clue | HTML source of public blog | A value hidden by page styling |
 
-Press enter or click to view image in full size
+## Phase 3: Geolocation and public-profile analysis
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/d653aca5-1bbe-4beb-8d94-0b5b65f7d23c.png align="center")
+### Question 2: “What city is this person in?”
 
-Simply follow the ring, zooming in step by step, until you reach street level, where the SSID ***"(UnileverWiFi)"*** will be visible uncovering the answer of the third question.
+The public profile mentions a BSSID, **B4:5D:50:AA:86:41**. A BSSID identifies a particular access-point radio, usually represented by its MAC address. Search the BSSID using the wireless mapping service indicated by the room, such as WiGLE, then confirm the map location.
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/18b3a8f7-b1d1-4063-b8a0-acd7e579f7fa.png align="center")
+The documented room answer is **London**. Do not claim that a BSSID lookup proves a person's current physical location: the data describes the mapped access point, can be stale, and can be imprecise. For the challenge, the intended inference is based on correlation with the other profile clues.
 
-***4th question :What is his personal email address?***
+### Question 3: “What is the SSID of the WAP he connected to?”
 
-***this is also an easy one we can see that he put his email on github so its easy***
+On the same wireless mapping record, inspect the network's SSID field. The documented answer is **UnileverWiFi**.
 
-***"OWoodflint@gmail.com"***
+SSID means Service Set Identifier, the network name. It is different from the BSSID, which identifies the access-point radio. Keep the two concepts separate when answering.
 
-***5th question : What site did you find his email address on?***
+### Question 4: “What is his personal email address?”
 
-i find his email on github page the answer is **"GitHub"**
+Return to the public identifier and inspect the matching GitHub account and repository README. The documented email is **OWoodflint@gmail.com**. Record the source page and make sure the address is associated with the same identifier found in the image metadata.
 
-**6th question: Where has he gone on holiday?**
+### Question 5: “What site did you find his email address on?”
 
-in this we have to scan every thing we can find for that lets use the wordpress link he left on the github to see if we can find any thing
+The address appears on **GitHub** in the documented room version. The question asks for the website where the address was published, not the email provider or domain.
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/c35bdeab-63fe-4ba7-98c9-d9362bd7453b.png align="center")
+### Question 6: “Where has he gone on holiday?”
 
-so he is in ***"new york"*** for holiday
+Inspect the matching personal blog and locate the post text about a holiday. The documented answer is **New York**. Cite the blog post as the evidence, rather than inferring travel from the wireless location or the user's email address.
 
-***7th question:What is the person's password?***
+## Phase 4: HTML source inspection
 
-*   in this case i can not find it by just scrolling around we have to dig dipper like i try every way to find the password by just scrolling through his social media account but there is nothing the only thing left is looking inside his wordpress source code so lets do that
-    
+### Question 7: “What is the person’s password?”
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/e54e24a4-3441-43e6-bfff-306555d81277.png align="center")
+Inspect the source of the public blog page in the browser. Use View Page Source or Developer Tools, then search the HTML for suspicious text, hidden styling, or content not visible in the normal page rendering.
 
-and after a lot of time scrolling through the source code i did find something that look suspicies and its not visible on the website it self its only on the source code so lets check that and yes it is the password ***"pennYDr0pper.!"***
+In the documented room version, the page contains a password-like value styled with white text on a white background. CSS presentation does not make the value secret; anyone who can access the HTML can inspect it. The documented answer is **pennYDr0pper.!**.
 
-***conclusion***
+This illustrates information disclosure through client-side content. A password should not be included in public HTML in any form. Hiding a string using CSS, comments, JavaScript, Base64, or unusual formatting is not access control.
 
-*   on this page we can learn that we can gather info with out doing to much , and easily by just exploring what is left by the user him self so osin is one essencial thing for cybersecurity .
-    
+## Phase 5: Evidence quality, ethics, and remediation
 
-***Thank you for reading!***
+### How to keep the investigation reproducible
+
+1. Preserve the original image and record its exact filename.
+2. Record the metadata field that revealed the initial identifier.
+3. Save the source URL for each public clue and note when it was observed.
+4. Correlate at least two clues before treating two profiles as belonging to the same person.
+5. Separate the fact observed in a source from the inference made from it.
+6. Avoid collecting personal information beyond what the authorized room asks for.
+
+### Room answer summary
+
+| Exact question | Answer in the documented room version | Evidence |
+|---|---|---|
+| What is this user’s avatar of? | Cat | Matching public social profile |
+| What city is this person in? | London | BSSID mapping and cross-profile context |
+| What is the SSID of the WAP he connected to? | UnileverWiFi | Wireless mapping record |
+| What is his personal email address? | OWoodflint@gmail.com | Public GitHub repository |
+| What site did you find his email address on? | GitHub | Source of the published email |
+| Where has he gone on holiday? | New York | Public blog post |
+| What is the person’s password? | pennYDr0pper.! | Hidden-styled text in public HTML source |
+
+### Defensive lessons
+
+- Remove unnecessary metadata from images and documents before publishing them.
+- Avoid reusing unique identifiers across unrelated accounts when privacy matters.
+- Never publish passwords, API keys, or credentials in public repositories, page source, CSS, or HTML comments.
+- Apply authentication and authorization at the server; CSS visibility is not a security control.
+- Treat geolocation databases as imperfect evidence and avoid overclaiming certainty.
+
+The point of OhSINT is to demonstrate how small public clues can be correlated into a detailed profile. Use the process responsibly and keep conclusions limited to the evidence available.

@@ -118,13 +118,13 @@ A second-order issue occurs when input is stored and becomes dangerous only when
 
 **Question: “What is the flag value after updating the title of all books to ‘compromised’?”**
 
-**Answer:** `THM{SO_HACKED}`.
+**Flag:** Read the value displayed by the active lab after the title-update operation. Public copy: `THM{hidden}`.
 
 Follow the book-review practical and use its intended query path to perform the mass title update. Verify the UI or task output shows that the operation occurred before submitting the flag.
 
 **Question: “What is the flag value once you drop the table hello from the database?”**
 
-**Answer:** `THM{Table_Dropped}`.
+**Flag:** Read the value displayed by the active lab after the table-drop task. Public copy: `THM{hidden}`.
 
 This is a destructive database operation intended only for the disposable room. It demonstrates the impact of injection on database integrity. In production, least-privilege database accounts should not have schema-modification permissions unless the application requires them.
 
@@ -174,7 +174,7 @@ This is the base directory value reported by the room's database. Treat it as a 
 
 **Question: “What is the value of the flag field in the books table where book_id = 1?”**
 
-**Answer:** `THM{HELLO}`.
+**Flag:** Read the value shown for the requested database field in the active lab. Public copy: `THM{hidden}`.
 
 Use the task's described database query or injection point to identify the row with book_id 1 and read the flag field. Preserve the exact braces and case.
 

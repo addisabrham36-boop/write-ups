@@ -1,56 +1,65 @@
-# SOC Role in the Blue Team: TryHackMe Walkthrough
+# SOC Role in Blue Team: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/socroleinblueteam
+Official room: https://tryhackme.com/room/socroleinblueteam
 
-A Security Operations Centre monitors an organisation's systems and investigates signs of compromise. The SOC is part of the blue team: its job is to protect the organisation, detect suspicious behaviour, coordinate response, and improve detection over time.
+## Room Overview & Information
 
-## 1. What a SOC does
+**Category:** Blue-team operations and careers  
+**Focus:** SOC responsibilities, analyst tiers, escalation, and career development.
 
-A SOC commonly performs continuous monitoring, alert triage, threat hunting, incident escalation, and reporting. It may work with incident responders, IT operations, threat intelligence teams, detection engineers, and business owners.
+A Blue Team protects an organisation by preventing, detecting, investigating, and responding to security incidents. A Security Operations Centre (SOC) monitors security telemetry and coordinates investigations, but it works with system owners, IT operations, identity teams, incident responders, threat intelligence, and security engineering.
 
-A tiered model is common but not universal:
-- **Tier 1:** reviews incoming alerts, gathers context, and follows triage procedures.
-- **Tier 2:** performs deeper investigation, correlates evidence, and handles escalated cases.
-- **Tier 3 or specialist teams:** investigate complex incidents, conduct threat hunting, reverse engineer malware, or improve detection content.
+## Task 1: Introduction
 
-Titles and responsibilities differ by organisation. What matters is that alerts have a clear owner and a defined escalation path.
+The SOC is not an isolated team that owns every security task. Analysts work with other teams to understand the business impact of an alert and to ensure that containment does not create unnecessary disruption.
 
-## 2. Triage an alert
+A hospital may prioritise patient safety and availability, a law firm may prioritise confidentiality, and a bank may prioritise transaction integrity as well as confidentiality. Business context changes how an incident is prioritised.
 
-A disciplined analyst does not immediately assume the alert is malicious or harmless. Start with the detection name, timestamp, affected asset, identity, source, and triggering evidence.
+## Task 2: Common SOC roles
 
-Then:
-1. Inspect the raw event and understand why the rule fired.
-2. Identify the user and device involved.
-3. Search related events around the same time.
-4. Compare the behaviour with normal activity or approved changes.
-5. Assess the potential impact and confidence.
-6. Record the reasoning and escalate when required.
+- **CISO/security leader:** owns security strategy, risk posture, and executive reporting.
+- **SOC manager or lead:** coordinates monitoring operations, staffing, and process quality.
+- **Tier 1 analyst:** monitors alerts, performs initial triage, gathers context, and escalates.
+- **Tier 2 analyst:** conducts deeper investigations and supports containment.
+- **Tier 3 analyst or threat hunter:** investigates complex incidents, develops detections, and searches for activity that automated alerts may miss.
+- **Incident response team:** coordinates containment, eradication, recovery, and lessons learned.
+- **Threat intelligence:** researches adversaries, campaigns, and indicators.
+- **Detection engineering:** builds, tests, and tunes detection rules.
+- **Security engineering:** designs and operates controls such as EDR, identity, firewalls, and SIEM pipelines.
 
-The quality of the investigation depends on evidence. A suspicious IP match may be useful, but context such as the destination service, user activity, and sequence of events is needed to understand the risk.
+These are common patterns, not a universal org chart. Smaller organisations may combine several responsibilities in one role.
 
-## 3. Use threat intelligence carefully
+## Task 3: How a Tier 1 analyst investigates
 
-Threat intelligence can provide information about malicious domains, IP addresses, file hashes, tactics, techniques, and known campaigns. Indicators become less useful when they are old, shared, or easy to change. Use intelligence to guide investigation, not as the only reason to declare an incident.
+A Tier 1 analyst often receives an alert from a SIEM, endpoint tool, email gateway, or network sensor. A repeatable triage sequence is:
 
-Map observed behaviour to a framework such as MITRE ATT&CK when it helps communicate the technique. A technique label should be supported by the observed activity, not added merely because it sounds relevant.
+1. Read the alert name, severity, detection rule, and timestamp.
+2. Identify the affected user, host, source, and destination.
+3. Inspect the raw event or events that caused the alert.
+4. Search for related activity before and after the event.
+5. Compare the activity with the user's normal behaviour and the asset's role.
+6. Decide whether the event is benign, suspicious, or confirmed malicious.
+7. Follow the playbook and escalate when impact or uncertainty exceeds the analyst's authority.
+8. Record the evidence, decisions, and actions in the case.
 
-## 4. Incident handling
+A detection is a signal, not a final conclusion. A successful login from an unusual location could be legitimate travel, VPN use, or compromised credentials. Context and corroborating evidence are needed.
 
-When evidence suggests a real incident, follow the organisation's response plan. Typical stages include preparation, identification, containment, eradication, recovery, and lessons learned. The exact order can vary, and containment may need to happen before every detail is known if the risk is severe.
+## Task 4: Escalation and communication
 
-Preserve evidence before taking actions that may destroy it, unless immediate containment is necessary to prevent greater harm. Coordinate with the responsible team and document changes, approvals, and results.
+Escalate when an incident involves a critical asset, successful unauthorised access, suspected data exfiltration, ransomware, privileged-account compromise, or activity requiring specialist skills. Include a summary, timeline, affected systems, supporting evidence, actions already taken, and specific questions for the next team.
 
-## 5. Measure and improve
+Good communication matters because an incident can affect service availability and business operations. Distinguish confirmed facts from hypotheses and do not overstate the evidence.
 
-SOC metrics may include time to triage, time to detect, time to contain, alert volume, false-positive rate, and coverage of critical assets. Metrics need context: reducing alert volume is not a success if important detections are also being lost.
+## Task 5: Career progression
 
-Detection engineering should use feedback from investigations. Repeated false positives may indicate that a rule needs tuning, while an incident with no alert may reveal a visibility gap.
+SOC analysts may progress toward incident response, threat hunting, detection engineering, threat intelligence, security engineering, cloud security, or management. Useful foundations include networking, Windows and Linux administration, identity systems, log analysis, SIEM queries, endpoint telemetry, scripting, and written communication.
 
-## 6. Working through the room
+Keep a portfolio of sanitised investigations that shows the question, evidence, reasoning, conclusion, and remediation. This demonstrates judgement more clearly than a list of tools alone.
 
-For each scenario, identify the SOC activity being described: monitoring, triage, investigation, threat hunting, escalation, or incident response. If the task presents an alert, use the evidence in that alert and the surrounding context. Do not classify an event solely by a single indicator.
+## Working through the room
 
-## What I took from this room
+For each task, identify whether it concerns organisational roles, analyst workflow, escalation, or career development. Use the scenario and task wording to choose the answer. Do not assume every organisation uses identical job titles.
 
-A SOC is not just a wall of dashboards. It is a repeatable process for turning telemetry into evidence-based decisions, escalating real threats, and feeding lessons back into security controls.
+## Key takeaways
+
+The SOC is a coordinated function within the broader Blue Team. Analysts validate alerts, gather context, and escalate appropriately; specialised teams investigate complex activity, build detections, and improve controls. Strong operations depend on useful telemetry, documented playbooks, and clear communication.

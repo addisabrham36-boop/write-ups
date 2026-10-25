@@ -136,3 +136,56 @@ The bonus task refers to a clue about the string the_eye_of_ruvik and instructs 
 ## What I took from this room
 
 Psycho Break is a good reminder that a CTF can combine many different skills: Nmap, source inspection, directory discovery, Atbash, reverse-image search, archive identification, Morse audio, wordlist testing, numeric keypad decoding, and Linux privilege escalation. Each stage supplies evidence for the next. The best way through it is to record clues carefully, verify each transformation, and keep the entire exercise within the assigned machine.
+
+## Phase 3 continued: Archive and encoding analysis
+
+When the room reveals an archive, inspect its contents before extraction and work in a clean directory:
+
+```bash
+file archive-file
+unzip -l archive-file
+mkdir -p /tmp/psychobreak-work
+unzip archive-file -d /tmp/psychobreak-work
+find /tmp/psychobreak-work -maxdepth 4 -type f -print
+```
+
+Use the extraction tool that matches the archive type; not every archive is a ZIP file. Record the file names and nesting structure, then extract only the files needed for the task. Avoid running extracted executables on a personal system.
+
+For encoded messages, identify the likely transformation from task clues. The earlier Atbash clue is reversed by mapping A↔Z, B↔Y, and so on. For multi-tap phone-keypad encoding, group the repeated digits and map them to the corresponding letters. For Morse code, preserve the spacing between letters and words; changing those boundaries can change the result.
+
+## Phase 4: Audio and password clues
+
+If the room provides an audio file, first identify it and inspect duration and format:
+
+```bash
+file clue-audio
+ffprobe -hide_banner clue-audio
+```
+
+Use the supplied audio tool or waveform/spectrogram viewer according to the room's instructions. Listen to the audio and compare likely Morse patterns only when the task indicates that representation. Verify each character grouping against the supplied clue; do not invent a decoded phrase.
+
+For a password candidate, use the room's specified wordlist and hash format. Distinguish online login attempts from offline hash testing, and do not reuse recovered credentials outside the lab.
+
+## Phase 5: Privilege escalation checklist
+
+After a shell is obtained, confirm identity and available privilege paths:
+
+```bash
+whoami
+id
+sudo -l
+find / -perm -4000 -type f 2>/dev/null
+getcap -r / 2>/dev/null
+```
+
+The SUID search finds files that run with their owner's effective identity; the capability search identifies binaries granted specific Linux privileges. These outputs can be large, so compare unusual entries with the room's hints and inspect the relevant binary's permissions and purpose before using it.
+
+For each flag, verify the account and path used to access it. Do not treat a clue, decoded phrase, or successful login as proof that a final privilege escalation succeeded.
+
+## Complete task evidence
+
+Psycho Break combines several skill areas, so keep a per-task table with the clue, transformation/tool used, verified output, and next room unlocked. The exact answers and flags should be read from the active machine and redacted as flag{hidden} in public notes.
+
+## Remediation and lessons
+
+Remove exposed clues and sensitive backups from web roots, avoid weak passwords, protect upload and service permissions, patch vulnerable components, and restrict privileged execution. Each stage becomes easier when the prior result is verified before it is used as a new assumption.

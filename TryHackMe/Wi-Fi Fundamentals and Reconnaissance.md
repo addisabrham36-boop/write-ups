@@ -88,3 +88,38 @@ The target values depend on the lab's wireless environment. This write-up explai
 ## Key takeaways
 
 Wireless reconnaissance is about understanding what the radio environment reveals. Airodump-ng helps map access points and clients, but each observation must be tied to the authorised lab target. Hidden SSIDs and MAC filtering are not substitutes for strong authentication and encryption.
+
+## Phase 1: Reconnaissance methodology
+
+Use the wireless lab equipment and network assigned to the room. Begin by identifying the adapter and its capabilities before attempting monitor mode:
+
+    ip link
+    iw dev
+    iw list
+    rfkill list
+
+The output establishes the actual interface name, supported bands, and whether the radio is blocked. Do not assume the interface is named wlan0; modern Linux systems commonly use predictable interface names.
+
+## Phase 2: Understand the visible wireless fields
+
+When the room's capture tool lists access points, record SSID, BSSID, channel, frequency/band, security suite, and signal strength. SSID is a network name; BSSID normally identifies a particular AP radio. One physical access point may advertise multiple SSIDs or use multiple radios.
+
+A hidden SSID is not a security boundary. Client probe or association behaviour can reveal it. MAC filtering is also weak as an identity control because addresses can be observed and spoofed.
+
+## Phase 3: Monitor mode and evidence
+
+Follow the room's instructions to enable monitor mode on the lab adapter. Confirm the interface state before starting capture. Use the specified channel and lab access point; changing channels can cause the capture to miss relevant frames.
+
+In airodump-ng output, access-point rows and client/station rows describe different entities. The BSSID column on an AP row identifies the AP radio; on a client row it may identify the AP the client is associated with. Read the row label and column context before answering a question.
+
+Capture only the traffic required by the exercise. Record the capture filename, tool version, and the exact row or packet that supports each answer.
+
+## Phase 4: Interpret security posture
+
+WEP is obsolete. WPA2-Personal depends on a pre-shared key and good configuration; WPA3-Personal uses SAE to improve resistance to offline guessing. Enterprise authentication can improve identity management but must be configured with correct certificate validation. An SSID name or a visual icon is not proof of the security protocol.
+
+## Phase 5: Questions and remediation
+
+Use the live lab output for requested SSIDs, BSSIDs, channels, bands, protocols, or client counts. Do not copy a value from another run because nearby APs and channel assignments can differ.
+
+Defensive measures include WPA3 or properly configured WPA2-AES, unique credentials, current firmware, disablement of unnecessary WPS, guest isolation, secure AP administration, rogue-AP monitoring, and proper certificate validation for enterprise networks.

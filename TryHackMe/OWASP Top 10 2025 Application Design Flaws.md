@@ -62,7 +62,7 @@ Read the response body. In the vulnerable version, the error handler reveals int
 
 **Question:** “What's the flag?”
 
-**Answer:** `THM{V3RB0S3_3RR0R_L34K}`.
+**Answer:** Copy the flag from the invalid-ID API response in the active room. Public copy: `THM{hidden}`.
 
 **Remediation:** Validate request parameters, return a generic client-facing error, and keep stack traces and diagnostic data in access-controlled server logs. Disable debug mode in production and test the error-handling path with malformed inputs.
 
@@ -80,7 +80,7 @@ THM{SUPPLY_CH41N_VULN3R4B1L1TY}
 
 **Question:** “What's the flag?”
 
-**Answer:** `THM{SUPPLY_CH41N_VULN3R4B1L1TY}`.
+**Answer:** Copy the flag shown by the active supply-chain practical. Public copy: `THM{hidden}`.
 
 **Evidence to record:** the component or artifact involved, the missing verification step, and the point where the system accepts an untrusted or tampered dependency. Do not assume every outdated library is compromised; the actual flaw is the failure to control provenance or integrity.
 
@@ -98,7 +98,7 @@ THM{CRYPTO_FAILURE_H4RDCOD3D_K3Y}
 
 **Question:** “What's the flag?”
 
-**Answer:** `THM{CRYPTO_FAILURE_H4RDCOD3D_K3Y}`.
+**Answer:** Copy the flag shown by the active cryptographic-failure practical. Public copy: `THM{hidden}`.
 
 **Why it matters:** A hard-coded key may be recoverable from source, a binary, configuration, or version-control history. If every installation uses the same key, a single disclosure can compromise multiple deployments.
 
@@ -116,7 +116,7 @@ THM{1NS3CUR3_D35IGN_4SSUMPT10N}
 
 **Question:** “What's the flag?”
 
-**Answer:** `THM{1NS3CUR3_D35IGN_4SSUMPT10N}`.
+**Answer:** Copy the flag shown by the active insecure-design practical. Public copy: `THM{hidden}`.
 
 **Remediation:** Create abuse cases during design, define security requirements before implementation, enforce authorization server-side, use independent approval for high-risk actions, and retest the full workflow. AI features need the same controls: do not allow model output alone to authorize payments, expose private data, run commands, or change records.
 
@@ -131,10 +131,10 @@ THM{1NS3CUR3_D35IGN_4SSUMPT10N}
 | Task | Question | Answer |
 |---|---|---|
 | Task 1: Introduction | I am ready to learn about design flaw vulnerabilities! | No answer needed |
-| Task 2: A02 Security Misconfigurations | What's the flag? | `THM{V3RB0S3_3RR0R_L34K}` |
-| Task 3: A03 Software Supply Chain Failures | What's the flag? | `THM{SUPPLY_CH41N_VULN3R4B1L1TY}` |
-| Task 4: A04 Cryptographic Failures | What's the flag? | `THM{CRYPTO_FAILURE_H4RDCOD3D_K3Y}` |
-| Task 5: A06 Insecure Design | What's the flag? | `THM{1NS3CUR3_D35IGN_4SSUMPT10N}` |
+| Task 2: A02 Security Misconfigurations | What's the flag? | Obtain from active task; redacted as `THM{hidden}` |
+| Task 3: A03 Software Supply Chain Failures | What's the flag? | Obtain from active task; redacted as `THM{hidden}` |
+| Task 4: A04 Cryptographic Failures | What's the flag? | Obtain from active task; redacted as `THM{hidden}` |
+| Task 5: A06 Insecure Design | What's the flag? | Obtain from active task; redacted as `THM{hidden}` |
 | Task 6: Conclusion | I'm ready for the next room! | No answer needed |
 
 ## Phase 4: Key Takeaways & Remediation

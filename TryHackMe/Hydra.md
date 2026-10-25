@@ -152,3 +152,68 @@ The second flag is redacted here as `THM{hidden}`.
 ## Key takeaways
 
 Hydra automates online authentication tests, but it only works reliably when the protocol, form structure, candidate list, and failure condition are understood. Verify every reported credential through the intended service, and keep all attempts inside the authorised lab.
+
+## Expanded authentication-testing workflow
+
+### 1. Confirm the service and scope
+
+Hydra performs online authentication attempts. Use it only against the room's assigned target and account. Before running it, enumerate the service and confirm the protocol, port, username format, and failure response.
+
+```bash
+nmap -sC -sV -oN hydra-services.txt TARGET_IP
+```
+
+Use the current lab IP. The scan's `-sC` option runs default scripts, `-sV` probes service versions, and `-oN` saves readable output. A service banner helps choose a Hydra module; it does not prove that password guessing is permitted or necessary.
+
+### 2. Prepare a wordlist
+
+Use the wordlist supplied by the room where possible. Verify that the file exists and inspect a small sample:
+
+```bash
+wc -l /path/to/wordlist.txt
+head -n 10 /path/to/wordlist.txt
+```
+
+The line count estimates the number of candidates. Do not print or publish real credentials. A smaller, task-specific wordlist is usually more efficient than blindly trying an enormous list.
+
+### 3. Understand the command structure
+
+For an SSH service in the lab, the general command pattern is:
+
+```bash
+hydra -l USERNAME -P /path/to/wordlist.txt ssh://TARGET_IP
+```
+
+- `-l USERNAME` supplies one known username.
+- `-P` selects a password list.
+- `ssh://TARGET_IP` selects the SSH module and target.
+
+Use the exact username and wordlist provided by the task. If the username is unknown, the room may specify a username list; do not assume one exists.
+
+For FTP, the analogous pattern is:
+
+```bash
+hydra -l USERNAME -P /path/to/wordlist.txt ftp://TARGET_IP
+```
+
+For an HTTP form, the module requires the actual request path, field names, and failure text or condition. Obtain those details from the form and the room instructions. Do not copy a generic HTTP-form string because a mismatch can make every attempt appear to fail.
+
+### 4. Control the test rate
+
+Online guessing can lock accounts, trigger monitoring, or overload services. Use the room's expected rate and stop when the task is complete. Parallelism options should be chosen conservatively; more simultaneous attempts do not necessarily make a test better.
+
+### 5. Verify a candidate
+
+Treat a reported candidate as a result to verify, not as permission to try it elsewhere. Confirm it through the intended lab login or the task's expected validation step. Record the target service, username, tool command, wordlist source, and verification result. Redact the password from public notes.
+
+### 6. Troubleshooting
+
+- Connection refused: check the target IP, service port, and whether the service is running.
+- All attempts fail: verify the module, username, wordlist path, and authentication method.
+- HTTP form tests fail unexpectedly: capture the actual request and determine the exact failure response.
+- Lockouts or throttling occur: stop and follow the lab's guidance.
+- A candidate appears in output: verify it with the intended service before claiming success.
+
+### 7. Defensive lessons
+
+Use strong unique passwords, MFA where available, rate limiting, account lockout controls that resist abuse, monitoring, and secure authentication protocols. Avoid exposing authentication services unnecessarily. Password testing is most useful when it demonstrates a specific weakness and ends with a clear remediation.

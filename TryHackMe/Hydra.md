@@ -1,74 +1,181 @@
 # Hydra: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/hydra
+Official room: https://tryhackme.com/room/hydra
 
-Hydra is a login-testing tool that can try supplied username and password candidates against supported services. In a lab, it helps demonstrate why weak passwords and exposed authentication services are risky. Use it only against the target assigned by the room or another system for which you have explicit permission.
+## Room Overview & Information
 
-## 1. Enumerate before testing credentials
+**Category:** Authentication testing  
+**Difficulty:** Beginner  
+**Focus:** Using Hydra to test SSH and HTTP form authentication against the room's deliberately vulnerable machine.
 
-First identify which services are available and which authentication mechanism the task asks you to test. If the room provides a target IP, use it rather than guessing an address.
+Hydra is an online authentication testing tool. It tries candidate credentials against a service and reports responses that appear to succeed. It is not the same as offline password cracking: each candidate is sent to the target service, so attempts can be logged, rate-limited, or trigger account lockouts.
 
-A common initial scan pattern is:
+Use Hydra only against the machine deployed by TryHackMe or another system you have explicit permission to test.
 
-    nmap -sC -sV -oN hydra-scan.txt TARGET_IP
+## Task 1: Hydra Introduction
 
-This requests default scripts and service-version detection and saves the result to a file. Replace TARGET_IP with the current lab target. Read the output to identify relevant ports, such as SSH or FTP. Do not run a password attack against every open service without understanding the task.
+Hydra supports multiple protocols, including SSH, FTP, HTTP form logins, SMTP, SMB, and others. The command must match the service and authentication method. A correct wordlist is not enough if the username, endpoint, request format, or failure condition is wrong.
 
-## 2. Prepare the username and password candidates
+The core options used in this room are:
 
-Hydra needs the correct service, target, and candidate values. A wordlist is a file containing candidate passwords, one per line. The lab may supply a particular list or credential hint. Use the path the environment actually provides.
+| Option | Meaning |
+|---|---|
+| `-l USERNAME` | Test one username |
+| `-L USER_FILE` | Read usernames from a file |
+| `-p PASSWORD` | Test one password |
+| `-P WORDLIST` | Read passwords from a file |
+| `-t N` | Use N parallel tasks/connections |
+| `-V` | Show each login attempt |
+| `-vV` | Increase verbosity |
+| `-s PORT` | Specify a non-default port |
+| `-f` | Stop after the first successful credential pair for the target |
 
-Check that the file exists and is readable:
+Use a modest thread count for the room. Too many parallel attempts can overload the service or cause the results to be unreliable.
 
-    ls -l /path/to/wordlist.txt
-    head /path/to/wordlist.txt
+## Task 2: Connect to the machine
 
-The example path is a placeholder. Do not assume a wordlist is installed in the same location on every Linux distribution.
+Start the AttackBox and the lab machine. Wait for the target to finish booting, then open the web service at:
 
-## 3. SSH and FTP examples
+```text
+http://MACHINE_IP
+```
 
-For a room that explicitly asks for an SSH login test, the general syntax is:
+Replace `MACHINE_IP` with the current address shown by TryHackMe. Do not use a remembered address from another session.
 
-    hydra -l USERNAME -P /path/to/wordlist.txt ssh://TARGET_IP
+Hydra is already installed on the AttackBox. On another Debian-based lab system, it may be installed with the package manager, but use a lab-provided tool environment where possible.
 
-For an FTP login test:
+Check the target's services with Nmap:
 
-    hydra -l USERNAME -P /path/to/wordlist.txt ftp://TARGET_IP
+```bash
+nmap -sC -sV -oN hydra-nmap.txt MACHINE_IP
+```
 
-Replace USERNAME, the wordlist path, and target with the values provided by the lab. The lowercase -l option supplies one username; uppercase -P supplies a file of password candidates. The service name tells Hydra which protocol module to use.
+- `-sC` runs the default scripts.
+- `-sV` attempts to identify service versions.
+- `-oN` saves the output.
 
-If the task provides a list of usernames instead of one known username, Hydra supports a username file with the appropriate option. Do not broaden the attack beyond the specific exercise.
+The room's exercises focus on a web form and SSH. Confirm which ports and services are available on your current instance.
 
-## 4. HTTP form authentication
+## Phase 1: Brute-force the web login
 
-Web login forms require additional details because Hydra must submit the right fields and recognise a failed login. The room should provide the URL, form parameters, and a failure message or other response condition.
+### 1. Inspect the login form first
 
-A generic form-based command has this shape:
+Open the website in the browser and identify:
+- The form path.
+- Whether it submits with GET or POST.
+- The username field name.
+- The password field name.
+- The exact failure message returned for an invalid login.
 
-    hydra -l USERNAME -P /path/to/wordlist.txt TARGET_IP http-post-form "/login:username=^USER^&password=^PASS^:F=Invalid credentials"
+Use browser Developer Tools → **Network** to inspect the request, or use Burp Suite Proxy to capture it. This step matters because Hydra must reproduce the form's request accurately.
 
-This is only a syntax example. The path, field names, and failure text must match the actual lab form. If the failure string is wrong, Hydra may misclassify results. Inspect the form in the browser or authorised proxy and compare a known failed login response before running the test.
+### 2. Understand the HTTP POST form syntax
 
-## 5. Read the output correctly
+A typical Hydra command for a POST form looks like this:
 
-Hydra reports attempts and may identify a candidate that appears to authenticate successfully. Treat this as a hypothesis until verified. In the lab, try the reported credential through the intended login interface if the instructions allow it, and confirm that it reaches the expected account or service.
+```bash
+hydra -l molly -P /usr/share/wordlists/rockyou.txt MACHINE_IP http-post-form "/:username=^USER^&password=^PASS^:F=incorrect" -V
+```
 
-Do not copy credentials from a different machine or assume the same answer persists between lab resets. Machine-specific passwords and target addresses can change.
+This is an example of the syntax, not a claim that the exact failure text is identical for every target. Match the form fields and failure condition to the actual room response.
 
-## 6. Troubleshooting
+Parameter breakdown:
+- `hydra` launches the tool.
+- `-l molly` supplies the username `molly`, which is the username used in this room.
+- `-P /usr/share/wordlists/rockyou.txt` loads candidate passwords from the wordlist.
+- `MACHINE_IP` identifies the deployed target.
+- `http-post-form` tells Hydra to submit a POST form.
+- `/` is the login path in this example.
+- `username=^USER^&password=^PASS^` describes the form body. Hydra replaces `^USER^` and `^PASS^` with the selected username and candidate password.
+- `F=incorrect` tells Hydra that the response containing the specified failure string indicates a failed login.
+- `-V` prints each attempt.
 
-- **Connection refused:** the service may not be running, the port may be wrong, or a firewall may block access.
-- **Timeout:** verify the target address, VPN or AttackBox connection, and service reachability.
-- **No matches:** check the username, wordlist path, protocol, and whether the credentials are actually in the list.
-- **HTTP results look wrong:** confirm the form path, field names, redirects, and failure condition.
-- **Too many requests or lockout:** stop and follow the room's guidance. Real systems may lock accounts or trigger alerts.
+If the real form uses different field names or a different failure message, the example must be adjusted. Do not guess the failure condition: test one invalid login and inspect the response first.
 
-Do not attempt to bypass account lockout or evade monitoring on real services. In professional testing, coordinate rate limits and lockout behaviour with the system owner.
+### 3. Verify the web password
 
-## 7. Defensive lessons
+When Hydra reports a candidate, log in through the browser to verify it. Confirm that the application accepts the credential and displays the expected account page. A response match can be a false positive if the failure condition was configured incorrectly.
 
-Use long unique passwords, multi-factor authentication, rate limiting, account lockout designed to resist denial of service, and monitoring for repeated failed logins. Disable unused services and restrict remote administration to trusted networks. Avoid exposing detailed authentication errors that reveal whether a username exists.
+### Question 1: “Use Hydra to brute-force molly's web password. What is the value of flag 1?”
 
-## What I took from this room
+After the web login succeeds:
+1. Open the web application with the recovered lab credential.
+2. Locate the flag in the account page or dashboard.
+3. Submit the flag to the active TryHackMe room.
+4. Redact it as `THM{hidden}` in public notes.
 
-Hydra demonstrates that authentication security depends on both password quality and how the service handles repeated attempts. Enumeration should come first, the command must match the actual protocol, and any reported credential must be verified against the authorised lab. I do not invent a successful password or flag when I have not observed it.
+Do not publish the password or flag from your lab instance.
+
+## Phase 2: Brute-force SSH
+
+### 4. Understand the SSH command
+
+For SSH, the room's command pattern is:
+
+```bash
+hydra -l molly -P /usr/share/wordlists/rockyou.txt -t 4 MACHINE_IP ssh
+```
+
+Parameter breakdown:
+- `-l molly` selects the username.
+- `-P` selects the password list.
+- `-t 4` uses four parallel tasks.
+- `MACHINE_IP` is the target.
+- `ssh` selects the SSH protocol module.
+
+The exact wordlist path can vary. Confirm that the file exists:
+
+```bash
+ls -l /usr/share/wordlists/rockyou.txt
+```
+
+Some environments provide a compressed `rockyou.txt.gz`. If the room's file is compressed, use the room's instructions or decompress a local copy before running Hydra. Do not alter the original wordlist unnecessarily.
+
+### 5. Interpret the result
+
+Hydra may print a line containing the service, username, and candidate password when it believes authentication succeeded. Confirm the result by connecting with SSH:
+
+```bash
+ssh molly@MACHINE_IP
+```
+
+Enter the candidate password when prompted. If login succeeds, verify the account and inspect the home directory:
+
+```bash
+whoami
+id
+pwd
+ls -la
+```
+
+These commands confirm the account, its groups, current directory, and available files. Do not assume the SSH password is the same as the web password; the room tests the two services separately.
+
+### Question 2: “Use Hydra to brute-force molly's SSH password. What is the value of flag 2?”
+
+1. Use Hydra against the room's SSH service with the username and wordlist specified by the task.
+2. Verify the candidate by logging in over SSH.
+3. Locate the second flag using the room's instructions.
+4. Submit the value to TryHackMe and redact it in the public write-up.
+
+## Troubleshooting
+
+- **No valid password found:** verify the username, wordlist path, service port, and target address.
+- **Hydra reports too many errors:** reduce `-t`, check network stability, and confirm the service is reachable.
+- **Web form never succeeds:** check GET versus POST, field names, URL path, cookies, CSRF requirements, and the failure string.
+- **False positive:** verify the candidate manually; a misconfigured failure condition can make every response look successful.
+- **SSH connection refused:** confirm SSH is listening on the target and that the machine has completed booting.
+- **Wordlist missing:** inspect the AttackBox's wordlist directory and follow the room's download instructions.
+
+## Phase 3: Defences and remediation
+
+- Require long, unique passwords and prevent common or breached passwords.
+- Enable MFA where practical.
+- Rate-limit failed login attempts and detect distributed guessing.
+- Avoid verbose errors that disclose account existence.
+- Monitor repeated failures and successful logins following a burst of failures.
+- Use secure password-reset flows and protect session tokens.
+- Disable unused authentication methods and restrict management services to trusted networks.
+
+## Key takeaways
+
+Hydra automates online authentication tests, but it only works reliably when the protocol, form structure, candidate list, and failure condition are understood. Verify every reported credential through the intended service and keep all attempts inside the authorised lab.

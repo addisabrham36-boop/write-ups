@@ -1,6 +1,6 @@
 # Operating Systems: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/operatingsystems
+Room: https://tryhackme.com/room/operatingsystems:introduction
 
 An operating system manages the hardware and provides services to applications. It handles process execution, memory, files, devices, user accounts, permissions, and networking. Understanding these functions is useful for troubleshooting and for investigating security incidents.
 

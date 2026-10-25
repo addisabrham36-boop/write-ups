@@ -69,3 +69,17 @@ Where the lab uses a model or dataset that is only available inside the running 
 ## What I took from this room
 
 Model security is not only about the model architecture. Data provenance, labels, preprocessing, packaging, deployment, and monitoring all affect the final behaviour. A good investigation connects the observed result to the stage that could have caused it.
+## Phase 5: Task-by-Task Verification Checklist
+
+Use the exact artifact supplied by the room. Do not substitute a public model or dataset with a similar name. For each result, record the input, expected output, actual output, model/data version, and the reason that result answers the question.
+
+| Investigation area | How to verify | What the evidence does not prove by itself |
+|---|---|---|
+| Dataset quality | Inspect schema, counts, duplicates, labels, and provenance | A single outlier does not prove poisoning |
+| Training-data poisoning | Correlate a data pattern with a repeatable model effect | Correlation alone may have another explanation |
+| Model behaviour | Re-run a controlled input and compare with baseline | One surprising response does not prove a backdoor |
+| Artifact integrity | Compare with a trusted hash or signed manifest | A hash without a trusted reference proves only identity |
+| Model provenance | Trace source, build, version, and approval | A familiar filename does not prove authenticity |
+| Inference context | Record preprocessing, prompt, settings, and tools | The model file alone may not explain the result |
+
+Remediate through dataset versioning, provenance controls, trusted evaluation sets, artifact signing, least-privilege model registries, and inference monitoring. Preserve original data and redact flags rather than filling gaps with guessed values.

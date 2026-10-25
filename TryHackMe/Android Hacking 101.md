@@ -27,19 +27,19 @@ Automated tools produce leads, not a final verdict. Decompiled output may be inc
 
 Use the Android emulator provided by the room. Confirm the connected device:
 
-\`\`\`bash
+```bash
 adb devices
-\`\`\`
+```
 
 If the device appears as unauthorized, follow the lab's instructions to approve the connection. If no device appears, confirm that the emulator is running and that the correct ADB connection is configured.
 
 Useful ADB commands:
 
-\`\`\`bash
+```bash
 adb shell
 adb shell getprop ro.build.version.release
 adb shell pm list packages
-\`\`\`
+```
 
 - **adb shell** opens a shell on the device.
 - **getprop** reads Android system properties.
@@ -64,10 +64,10 @@ For each sensitive permission, ask:
 
 Preserve the original APK and calculate a hash before analysis:
 
-\`\`\`bash
+```bash
 sha256sum sample.apk
 file sample.apk
-\`\`\`
+```
 
 Use JADX or Apktool to inspect the package. Search for hard-coded API keys, endpoints, debug settings, insecure cryptography, unsafe WebView settings, and sensitive data written to logs or local files.
 
@@ -77,9 +77,9 @@ A string search is a starting point. Verify whether the value is a real secret, 
 
 Run the sample only in the room's emulator. Observe app behaviour, network requests, permission prompts, logs, and filesystem changes. ADB can display logs:
 
-\`\`\`bash
+```bash
 adb logcat
-\`\`\`
+```
 
 Stop the stream with Ctrl+C. Logs may contain personal data or tokens, so handle them carefully.
 

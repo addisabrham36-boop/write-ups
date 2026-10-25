@@ -127,3 +127,34 @@ Keep command output or a result note that links the input hash, mode, wordlist, 
 MD5, MD4, NTLM, SHA-1, and fast SHA-256 are not suitable as direct password-storage schemes. Use Argon2id, scrypt, or bcrypt with unique salts and cost parameters appropriate to the deployment. Enforce long unique passwords, block common and breached passwords, apply MFA where appropriate, and protect password databases as sensitive material.
 
 Hash cracking is a process of classification and candidate testing: identify the format, preserve salt details, choose a matching tool mode, and verify which candidate belongs to each task.
+
+## Expanded task reasoning and tool interpretation
+
+### Why the mode number matters
+
+Hashcat needs to know how each candidate should be transformed before comparison. A mode for raw MD5 is not interchangeable with a mode for bcrypt or a Unix crypt string. When the mode is wrong, Hashcat may reject the input, report a token-length error, or complete without recovering a value even when the password is present in the list.
+
+Keep a separate input file for each format if the input syntax differs. Inspect the copied line for leading/trailing spaces, missing fields, or a line wrap introduced when copying from the task.
+
+### A reproducible test pattern
+
+    file hashes.txt
+    wc -l hashes.txt
+    hashcat -m 0 -a 0 md5.txt /path/to/wordlist.txt
+    hashcat --show -m 0 md5.txt
+
+The first two commands check the input file and count its records. The next command runs a wordlist attack against a raw MD5 hash. The final command displays recovered results for that hash format. Replace the example mode and filenames with those that match the current task.
+
+### Understanding salts and slow hashes
+
+A salt is data combined with the password before hashing. It prevents identical passwords from automatically producing identical stored hashes and makes precomputed tables less useful. The salt is normally not secret, but it must be included in the correct input format for verification.
+
+bcrypt and SHA-512 crypt are designed to require more work than fast hashes, making large-scale guessing more expensive. HMAC-SHA1 is a keyed construction rather than a normal password hash; interpret the room's given salt/key fields according to the exact format it uses.
+
+### Verify each answer separately
+
+For every recovered candidate, map the value to the original hash and task question. A cracked result for one hash must not be assigned to the next question merely because the rows appear in a certain order. Submit the exact value expected by the room and keep passwords or hashes from real accounts out of public notes.
+
+### Remediation summary
+
+Use a dedicated password hashing scheme such as Argon2id, scrypt, or bcrypt with unique salts and cost settings appropriate to the system. Enforce long, unique passwords, screen against known breached values, add MFA, and protect the password database. Fast hashes such as MD5, MD4, SHA-1, and direct SHA-256 are not suitable for direct password storage.

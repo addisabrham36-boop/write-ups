@@ -87,3 +87,17 @@ Keep notes about assumptions. A threat model is a snapshot of a system and shoul
 ## What I took from this room
 
 Good AI threat modelling starts with the system and its trust boundaries, then follows concrete attack paths to assets and impact. Controls must be enforced by the component that owns the relevant permission, not left to the model's good intentions.
+## Phase 5: Complete the Threat Model
+
+A complete result should connect each risk to a specific asset, trust boundary, abuse path, impact, existing control, and recommended change. Use the room's own rating scale; do not invent a numeric score.
+
+| Risk | Asset | Required proof | Mitigation |
+|---|---|---|---|
+| Prompt injection | Model instructions, retrieved data, tool access | Untrusted content causes a policy or trust-boundary violation | Treat retrieved content as untrusted; validate actions server-side |
+| Data poisoning | Training data and model behaviour | Suspicious examples produce a repeatable targeted change | Provenance, access control, label review, trusted evaluation |
+| Model extraction | Model IP and API budget | Query patterns can reproduce behaviour beyond intended access | Authentication, quotas, output controls, monitoring |
+| Privacy leakage | Training and retrieval data | Sensitive content is disclosed to an unauthorised requester | Data minimisation, retrieval authorization, privacy tests |
+| Model drift | Decision quality and security detections | Evaluation shows performance degrades over time | Continuous evaluation, monitoring, retraining review |
+| Unsafe tool use | Downstream systems and credentials | Model output invokes an action without an independent policy check | Least privilege, schemas, server-side authorization, human approval |
+
+Prioritise risks based on evidence, likelihood, and impact, then define a retest for each mitigation. Threat models should be revisited when the model, retrieval corpus, plugins, tool permissions, or deployment architecture changes.

@@ -1,24 +1,21 @@
-# AI System Reconnaissance: TryHackMe Walkthrough
+# AI System Reconnaissance: Complete TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/aisystemreconnaissance
+Official room: https://tryhackme.com/room/aisystemreconnaissance
 
 ## Room Overview & Information
 
-This note covers the practical workflow, evidence to collect, common interpretation errors, and defensive lessons for AI System Reconnaissance. Use the live room as the authority for task wording and machine-specific values. The repository does not include fabricated terminal output, credentials, or flags.
+**Category:** AI security and application reconnaissance  
+**Objective:** Map an AI application's public surface, API endpoints, model/retrieval dependencies, tool integrations, and security boundaries.
 
-## 1. Scope and reconnaissance plan
+AI reconnaissance adds attention to models, retrieval and tool use to ordinary web application mapping. Only examine the hostname, IP addresses, APIs, and accounts explicitly in scope for the room.
 
-Room: https://tryhackme.com/room/aisystemreconnaissance
+## Phase 1: Reconnaissance & Enumeration
 
-Start the room and identify the assets and scope stated in its briefing. Reconnaissance should establish what the AI application exposes before any active testing. Record the base URL, permitted endpoints, test account, and restrictions. Do not probe external systems that are merely mentioned by the target.
+### 1. Confirm scope and identify the exposed surface
 
-The goal is to map the AI system's public surface: interface, API routes, model or provider information, documentation, authentication, file upload and retrieval features, plugins, and tool integrations. Separate confirmed facts from assumptions.
+Start the room and record the assigned host, base URL, authorized account, and any scanning restrictions. Open the application normally. Note its visible pages, features, model interface, uploads, retrieval functions, plugins, and administrative screens.
 
-## 2. Passive inspection
-
-Open the provided application normally. Inspect the visible pages, page source, JavaScript bundles, robots.txt, sitemap, and any API documentation linked by the application. These can reveal route names or technology hints, but a route name does not prove that it is accessible or vulnerable.
-
-Useful checks against the in-scope host include:
+Inspect common public resources when they exist:
 
 ```bash
 curl -i https://TARGET_HOST/
@@ -26,69 +23,67 @@ curl -i https://TARGET_HOST/robots.txt
 curl -i https://TARGET_HOST/sitemap.xml
 ```
 
-Replace TARGET_HOST with the hostname explicitly provided by the room and use HTTP if that is what the lab uses. The `-i` option displays response headers with the body. Record status codes, redirects, cookies, and server headers without publishing session tokens.
+- **-i** includes response headers and body.
+- Replace TARGET_HOST with the exact hostname in the room.
+- Use HTTP instead of HTTPS if that is what the lab provides.
 
-If browser developer tools are available, inspect the Network tab while using the application's normal features. Note which API endpoint is called, the HTTP method, and the shape of the request and response. Redact authorization headers and tokens from notes.
+A route name or server header is a clue, not proof that the endpoint is vulnerable. Do not publish cookies, authorization headers, or tokens in notes.
 
-## 3. Map the application and API
+### 2. Inspect browser requests
 
-Create a simple endpoint inventory. For each endpoint, record its purpose, method, authentication requirement, user-controlled fields, and whether it invokes a model, retrieval system, or external tool.
+Use the browser Developer Tools Network tab while using the application's normal features. Record API path, method, content type, request fields, and response shape. Redact credentials and personal data. If the room provides API documentation or source files, inspect those as part of the authorized environment.
 
-| Item | Questions to answer |
+## Phase 2: API and AI-Specific Vulnerability Analysis
+
+### 3. Build an endpoint inventory
+
+| Component | What to inspect |
 |---|---|
-| Chat endpoint | What input is sent? Is conversation state stored? |
-| Retrieval endpoint | Which documents can the current user access? |
-| Upload endpoint | Which types and sizes are accepted? |
-| Tool or plugin | What action can it perform and under whose identity? |
-| Admin or debug route | Is it documented, authenticated, and in scope? |
-| Model metadata | Is the information intentionally public? |
+| Chat endpoint | Input fields, session state, authentication |
+| Retrieval endpoint | Source documents and per-user access controls |
+| Upload endpoint | Allowed types, size limits, and processing path |
+| Tool/plugin endpoint | Available actions, credentials, authorization |
+| Admin/debug routes | Authentication, exposed configuration, errors |
+| Model metadata | Public model/configuration information |
 
-Use the routes actually observed in the lab. Do not fabricate endpoints or blindly scan a production service. If the room provides an API collection or source file, inspect it as the authoritative lab artifact.
+Record only the routes actually observed in the lab. Do not fabricate endpoints or blindly scan production services.
 
-## 4. Identify AI-specific exposure
+### 4. Inspect AI-specific exposure
 
-An AI application can expose more than a traditional web application. Look for the model identifier, system prompt handling, retrieval sources, conversation history, tool definitions, file-processing components, and external provider requests. The existence of one of these components is not automatically a vulnerability.
+Look for model identifiers, prompt templates, retrieval sources, conversation history, tool definitions, file processors, provider requests, and inference logs. The existence of these components does not prove a vulnerability.
 
-Test whether access controls are enforced at the server. For example, if a chat interface displays only a user's documents, determine whether the retrieval API also enforces ownership. If a model can call tools, determine whether each tool independently checks authorization and validates its arguments.
+Check where permissions are enforced. Retrieval should check access before private content is passed to the model. Each tool should independently verify identity, target resource, allowed operation, and argument schema. Client-side hiding of a feature is not authorization.
 
-Prompt injection becomes a security issue when untrusted content can influence an action that crosses a trust boundary. Record the input and resulting behaviour, and distinguish a harmless answer change from unauthorized data access or an unsafe tool call.
+### 5. Active enumeration within authorized scope
 
-## 5. Active enumeration within scope
-
-If the room authorises active enumeration, use a small, controlled request rate and stay on the supplied host. For HTTP services, a service scan can help identify exposed ports:
+If the room allows port scanning and provides a lab IP, a service scan may be useful:
 
 ```bash
 nmap -sC -sV -oN ai-recon-nmap.txt TARGET_IP
 ```
 
-Here, `-sC` runs Nmap's default scripts, `-sV` attempts service-version detection, and `-oN` saves human-readable output. Only run this against the lab IP and only if port scanning is permitted by the room. A web-only challenge may not require Nmap at all.
+- **-sC** runs Nmap's default scripts.
+- **-sV** attempts service/version identification.
+- **-oN** saves readable output.
 
-If you encounter authentication, do not try random credentials unless the task explicitly authorises credential testing. Instead, document the access boundary and use the supplied lab account.
+Only scan the specified lab machine. A web-only task may not need Nmap. Do not test credentials unless the room explicitly authorizes it.
 
-## 6. Evidence and answer workflow
+## Phase 3: Validate Findings & Post-Investigation Handling
 
-For each task question, identify the relevant page, header, route, configuration, or observed behaviour. Save the exact request and a sanitized response when permitted. Avoid claiming a route is vulnerable because it returns 200 OK; the status code only says the server returned a successful HTTP response.
+For a suspected prompt-injection or tool issue, preserve the original input, altered input, model response, downstream tool call, and resulting application state. A changed answer is not by itself a security impact. Verify whether protected data was disclosed or an unauthorized action actually occurred.
 
-Use the active lab for exact model names, endpoint values, tokens, and flags. Those values can change and should not be invented. Redact flags in the public write-up as `flag{hidden}`.
+A route returning HTTP 200 is not proof of a vulnerability. Record the status, relevant body, user identity, permission context, and any corroborating evidence. Stop after the minimum authorized validation.
 
-## 7. Hardening recommendations
+No privilege escalation is implied by API mapping. If a specific lab provides an execution path, verify the effective identity before claiming a foothold or elevated access.
 
-Reduce the exposed surface, remove debug routes from production, authenticate administrative APIs, enforce per-user retrieval authorization, restrict tool permissions, validate uploaded content, rate-limit expensive model calls, and avoid leaking secrets in client-side bundles or logs. Maintain an endpoint inventory and retest it when the model, plugin set, or orchestration code changes.
+## Phase 4: Room Questions & Evidence Walkthrough
 
-## What I took from this room
+For each task, identify the requested page, header, route, model setting, retrieval source, or behaviour. Save the exact request and a sanitized response when permitted. Use the live room for exact endpoint names, values, and flags; do not make up answers based on common application patterns.
 
-AI reconnaissance is ordinary application reconnaissance with extra attention to model, retrieval, and tool boundaries. The best result is an evidence-based map of what exists, who can access it, and which components deserve deeper testing.
-## Phase 5: Final Checklist and Remediation
+Separate confirmed facts from assumptions and record the time and tool version. Redact sessions and flags in public notes.
 
-Before closing the room, verify that the inventory separates confirmed exposure from assumptions. For each discovered route, record its purpose, HTTP method, authentication requirement, the identity used during the test, and whether it calls a model, retrieval service, or tool.
+## Phase 5: Key Takeaways & Remediation
 
-| Check | Evidence to preserve | Security question |
-|---|---|---|
-| Public interface | URL, redirects, response headers | Does it disclose unnecessary platform details? |
-| API route | Method, path, request shape, status | Is the route intended and properly authenticated? |
-| Model service | Model identifier and permitted input | Is access controlled and usage rate-limited? |
-| Retrieval or upload | Data source and ownership checks | Can one user access another user's data? |
-| Tool integration | Tool definition and authorization result | Does the tool enforce permissions independently? |
-| Debug or metrics endpoint | Exposure and authentication state | Does it reveal secrets, prompts, or internal state? |
+Reduce exposed surface area, remove debug routes, authenticate administrative APIs, enforce per-user retrieval authorization, restrict tool permissions, validate uploads, rate-limit expensive inference, and keep secrets out of client-side bundles and logs. Maintain an endpoint inventory and retest it when the model, plugin set, or orchestration code changes.
 
-Do not invent a task answer if it depends on the lab's interactive state. When the room asks for a completion confirmation, use the site's visible feedback. Remediation should minimise public endpoints, enforce authorization at the service that owns the data, restrict tool capabilities, validate uploaded content, and monitor model/API usage.
+AI reconnaissance is ordinary application reconnaissance with extra attention to model, retrieval, and tool boundaries. The result should be an evidence-based map of what exists, who can access it, and which components need deeper testing.

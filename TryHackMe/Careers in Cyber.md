@@ -1,43 +1,97 @@
-# Careers in Cyber — TryHackMe
+# Careers in Cyber: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/startingoutincybersec
+Official room: https://tryhackme.com/room/careersincyber
 
-When I first started looking into cybersecurity, I thought most of the jobs were probably about hacking into systems or finding vulnerabilities. That is only one part of it, though. A company also needs people who can notice when something suspicious is happening, investigate an attack, recover the systems afterwards, and make sure the same problem is less likely to happen again.
+## Room Overview & Information
 
-That is what I wanted to understand in this room: what kinds of jobs are actually available in cybersecurity, and what does each person do?
+**Category:** Cybersecurity careers and awareness  
+**Difficulty:** Beginner  
+**Focus:** Career accessibility, job-market context, the impact of security work, role diversity, and choosing a starting point.
 
-## Starting with the two main sides
+This is a career-awareness room rather than a technical exploitation lab. There is no target to scan, no shell to obtain, and no flag to fabricate. The tasks are short knowledge checks followed by an interactive career quiz.
 
-The first big area is **offensive security**. The idea is to test systems and applications with permission, find weaknesses, and show how those weaknesses could be abused. A penetration tester is one example. They might inspect a website, test how its login works, or check whether a server is running a vulnerable service. The point is not just to break something. The useful part is explaining the weakness clearly and helping the owner fix it.
+## Task 1: The Open Door
 
-The other major area is **defensive security**. Instead of trying to find a way in, defensive teams monitor systems, investigate alerts, and try to stop attacks before they cause too much damage. A security analyst might spend a lot of time looking through logs and checking whether an alert is a real threat or just normal activity that looks unusual.
+The room explains that cybersecurity needs people from a wide range of backgrounds. Experience in healthcare, finance, law enforcement, teaching, customer support, or other fields can be useful because security work involves understanding people, business processes, and real-world risk as well as technology.
 
-I should remember that these two sides are connected. A good defender needs to understand how attacks work, and someone doing penetration testing needs to understand how the system is supposed to behave in the first place.
+**Question: “Which of these is true?”**
 
-## Some jobs I came across
+Options presented by the room:
+- There are enough professionals to fill most roles.
+- You need a computer science degree to get into cyber.
+- Millions of roles are unfilled, and people from all backgrounds can fill them.
 
-**Penetration tester:** I think of this role as someone who checks a system for weaknesses before a real attacker finds them. The tester needs technical knowledge, patience, and the ability to explain findings so that another person can reproduce and fix them.
+The correct choice is the third option. The point is that the field has a skills gap and does not have a single mandatory educational path. This does not mean that every role is easy to enter or that learning is optional; it means candidates can build the required skills through multiple routes.
 
-**Security analyst / SOC analyst:** This role focuses on monitoring alerts and investigating suspicious activity. A SOC analyst may check IP addresses, login attempts, endpoint alerts, or unusual network traffic. An alert does not automatically mean a system was hacked, so the analyst needs to collect evidence before deciding what it means.
+## Task 2: What It Pays
 
-**Incident responder:** Sometimes an attack has already happened. An incident responder helps contain it, work out what was affected, and coordinate recovery. The team also tries to understand how the incident started so the same route is not left open.
+The room discusses compensation and the possibility of progressing through training, practice, and certifications. Pay varies significantly by country, organisation, speciality, experience, and responsibility. A certification can help demonstrate knowledge, but it is not a guarantee of a particular salary or job.
 
-**Digital forensics analyst:** This role involves examining digital evidence, such as logs, files, disk images, or other system artefacts. It is important to preserve evidence and record what was done, because conclusions should be based on what can actually be supported.
+**Question: “Which of these is true?”**
 
-**Threat intelligence analyst:** This person researches threats, attacker techniques, indicators, and campaigns. The goal is to turn information into something useful for a security team, rather than just collecting a giant pile of links and calling it research.
+Options:
+- You need a four-year degree to be paid well in cyber.
+- Certifications alone can get you to a well-paying role, faster than most people expect.
+- Salaries are similar to general IT support.
 
-**Security engineer:** A security engineer helps build and maintain the protections an organisation uses. That can include access controls, firewalls, endpoint protection, secure configurations, and monitoring systems.
+The intended answer is the second option, reflecting the room's message that certifications and practical learning can accelerate progress. Read it as encouragement, not a promise that a certificate alone guarantees employment. Employers commonly look for practical skill, communication, judgement, and evidence that a candidate can do the work.
 
-There are other specialities too, including cloud security, application security, malware analysis, and security research. I do not need to choose one immediately. It makes more sense to build the basics and try different kinds of labs before deciding which work suits me.
+## Task 3: The Bigger Picture
 
-## Going through the room
+Cybersecurity failures can affect essential services, personal data, and business operations. Hospitals may cancel appointments, banks may suspend transactions, and industrial operations can be disrupted. Security work protects people and systems, not just company profits.
 
-As I work through the room, I pay attention to the difference between the roles instead of trying to memorise job titles without understanding them. If a question describes someone investigating logs and alerts, I think about defensive monitoring. If it describes someone testing a website with permission to find weaknesses, that points toward penetration testing.
+**Question: “Which of these is true?”**
 
-The career quiz is useful as a starting point, but I would not treat one result as a final decision about what I should do with my life. It is better to use it as a hint, then try a few practical rooms and see which tasks I actually enjoy.
+Options:
+- Cyber professionals protect hospitals, power grids, factories, and much more.
+- Attacks only hurt the profits of an organisation.
+- Cyber attacks only target tech companies.
 
-## What I took from this room
+The correct choice is the first option. The broader lesson is that cyber risk can create operational, financial, privacy, and safety consequences across many industries.
 
-Cybersecurity is not one single job. There are people who test systems, people who defend them, people who investigate incidents, and people who build security into the systems from the beginning. Those jobs overlap, but they need different skills and involve different day-to-day work.
+## Task 4: Find Your Place
 
-For now, the best thing I can do is keep learning networking, Linux, operating systems, scripting, and web security. Those foundations will help me understand more advanced topics later, whatever speciality I end up choosing.
+Cybersecurity includes offensive testing, SOC monitoring, threat intelligence, incident response, security engineering, governance, cloud security, digital forensics, application security, and many other specialties. Different roles use different combinations of technical and nontechnical skills.
+
+**Question: “Which of these is true?”**
+
+Options:
+- All cybersecurity roles require the same technical skills.
+- There are many roles in cyber security, and the right one depends on how your mind works.
+- Cyber security is a single career path, not a range of different roles.
+
+The correct choice is the second option. Someone who enjoys investigating evidence may prefer DFIR; someone who enjoys real-time monitoring may prefer a SOC; someone who likes building secure systems may prefer security engineering; and someone who likes finding software flaws may prefer application security or penetration testing.
+
+## Task 5: Your Starting Point
+
+New technologies create new security work. Cloud services, AI systems, connected healthcare, digital banking, and industrial automation all introduce assets and risks that need to be understood and protected. Career development is ongoing because tools and threats change.
+
+**Question: “Which of these is true?”**
+
+Options:
+- The availability of job roles is the same as other job markets.
+- Cyber security is one of the fastest growing fields, and every new technology expands it further.
+- AI will take over cyber security, requiring no one.
+
+The intended answer is the second option. AI may automate some tasks and create new risks, but organisations still need people to define objectives, validate results, make decisions, handle incidents, and accept responsibility.
+
+## Task 6: Launch Careers Quiz
+
+Open the **Launch Careers Quiz** from the room. Answer based on the kinds of work you enjoy, not on which role sounds most impressive. The quiz is a starting point for reflection, not a formal aptitude test or a binding career recommendation.
+
+When interpreting the result, consider:
+- What work do you enjoy: investigation, coding, communication, systems administration, or research?
+- Do you prefer responding to active incidents or building controls to prevent them?
+- Do you like a broad overview or deep technical specialisation?
+- What skills can you demonstrate today, and which skills do you need to develop?
+- What local training, internship, and entry-level opportunities are available?
+
+## Turning the room into an action plan
+
+A useful next step is to choose one area and build evidence of ability. For example, a beginner interested in defensive security can study networking and Windows/Linux fundamentals, practise analysing logs, learn SIEM queries, and write up small investigations. Someone interested in web security can learn HTTP, JavaScript, authentication, and common web vulnerabilities before practising in authorised labs.
+
+Keep a learning log with the problem, tools used, evidence, conclusion, and what you would improve. This is more useful than listing a large number of unfinished courses on a CV.
+
+## Key takeaways
+
+Cybersecurity is not one job with one required background. The field needs a range of technical, analytical, and communication skills. The room's answers reinforce that the profession spans multiple industries and roles, and that a practical learning path should be built around the work you want to do.

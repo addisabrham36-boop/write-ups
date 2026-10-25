@@ -1,4 +1,4 @@
-# Defensive Security Intro: TryHackMe Walkthrough
+# Defensive Security Intro: Complete TryHackMe Walkthrough
 
 Official room: https://tryhackme.com/room/defensivesecurityintro
 
@@ -6,117 +6,85 @@ Official room: https://tryhackme.com/room/defensivesecurityintro
 
 **Category:** Defensive security  
 **Difficulty:** Easy  
-**Focus:** Blue Team responsibilities, Security Operations Centres (SOCs), Digital Forensics and Incident Response (DFIR), and common malware threats.
+**Topics:** Blue Team, Security Operations Centre (SOC), Digital Forensics and Incident Response (DFIR), malware analysis, and ransomware.
 
-Offensive security tests systems by simulating attacker behaviour. Defensive security focuses on protecting systems, detecting suspicious activity, investigating incidents, and reducing harm. This room introduces the people and processes that help organisations defend their networks.
+This is a conceptual and interactive room. It does not require port scanning, initial access, or privilege escalation. Its workflow is to understand the defensive role, distinguish specialist teams, and answer the provided knowledge checks using the room's definitions.
 
-## Task 1: Introduction to Defensive Security
+## Phase 1: Reconnaissance & Enumeration of Defensive Functions
 
-Defensive security includes monitoring, threat intelligence, incident response, malware analysis, and security engineering. These functions work together: monitoring detects a possible event, investigation determines what happened, and response contains the threat and restores trusted operation.
+Defensive security focuses on preventing, detecting, investigating, and responding to harmful activity. Monitoring can detect an anomaly, investigation determines what likely happened, and incident response limits damage and restores trusted operation. These activities depend on useful logs, endpoint telemetry, identity records, and network evidence.
 
-### Question: “Which team focuses on defensive security?”
+## Phase 2: Identify the Relevant Defensive Team
 
-**Answer: Blue Team.**
+### Task 1: Introduction to Defensive Security
 
-The Blue Team protects systems and data, monitors for suspicious behaviour, and responds to incidents. It may include SOC analysts, incident responders, threat hunters, security engineers, and other defensive specialists.
+**Question:** “Which team focuses on defensive security?”
 
-## Task 2: Areas of Defensive Security
+**Answer:** **Blue Team**.
 
-### Security Operations Centre (SOC)
+The Blue Team protects systems and data, monitors for suspicious behaviour, and responds to incidents. It can include SOC analysts, incident responders, threat hunters, security engineers, digital forensics specialists, and other defensive roles.
 
-A SOC monitors security telemetry from endpoints, servers, identity systems, networks, and applications. Analysts triage alerts, correlate events, identify likely incidents, and escalate activity that needs deeper investigation.
+### Task 2: Areas of Defensive Security
 
-### Question: “What would you call a team of cyber security professionals that monitors a network and its systems for malicious events?”
+#### Security Operations Centre
 
-**Answer: Security Operations Center (SOC).**
+A SOC monitors security telemetry from endpoints, servers, identity systems, networks, and applications. Analysts triage alerts, correlate events, identify likely incidents, and escalate findings for deeper investigation.
 
-The room uses the American spelling, Center. The British spelling, Centre, refers to the same function.
+**Question:** “What would you call a team of cyber security professionals that monitors a network and its systems for malicious events?”
 
-### Digital Forensics and Incident Response (DFIR)
+**Answer:** **Security Operations Center (SOC)**.
 
-Digital forensics preserves and analyses evidence to understand what happened. Incident response contains the incident, removes the cause, restores operations, and records lessons learned. Evidence can include logs, files, memory, network traffic, and authentication records.
+The room uses the American spelling, Center. Centre describes the same function.
 
-### Question: “What does DFIR stand for?”
+#### Digital Forensics and Incident Response
 
-**Answer: Digital Forensics and Incident Response.**
+Digital forensics preserves and analyses evidence to understand what happened. Incident response contains an incident, removes the cause, restores operations, and records lessons learned. Evidence can include logs, files, memory, network traffic, and authentication records.
 
-DFIR teams need to preserve evidence carefully and separate confirmed observations from hypotheses. A good timeline combines multiple sources rather than relying on a single log entry.
+**Question:** “What does DFIR stand for?”
 
-### Malware analysis
+**Answer:** **Digital Forensics and Incident Response**.
 
-Malware analysis investigates suspicious files and behaviour to understand capabilities, indicators, and impact. Analysts may inspect hashes, strings, metadata, code, process activity, filesystem changes, and network connections. Samples should be analysed in an isolated environment, not run on a personal workstation.
+A DFIR investigation builds a timeline from multiple sources and separates observed facts from hypotheses. Evidence should be preserved carefully because ordinary activity can alter timestamps, volatile memory, and local logs.
 
-### Question: “Which kind of malware requires the user to pay money to regain access to their files?”
+#### Malware analysis
 
-**Answer: Ransomware.**
+Malware analysis investigates suspicious files and behaviour to understand capabilities, indicators, and impact. Analysts may inspect hashes, strings, metadata, code, process activity, filesystem changes, and network connections. Unknown samples should be investigated in an isolated environment rather than executed on a personal workstation.
 
-Ransomware commonly encrypts or otherwise blocks access to data and demands payment. Paying does not guarantee recovery. Defensive controls include offline or immutable backups, patching, least privilege, endpoint monitoring, and tested recovery procedures.
+**Question:** “Which kind of malware requires the user to pay money to regain access to their files?”
 
-## Task 3: Follow Along
+**Answer:** **Ransomware**.
 
-The room asks you to follow the introductory material and obtain the flag displayed by the exercise.
+Ransomware commonly encrypts or otherwise blocks access to data and demands payment. Paying does not guarantee recovery. Strong recovery controls include offline or immutable backups, patching, least privilege, endpoint monitoring, and tested restoration procedures.
 
-### Question: “What is the flag that you obtained by following along?”
+### Task 3: Follow Along
 
-Follow the active room's instructions and copy the flag shown by the task. The public repository intentionally redacts the value as `THM{hidden}`.
+**Question:** “What is the flag that you obtained by following along?”
 
-## How the concepts work together
+Follow the active room's instructions and copy the flag displayed by the exercise. The live value is not independently available in this write-up, so it is intentionally redacted as **THM{hidden}** rather than guessed.
 
-A simple defensive workflow is:
+## Phase 3: Apply the Defensive Workflow
+
+A practical defensive sequence is:
 
 1. **Detect:** monitoring tools raise an alert.
-2. **Triage:** an analyst checks the alert's evidence and context.
-3. **Investigate:** related logs and artefacts are correlated to establish what happened.
-4. **Contain:** access or systems are restricted to stop ongoing harm.
+2. **Triage:** an analyst checks evidence and context.
+3. **Investigate:** related logs and artefacts establish what happened.
+4. **Contain:** affected accounts, systems, or network paths are restricted to stop ongoing harm.
 5. **Eradicate and recover:** the root cause is removed and systems return to trusted operation.
 6. **Improve:** detections, controls, and procedures are updated to reduce recurrence.
 
-Not every alert is a confirmed incident. Analysts should verify evidence, record uncertainty, and escalate when the impact or complexity exceeds their authority.
+Not every alert is a confirmed incident. Validate evidence, record uncertainty, and escalate when the impact or complexity exceeds your authority. Containment actions can disrupt business operations, so follow an approved playbook.
 
-## Key takeaways
+## Phase 4: Room Questions & Answer Summary
 
-The Blue Team provides defensive security. A SOC monitors systems for suspicious events, DFIR investigates and responds to incidents, and malware analysts help identify what malicious software does. Ransomware is a type of malware that can deny access to files and demand payment. The room's flag should be obtained from the live exercise and redacted in public notes.
+| Question | Answer |
+|---|---|
+| Which team focuses on defensive security? | **Blue Team** |
+| What is the team that monitors systems for malicious events? | **Security Operations Center (SOC)** |
+| What does DFIR stand for? | **Digital Forensics and Incident Response** |
+| Which malware demands payment to restore access to files? | **Ransomware** |
+| What is the flag after following along? | Read from the active room; redacted as **THM{hidden}** |
 
-## Expanded defensive workflow
+## Phase 5: Key Takeaways & Remediation
 
-### 1. Define the defensive objective
-
-Defensive security aims to prevent, detect, investigate, and recover from attacks. The work may involve security operations, incident response, threat intelligence, endpoint security, identity protection, vulnerability management, and governance. The exact responsibilities vary by organization.
-
-Begin by identifying the asset, the threat, and the control expected to reduce risk. A security product is not the goal by itself; the goal is to reduce the likelihood or impact of a real attack and prove that the control works.
-
-### 2. Understand prevention, detection, and response
-
-Prevention makes an attack harder or blocks it, for example by patching, least privilege, MFA, and network segmentation. Detection identifies suspicious activity through logs, endpoint telemetry, network sensors, and alerts. Response validates the alert, scopes the incident, contains the threat, removes persistence, and restores normal operation.
-
-No single control is perfect. A layered design assumes that some controls will fail and provides additional opportunities to detect and contain an attack.
-
-### 3. Security operations and logs
-
-A SOC analyst gathers context from authentication, endpoint, firewall, DNS, proxy, and application logs. Useful questions include: which account acted, from which host, at what time, against what resource, and whether the behaviour is normal for that user or system.
-
-A log entry is evidence of an event recorded by a particular source, not necessarily the complete truth. Check timestamps, host identity, event IDs, surrounding activity, and other sources. Preserve the original log and record the query or filter used.
-
-### 4. Threat intelligence
-
-Threat intelligence turns observations into context that helps defenders prioritize action. Indicators can include IP addresses, domains, URLs, file hashes, email senders, and behavioural patterns. Indicators have lifetimes and false positives; verify source, confidence, timestamp, and relevance before blocking or escalating.
-
-Tactical intelligence helps detect immediate activity, operational intelligence describes campaigns and techniques, and strategic intelligence supports risk decisions. Use the level appropriate to the question rather than treating every indicator as equally useful.
-
-### 5. Vulnerability and asset management
-
-Defenders need an accurate inventory of devices, applications, owners, exposed services, and software versions. Prioritize vulnerabilities using exploitability, exposure, asset importance, available mitigations, and operational constraints. A severity score alone does not explain business risk.
-
-After patching, verify the installed version or configuration and confirm the affected service is still healthy. Record exceptions and deadlines instead of assuming a change succeeded.
-
-### 6. Work through the room
-
-For each task, identify whether it asks about prevention, detection, response, intelligence, or a specific defensive role. Use the room's own definitions and examples for exact answers. If the question asks how an alert should be handled, explain triage, evidence gathering, escalation, and containment rather than jumping immediately to deletion or rebooting.
-
-### 7. Measure effectiveness
-
-Useful measures include time to detect, time to contain, coverage of critical assets, patch compliance, alert quality, and recovery-test results. Metrics should be interpreted carefully: a high alert count may indicate more attacks, noisy detection, or both.
-
-### 8. Key lessons
-
-Effective defence combines people, process, and technology. Maintain asset visibility, enforce strong identity controls, centralize useful logs, tune detections, rehearse incident response, and validate recovery. The goal is not to claim a system is impossible to compromise, but to make attacks harder to execute and easier to detect and contain.
+The Blue Team provides defensive security; the SOC monitors and triages events; DFIR investigates and coordinates response; and malware analysts help determine what suspicious software does. Organisations should centralise useful logs, protect evidence, maintain tested backups, restrict privileges, patch exposed services, and rehearse incident response. Clear communication and evidence-based decisions are as important as the tools.

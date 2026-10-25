@@ -47,3 +47,33 @@ The techniques may look similar, but authorisation and scope are what distinguis
 ## Key takeaways
 
 Offensive security simulates attacker behaviour to find weaknesses in a controlled and authorised way. The room's answer is **Offensive Security**, and the simulated site displays **BANK-HACKED** after the correct interaction. The lesson is about the method and its boundaries, not about attacking a real bank.
+
+## Expanded room workflow
+
+### 1. Understand the legal boundary
+
+Offensive security uses attacker techniques to discover weaknesses under explicit authorization. The scope defines the hosts, applications, methods, time window, and prohibited actions. A public IP or accessible login page is not permission to test it.
+
+### 2. Follow a repeatable methodology
+
+A controlled assessment typically proceeds through scoping, reconnaissance, enumeration, vulnerability validation, exploitation where permitted, impact assessment, cleanup, and reporting. Not every task requires every phase. Avoid running an exploit before understanding the service and the risk.
+
+### 3. Reconnaissance and enumeration
+
+Passive reconnaissance gathers information from public sources. Active reconnaissance sends traffic to the target. Enumeration identifies concrete services, users, shares, routes, or application behaviour. Keep a record of commands, timestamps, and outputs so findings can be reproduced.
+
+### 4. Validate a vulnerability
+
+A version number or banner is only a lead. Check whether the affected feature is enabled, whether the target configuration is vulnerable, and whether the proof of concept applies. Prefer a minimal, non-destructive validation and stop once the task objective is demonstrated.
+
+### 5. Initial access and privilege boundaries
+
+Initial access means obtaining a foothold under the permissions granted by the vulnerable path. Privilege escalation means increasing those permissions. Verify the current identity before and after a step with the appropriate command. Do not call a user shell root access unless the effective identity confirms it.
+
+### 6. Report and remediate
+
+A useful report contains the affected asset, steps to reproduce within scope, evidence, impact, severity rationale, and specific remediation. Remove temporary files, restore lab changes when required, and do not expose credentials or flags in public notes.
+
+### 7. Complete the room tasks
+
+Read the scenario and identify which phase or role the question describes. Use the official room's definitions where exact wording matters. This room is an introduction, so the goal is to understand the workflow and ethics rather than to force an exploit where none is required.

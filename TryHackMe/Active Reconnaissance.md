@@ -1,51 +1,111 @@
-# Active Reconnaissance — TryHackMe
+# Active Reconnaissance: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/activerecon
+Official room: https://tryhackme.com/room/activerecon
 
-Passive reconnaissance uses information that is already public. Active reconnaissance is different because I interact directly with the target to learn how it responds. That can include checking whether a host is reachable, discovering open ports, and identifying services. These actions create traffic and may be logged, so I should only do them against systems I own or have explicit permission to test.
+## Room Overview & Information
 
-## Start with a target and a scope
+**Category:** Network security fundamentals  
+**Difficulty:** Beginner  
+**Focus:** Browser inspection, ping, traceroute, telnet, netcat, and direct interaction with an authorised target.
 
-In a lab, the target address is usually provided by the room. I should use that exact address instead of guessing an IP from a hostname or copying an address from someone else's walkthrough. For the examples below, `TARGET_IP` is a placeholder that I replace with the lab's assigned address.
+Active reconnaissance sends traffic to a target to learn how it responds. Unlike passive research, these actions may appear in server logs, firewalls, intrusion-detection alerts, or honeypot telemetry. The scope must be explicit: use the room's intended targets and do not expand the scan to unrelated systems.
 
-Before scanning, I need to know which machines and ports are in scope. An authorised test is not permission to scan everything nearby just because the network interface happens to reach it.
+This room focuses on simple network tools. It is not necessary to invent an exploit chain or privilege escalation where the task is teaching reachability and service interaction.
 
-## Checking reachability
+## Phase 1: Establish the scope
 
-A basic connectivity check can be:
+Use the target hostname or address supplied by the active room. In examples below, `TARGET_IP` is a placeholder and must be replaced with the room's actual target. A hostname can resolve to a different address over time, so do not blindly reuse an address from an old guide.
+
+Record the target, time, tool, command, and result. This makes it easier to distinguish an observed fact from an assumption.
+
+## Phase 2: Browser and web inspection
+
+A browser makes a normal HTTP or HTTPS request. Inspect the address bar, redirects, certificate information, page content, and developer tools. The Network tab shows the requests made by the page, status codes, headers, and response sizes.
+
+From a terminal, a simple header and response check is:
+
+```bash
+curl -i http://TARGET_IP/
+```
+
+- `curl` sends an HTTP request.
+- `-i` prints the response headers as well as the body.
+- The final URL is the target's web service.
+
+If the room specifies a hostname-based site, preserve the hostname and use the provided host mapping or the exact URL. An IP request can reach a default virtual host rather than the intended website.
+
+## Phase 3: Ping and reachability
 
 ```bash
 ping -c 4 TARGET_IP
 ```
 
-This sends four ICMP echo requests. A reply suggests the host is reachable through that path, but no reply does not prove the host is offline. Firewalls may block ICMP, or the network may treat the packets differently.
+- `ping` sends ICMP Echo Requests.
+- `-c 4` sends four requests and then stops.
+- The output reports replies, round-trip times, and packet loss.
 
-## Discovering ports with Nmap
+A reply demonstrates that ICMP traffic can reach the target and return. No reply is inconclusive: the host may be online while ICMP is filtered.
 
-Nmap can check for open ports on an authorised target:
+## Phase 4: Trace the network path
 
-```bash
-nmap -Pn TARGET_IP
-```
-
-The `-Pn` option tells Nmap to skip its usual host-discovery stage and scan the target as if it were online. It can be useful when ICMP or other discovery probes are filtered, but it may also cause Nmap to spend time scanning an address that is genuinely unreachable.
-
-After finding ports, I can investigate service versions and run Nmap's default scripts:
+On Linux, use:
 
 ```bash
-nmap -sV -sC -oN nmap-initial.txt TARGET_IP
+traceroute TARGET_IP
 ```
 
-Here, `-sV` attempts to identify service versions, `-sC` runs the default script set, and `-oN` saves a normal text report. Script output is a clue, not automatic proof of a vulnerability. I need to understand what a result means before deciding what to test next.
+If the tool is not installed, the system may provide `tracepath`. Traceroute sends probes with progressively increasing TTL values. Routers that decrement a packet's TTL to zero may return an ICMP time-exceeded message, allowing the tool to infer a hop.
 
-## Reading the results
+Asterisks do not necessarily mean a router is broken; it may simply not answer the probe. Routing paths can also change between attempts.
 
-A port marked `open` means a service accepted a connection during the scan. `closed` generally means the host responded but no service was listening on that port. `filtered` means Nmap could not determine the state because filtering or a lack of response prevented a clear answer.
+## Phase 5: Test a TCP service with Telnet or Netcat
 
-Service identification helps me choose the next step. For example, an HTTP service may lead to web enumeration, while SSH may suggest checking the room's intended authentication or configuration tasks. I should not jump straight from a port number to a claim that a service is vulnerable.
+Telnet can make a plain TCP connection to a known service:
 
-## What I took from this room
+```bash
+telnet TARGET_IP PORT
+```
 
-Active reconnaissance gives me direct information about how a target responds, but it is also more visible and intrusive than passive research. I should confirm the scope, use the lab-provided target, save results, and interpret each finding carefully. Nmap is useful because it helps me build an evidence-based map of exposed services instead of blindly guessing what might be running.
+Replace `PORT` with a port explicitly in scope. A successful connection proves a TCP connection was established, not that the application protocol is understood or that authentication succeeded.
 
-The commands above are general examples. I should add exact scan results only after running them in the authorised lab.
+Netcat can make a similar connection:
+
+```bash
+nc -nv TARGET_IP PORT
+```
+
+- `-n` avoids DNS lookups.
+- `-v` prints connection details.
+- The target and port identify the service.
+
+For an HTTP service, the client may accept a manually typed HTTP request, but modern HTTPS requires TLS negotiation and cannot be treated as plain HTTP. Use a proper HTTPS client for encrypted endpoints.
+
+## Phase 6: Interpret evidence carefully
+
+- **Connection refused:** the host or an intermediary actively rejected the TCP connection; the port may be closed.
+- **Timeout:** filtering, routing issues, or a nonresponsive service may be responsible.
+- **Successful TCP connection:** the port accepted a connection, but application-level behaviour still needs inspection.
+- **Ping reply:** ICMP reachability worked; it does not prove that every port is open.
+- **Traceroute gap:** an intermediate device may be filtering or rate-limiting probes.
+
+Do not interpret one tool's failure as proof of a host's overall state. Combine results and test the specific protocol relevant to the task.
+
+## Phase 7: Question and task workflow
+
+The room teaches these tools through the provided target and browser-based tasks. For each question:
+
+1. Read which protocol or tool the question describes.
+2. Use the exact room target, not an arbitrary public host.
+3. Run the corresponding test or use the supplied browser.
+4. Record the result that the tool actually shows.
+5. Match the question to the meaning of the result, not merely to a familiar-looking command.
+
+If a task asks for a path or service response, inspect that exact service. If it asks about a tool's purpose, distinguish reachability testing from route discovery and application interaction.
+
+## Phase 8: Reporting and mitigation
+
+Active recon is a normal part of authorised testing, but it should be rate-limited and scoped. Maintain a written scope, avoid unnecessary scans, and record timestamps. Organisations can reduce unnecessary exposure by closing unused ports, filtering management interfaces, monitoring scan patterns, and documenting approved testing.
+
+## Key takeaways
+
+Ping tests ICMP reachability, traceroute estimates the network path, Telnet and Netcat test TCP connections, and a browser or curl inspects web behaviour. Each tool answers a different question. Active reconnaissance works best when every probe has a clear purpose and the result is interpreted within its limits.

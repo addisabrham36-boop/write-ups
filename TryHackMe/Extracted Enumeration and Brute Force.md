@@ -255,42 +255,27 @@ This is the room's final acknowledgement. Submit it as the task requests after c
 
 Enumeration reduces uncertainty for an attacker; predictable reset tokens turn a recovery feature into an authentication bypass; and Basic Authentication is only as strong as the credentials and transport protection around it. The analyst should prove each weakness from the actual response, verify the successful path, and recommend a fix that removes the underlying design flaw.
 
-## Expanded assessment workflow
+## Phase 5: Task evidence and answer checklist
 
-### 1. Enumerate before attempting credentials
+| Lab | Evidence required | Verification |
+|---|---|---|
+| Verbose login errors | Different response for unknown email versus known email | Compare the two response bodies using the same incorrect password |
+| Candidate email list | Exact item marked valid by the supplied script | Confirm the script sent requests to the current enum.thm lab |
+| Predictable reset token | Successful response for one candidate token | Inspect response body and complete the intended reset flow |
+| HTTP Basic Authentication | Authorization header and response for each candidate | Decode the successful header and verify the protected page |
+| Hydra alternative | Reported candidate plus application response | Confirm the candidate in the lab rather than relying only on output |
+| OSINT | Wayback snapshot or indexed URL from the named domain | Distinguish historical evidence from current exposure |
 
-Start with the service and application surface the room provides. Confirm open ports, identify the service, and establish which authentication method is in use. An initial scan can be saved as:
+The task may use generated credentials, addresses, and flags, so retrieve exact values from the active lab. Do not substitute a result from another instance. Where the question depends on the supplied list, the answer is the candidate whose response differs from the documented failure response.
 
-```bash
-nmap -sC -sV -oN enum-baseline.txt TARGET_IP
-```
+## Defensive remediation checklist
 
-This uses default Nmap scripts, service-version detection, and readable output. Continue only with service-specific enumeration justified by the scan.
+- Return generic authentication and reset responses.
+- Use long, random, one-time reset tokens and expire them quickly.
+- Rate-limit login and reset endpoints without making lockouts easy to weaponise.
+- Require HTTPS and protect session tokens.
+- Monitor repeated failed attempts and suspicious successful logins.
+- Review publicly indexed files and historical URLs.
+- Remove exposed secrets, rotate them, and check version-control history for copies.
 
-### 2. Distinguish discovery from guessing
-
-Enumeration gathers information such as usernames, paths, service banners, and allowed methods. Brute force or password spraying tests credential guesses. These are different activities and should not be conflated. Prefer a known lab username and the supplied wordlist over broad guessing, and follow any explicit rate limits in the task.
-
-### 3. Understand the authentication path
-
-For web forms, capture the genuine request and identify the username field, password field, CSRF token, session cookie, and failure condition. If the task concerns SSH or FTP, verify the service and port before choosing a corresponding module. A tool configured for the wrong protocol or response condition can report misleading failures.
-
-### 4. Use controlled tests
-
-Run only the credential test explicitly authorized by the room. Limit the candidate set and concurrency to the exercise's instructions. Stop after confirming the intended finding. Avoid account lockouts, excessive load, or reuse of any discovered credentials on other services.
-
-### 5. Verify credentials and access
-
-A candidate printed by a tool should be verified through the intended lab service. Once logged in, confirm the identity and permissions; do not infer elevated access from authentication success. Record the evidence while redacting the password itself.
-
-### 6. Explain likely root causes
-
-Weak or reused passwords, default accounts, missing rate limits, and insufficient monitoring can enable online guessing. A web form that reveals different messages for unknown users and wrong passwords may also permit account enumeration. The exact issue must match the observed application behaviour.
-
-### 7. Remediation
-
-Use long unique passwords, MFA, rate limiting, progressive delays, monitoring, generic failure responses, and protection against account enumeration. Keep privileged accounts separate and avoid enabling unnecessary remote-login services.
-
-### 8. Room questions
-
-Answer from the current lab's service output and successful validation. Record the tool command and why its flags were selected. Do not invent a username, password, or result; redact public flags as `flag{hidden}`.
+The core workflow is: baseline request, change one variable, compare the response, validate the result, document evidence, and recommend a root-cause fix.

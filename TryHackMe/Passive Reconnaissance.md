@@ -36,9 +36,9 @@ WHOIS returns domain-registration details such as registrar, registration dates,
 
 Run:
 
-\`\`\`bash
+```bash
 whois tryhackme.com
-\`\`\`
+```
 
 Read the relevant field rather than relying on a search snippet.
 
@@ -69,10 +69,10 @@ DNS maps names to records. Different record types answer different questions:
 
 The room asks you to query the TXT record for thmlabs.com. Use either tool:
 
-\`\`\`bash
+```bash
 nslookup -type=TXT thmlabs.com
 dig thmlabs.com TXT
-\`\`\`
+```
 
 - **nslookup -type=TXT** asks for TXT records.
 - **dig thmlabs.com TXT** performs the same query using dig.

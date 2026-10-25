@@ -4,89 +4,94 @@ Official room: https://tryhackme.com/room/dataencoding
 
 ## Room Overview & Information
 
-**Category:** Cryptography fundamentals  
+**Category:** Computer fundamentals  
 **Difficulty:** Beginner  
-**Focus:** Recognising common data representations, decoding safely, and distinguishing encoding from encryption and hashing.
+**Focus:** ASCII, Unicode, UTF-16, UTF-32, and how computers represent text.
 
-Encoding changes how data is represented so it can be stored, transmitted, or interpreted by another system. It is not necessarily a security mechanism. Base64, hexadecimal, URL encoding, and character encodings are common examples. A string that looks random may be encoded, encrypted, compressed, or simply binary data rendered as text; appearance alone is not enough to identify it.
+Computers store and process data as numbers and bytes. Character encodings define how characters map to numeric values. Encoding is not encryption: it is a representation that allows systems to store and exchange text consistently.
 
-## Phase 1: Identify the representation
+## Task 1: Introduction
 
-Start by checking the context. Ask where the value came from, which characters it contains, whether its length fits a common format, and whether the room gives a clue about the transformation.
+The room introduces the idea that text is stored as numeric values. The correct interpretation depends on the character encoding being used.
 
-Useful local tools include:
+## Task 2: ASCII
 
-```bash
-file sample.txt
-xxd -g 1 sample.txt | head
-strings -n 4 sample.bin | head
-```
+ASCII is a character encoding that maps letters, digits, punctuation, and control characters to numeric values. The classic ASCII set uses seven bits and defines values from 0 to 127. Many familiar characters have standard decimal codes.
 
-- `file` guesses a file type from its content.
-- `xxd -g 1` displays bytes in hexadecimal groups.
-- `strings` extracts readable sequences from a binary file.
+### Question: “What is the ASCII code in decimal for the character @?”
 
-These tools provide clues, not certainty. A file extension or a readable substring does not prove the complete format.
+**Answer:** **64**.
 
-## Phase 2: Base64
+The at sign maps to decimal 64 in ASCII.
 
-Base64 represents binary data using a set of 64 printable characters, commonly including letters, digits, `+`, `/`, and optional `=` padding. It is useful for transport, not secrecy.
+### Question: “What is the character that has the ASCII code of 35 in decimal?”
 
-Decode a Base64 string from a file:
+**Answer:** `#`.
 
-```bash
-base64 --decode encoded.txt
-```
+Decimal 35 represents the number sign/hash character.
 
-Encode a short text:
+### Question: “What is the name of the character that has the ASCII code of 7?”
 
-```bash
-printf '%s' 'hello' | base64
-```
+**Answer:** **BEL**.
 
-Use `printf` rather than `echo` when you want to avoid an added newline changing the encoded bytes. On systems where the command option differs, check `base64 --help`.
+BEL is the bell control character. It is a control code rather than a printable letter or symbol.
 
-A valid-looking Base64 string can decode to binary rather than readable text. If the output is unreadable, inspect it with `file` or `xxd` instead of assuming the decoding failed.
+## Task 3: Unicode
 
-## Phase 3: Hexadecimal
+Unicode assigns code points to characters across many writing systems and symbol sets. UTF-8, UTF-16, and UTF-32 are different ways of encoding Unicode code points as bytes or code units.
 
-Hexadecimal represents each byte using two hexadecimal digits. It is common in packet captures, file dumps, hashes, and binary analysis.
+- **UTF-8** uses one to four bytes per code point.
+- **UTF-16** uses one or two 16-bit code units.
+- **UTF-32** uses a fixed 32-bit code unit for each code point.
 
-Convert a file to a hex view:
+A Unicode code point is commonly written as `U+` followed by hexadecimal digits. The number of hexadecimal digits in a displayed value does not necessarily indicate the number of bytes used by UTF-8.
 
-```bash
-xxd sample.bin | head
-```
+### Question: “What is the UTF-32 encoding of the character U+1F60C (smiling face with closed eyes)?”
 
-A byte such as decimal 65 is hexadecimal `41`, which corresponds to ASCII `A`. Hex is a representation of bytes, not encryption. A hex string can represent text, machine code, compressed data, or arbitrary binary content.
+**Answer:** `U+0001F60C`.
 
-## Phase 4: URL encoding
+UTF-32 displays the code point in a 32-bit form, padded with leading zeros.
 
-URLs have reserved characters that may need percent-encoding. For example, a space is often represented as `%20` in a URL. URL encoding is not a way to protect secrets; the server can decode it.
+### Question: “What is the UTF-16 encoding of シ? Note that ツ and シ are two different characters.”
 
-When examining a suspicious URL, distinguish the actual path and query parameters from their encoded representation. Repeated or nested encoding can make a value harder to read, but it does not automatically make it safe or malicious.
+**Answer:** `U+30B7`.
 
-## Phase 5: Character encodings
+The character シ is Japanese katakana Shi. It is distinct from ツ, which is katakana Tsu.
 
-ASCII maps a limited set of characters to numeric values. UTF-8 is a variable-length encoding for Unicode and is widely used on the web. A byte sequence interpreted with the wrong character encoding may display incorrectly even when the underlying bytes are intact.
+### Question: “What is the character that has the following UTF-32 encoding U+0001F60E?”
 
-If text appears corrupted, preserve the original bytes and identify the expected encoding before converting it. Avoid repeatedly converting a file in place because this can destroy the original evidence.
+**Answer:** The smiling face with sunglasses character, Unicode code point `U+1F60E`.
 
-## Phase 6: Encoding versus encryption versus hashing
+Use the code point to identify the character in a Unicode chart or the room's interactive viewer.
 
-- **Encoding:** changes representation and is generally reversible without a secret.
-- **Encryption:** protects confidentiality and requires a key to decrypt.
-- **Hashing:** produces a fixed-length digest designed not to be reversed.
-- **Compression:** reduces data size and may also be reversible, but serves a different purpose.
+### Question: “What is the character that has the following UTF-16 encoding U+2658?”
 
-A Base64 string is not encrypted merely because it is unreadable at first glance. Likewise, a SHA-256 digest cannot be decoded to recover the original file.
+**Answer:** The white chess knight, `U+2658`.
 
-## Phase 7: Working through the room
+The character belongs to the Unicode chess-symbol block.
 
-For each challenge, preserve the original string and identify the likely format before applying a decoder. Use one transformation at a time and inspect the output. If a decoded result appears to contain another encoding, record the first result and then analyse the next layer separately.
+## How to verify a character
 
-When a question asks for a specific decoded value, use the exact value supplied by the active room. Do not copy an answer from a different challenge instance or invent a flag.
+If you need to inspect a Unicode code point locally, Python can display its character and code point:
+
+\`\`\`python
+character = chr(0x1F60E)
+print(character)
+print(f"U+{ord(character):04X}")
+\`\`\`
+
+- `chr()` converts a numeric code point to a character.
+- `ord()` returns the code point for a character.
+- The format specifier `04X` prints hexadecimal with at least four digits.
+
+For a UTF-16 or UTF-32 byte representation, the byte order and encoding form matter. A Unicode code point is not the same thing as the raw bytes stored by every encoding.
+
+## Task 4: Conclusion
+
+### Question: “If you are curious to see how computers manipulate data, join the Python Demo room (coming soon).”
+
+**Answer:** No answer needed.
 
 ## Key takeaways
 
-Encoding is about representation, not confidentiality. Identify the likely format from context, use the appropriate tool, preserve the original bytes, and verify the output before interpreting it. This discipline is useful in CTF puzzles, malware triage, web traffic analysis, and digital forensics.
+ASCII assigns numeric codes to a limited character set. Unicode defines code points for a much wider range of characters, while UTF-8, UTF-16, and UTF-32 encode those code points differently. Always distinguish a character's code point from the byte sequence used to store it.

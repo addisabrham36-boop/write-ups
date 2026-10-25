@@ -160,3 +160,52 @@ For each question, identify whether it tests syntax, a data type, a collection, 
 ## Key takeaways
 
 Python becomes useful when the basics are clear: values, conditions, loops, functions, files, and exceptions. In security work, scripts should validate inputs, handle errors explicitly, and produce results that can be checked against the original evidence.
+
+## Expanded Python practical guide
+
+### 1. Run code and inspect errors
+
+Use the Python interpreter or the environment supplied by the room. Save scripts with a `.py` extension and run them with the intended Python version:
+
+```bash
+python --version
+python script.py
+```
+
+Read the full traceback when an error occurs. The final line identifies the exception type and message; the preceding lines show the call path. Fix the first meaningful error rather than changing unrelated lines.
+
+### 2. Variables and types
+
+Python variables refer to objects. Common built-in types include integers, floats, strings, booleans, lists, tuples, dictionaries, and sets. Use `type(value)` when unsure of a value's type. A string such as `"5"` is not the same as integer `5`; convert deliberately with `int()` or `str()` where appropriate.
+
+### 3. Conditions and loops
+
+Conditions use `if`, `elif`, and `else`. Loops repeat work: `for` iterates over an iterable, while `while` continues while a condition is true. Indentation defines code blocks, so inconsistent indentation changes program structure or raises an error.
+
+### 4. Functions and scope
+
+Functions package reusable behaviour. Parameters receive values, and `return` sends a result back to the caller. A local variable normally exists within its function's scope. Use descriptive names and keep functions small enough to test.
+
+### 5. Collections and iteration
+
+Lists are ordered and mutable; tuples are ordered and immutable; dictionaries map keys to values; sets store unique elements. Select the data structure that matches the task. Check whether a key exists before reading it when input is uncertain.
+
+### 6. Files and exceptions
+
+Use a context manager to ensure a file is closed:
+
+```python
+with open("notes.txt", "r", encoding="utf-8") as handle:
+    content = handle.read()
+print(content)
+```
+
+Catch specific exceptions where recovery is possible. Avoid broad exception handling that hides programming errors. Validate external input and do not execute untrusted strings as code.
+
+### 7. Debugging and testing
+
+Print small values, use a debugger, or write assertions to verify assumptions. Test normal input, empty input, unexpected types, and boundary values. Keep expected output separate from actual output so failures are easy to identify.
+
+### 8. Complete the room
+
+For each question, run the exact code or command in the room's environment and inspect the output. Preserve capitalization and punctuation when the answer is a literal string. Do not invent output from code that has not been run.

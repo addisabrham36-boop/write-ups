@@ -137,56 +137,19 @@ For email, configure SPF, DKIM, and DMARC carefully and monitor reports. Avoid p
 
 DNS is a distributed database with caching and delegation. Record types answer different questions, and the record value must be read from the correct query. For the practical, the correct method is to select the requested name and record type in the emulator, then copy the value returned by the lab exactly.
 
-## Expanded DNS practical reference
+## Phase 8: Practical question checklist
 
-### 1. What DNS does
+| Question | Query | Field to submit |
+|---|---|---|
+| What is the CNAME of shop.website.thm? | Query shop.website.thm with type CNAME | Alias hostname |
+| What is the TXT record value of website.thm? | Query website.thm with type TXT | Exact TXT text |
+| What is the numerical priority value for the MX record? | Query website.thm with type MX | Numeric preference |
+| What is the IP address for the A record of www.website.thm? | Query www.website.thm with type A | IPv4 address |
 
-The Domain Name System maps names to records used by clients and services. A resolver may answer from cache or ask the DNS hierarchy. DNS is not a single central database; authority is delegated across root, top-level-domain, and authoritative nameservers.
+These values belong to the room's simulated DNS zone. The answer should come from the current emulator output; don't replace it with a plausible value from a public domain. Preserve the exact spelling and formatting.
 
-### 2. Query common record types
+## Final troubleshooting and defence
 
-Use the exact domain from the room:
+If a query fails, check the record type, spelling, resolver, cache/TTL, and response status before changing multiple things at once. NXDOMAIN, NOERROR-without-an-answer, SERVFAIL, and timeout indicate different failure classes.
 
-```bash
-dig TARGET_DOMAIN A
-dig TARGET_DOMAIN AAAA
-dig TARGET_DOMAIN MX
-dig TARGET_DOMAIN NS
-dig TARGET_DOMAIN TXT
-dig TARGET_DOMAIN CNAME
-```
-
-A maps a name to IPv4, AAAA maps to IPv6, MX lists mail exchangers and priorities, NS lists authoritative nameservers, TXT stores text data such as SPF policy or verification values, and CNAME aliases one name to another. CNAME and other records have DNS-specific restrictions; do not assume every name can have every record type.
-
-The `dig` output includes the question, answer, authority and additional sections, plus TTL and query timing. The TTL is the cache lifetime in seconds, not a guarantee that the value will remain unchanged for that period.
-
-### 3. Understand the resolution path
-
-A stub resolver on the client usually asks a recursive resolver. If the answer is not cached, the resolver follows referrals through the hierarchy and asks the authoritative server. The client normally receives the final answer, not every intermediate step.
-
-If a name fails, distinguish NXDOMAIN (the queried name does not exist according to the response) from SERVFAIL (the resolver could not complete the lookup) and timeout (no usable response arrived). These failures have different causes.
-
-### 4. Email security records
-
-MX records identify mail exchangers. SPF uses TXT records to describe which hosts are authorized to send mail for a domain. DKIM publishes a public key under a selector-specific name. DMARC specifies how receivers should handle messages that fail alignment and where reports may be sent. A TXT record alone does not guarantee that email is secure; the policy and receiving system's enforcement matter.
-
-### 5. Subdomains and zone transfers
-
-Subdomains can represent services such as mail, VPN, web, or staging environments. In an authorized lab, query known names and use the task's specified source to discover additional ones. An AXFR zone transfer is intended for authorized secondary DNS servers; an unrestricted transfer may expose a zone's records. Do not attempt it against domains outside the room's scope.
-
-### 6. DNS over UDP and TCP
-
-DNS commonly uses UDP port 53, but TCP is also used, including for large responses and zone transfers. A firewall that permits one transport but blocks the other can cause selective failures. Use `dig +tcp TARGET_DOMAIN` only when the task requires testing TCP resolution.
-
-### 7. Troubleshooting
-
-- Check the exact spelling and trailing domain suffix.
-- Query the record type requested by the question.
-- Inspect TTL and authoritative information if results differ.
-- Compare the configured resolver with an authoritative result when permitted.
-- Do not assume a cached answer is current.
-- Preserve the exact value, especially MX priority and TXT record content.
-
-### 8. Complete the room tasks
-
-For each task, identify the requested DNS record and query it directly. Answer from the record section, not from a guess based on a hostname. The live room may use example domains or values that differ from this note, so copy the answer from your own query. Redact public flags as `flag{hidden}`.
+For defensive practice, remove stale DNS records, protect registrar access with MFA, maintain SPF/DKIM/DMARC, monitor public changes, and avoid putting secrets into TXT records. DNSSEC can improve DNS data authenticity but does not encrypt queries or establish that a destination is trustworthy.

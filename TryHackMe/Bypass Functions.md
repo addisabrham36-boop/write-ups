@@ -13,9 +13,9 @@ The room title suggests a function restriction or filtering challenge. The corre
 
 Start the target and record the assigned IP. Identify the web service:
 
-\`\`\`bash
+```bash
 nmap -sC -sV -oN bypass-functions-nmap.txt TARGET_IP
-\`\`\`
+```
 
 - **-sC** runs Nmap's default scripts.
 - **-sV** attempts to identify service versions.

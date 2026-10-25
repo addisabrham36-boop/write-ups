@@ -1,85 +1,234 @@
 # HTTP in Detail: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/httpindetail
+Official room: https://tryhackme.com/room/httpindetail
 
-HTTP is the application protocol browsers and web services use to exchange requests and responses. HTTPS is HTTP carried over TLS, which protects the connection against eavesdropping and tampering when configured correctly.
+## Room Overview & Information
 
-## 1. A request has a structure
+**Category:** Web fundamentals  
+**Difficulty:** Beginner  
+**Focus:** HTTP and HTTPS, URLs, request/response structure, methods, status codes, headers, cookies, and constructing requests.
 
-A typical HTTP request contains a method, path, protocol version, headers, a blank line, and sometimes a body. For example:
+HTTP is the application protocol browsers and web servers use to exchange resources. Understanding the request and response format makes web debugging and security testing much less mysterious. HTTPS is HTTP protected by TLS; TLS provides transport encryption and helps authenticate the server through certificates.
 
-```http
-GET / HTTP/1.1
-Host: example.com
-User-Agent: example-client
-Accept: */*
+This room is a protocol-learning lab, not a boot-to-root target. There is no Nmap exploitation chain or privilege escalation phase. The useful evidence comes from the interactive HTTP emulator and the protocol examples shown in the task.
+
+## Phase 1: Understand URLs and requests
+
+A URL can contain a scheme, user information, host, port, path, query string, and fragment. Not every URL uses every component.
+
+Example:
+
+```text
+https://example.test:8443/articles?id=7#comments
 ```
 
-The method describes the intended operation. GET requests a representation, POST commonly submits data, PUT commonly creates or replaces a resource, PATCH applies a partial update, and DELETE requests removal. Actual server behaviour depends on the application, so a method's name is not proof that the action is safe.
+- `https` is the scheme.
+- `example.test` is the host.
+- `8443` is the explicit port.
+- `/articles` is the path.
+- `id=7` is a query parameter.
+- `comments` is a fragment handled by the client; it is not normally sent to the server in the HTTP request.
 
-Headers provide metadata. The Host header identifies the requested hostname in HTTP/1.1. Content-Type describes the body format, while Authorization may carry credentials or a token. Cookies can carry session identifiers and must be protected.
+A request line contains a method, path, and HTTP version. The Host header identifies the requested hostname, which matters when one IP hosts multiple websites. Headers carry metadata, and a blank line separates the headers from an optional body.
 
-## 2. Responses and status codes
-
-A response contains a status line, headers, and optionally a body. Common status codes include:
-
-- **200 OK:** the request succeeded.
-- **301 / 302:** redirection.
-- **400 Bad Request:** the request was invalid.
-- **401 Unauthorized:** authentication is required or failed.
-- **403 Forbidden:** the server refuses the request.
-- **404 Not Found:** the requested resource was not found or is being hidden.
-- **405 Method Not Allowed:** the method is not supported for the resource.
-- **500 Internal Server Error:** the server encountered an error.
-
-Read the response body and headers as well as the status code. A 200 response can still contain an application-level error, and a 404 may be intentionally used to conceal whether a resource exists.
-
-## 3. Inspect requests from the command line
-
-Use `curl` to examine a public example or a lab target you are authorised to test:
+A simple request can be made from a terminal with:
 
 ```bash
 curl -i https://example.com/
-curl -I https://example.com/
-curl -v https://example.com/
 ```
 
+- `curl` makes the HTTP request.
 - `-i` includes response headers in the output.
-- `-I` requests headers only, using a HEAD request when supported.
-- `-v` shows connection and protocol details useful for troubleshooting.
+- The URL identifies the scheme and destination.
 
-Replace the example host with the room's target when required. Avoid placing real passwords or API tokens directly in shell history.
+This command is an illustrative example, not a command required to complete the room's browser emulator.
 
-To send a form body in a controlled lab, `curl` supports `-d`, but first check the endpoint and the expected content type. Do not send state-changing requests to a system without permission.
+## Phase 2: HTTP methods
 
-## 4. Cookies, sessions, and authentication
+Methods describe the intended operation. They do not, by themselves, enforce authorisation.
 
-HTTP itself is stateless: each request is evaluated independently at the protocol level. Web applications commonly use cookies to associate requests with a server-side session. Session cookies should be protected with Secure and HttpOnly attributes, and an appropriate SameSite policy.
+| Method | Common purpose | Room-style example |
+|---|---|---|
+| `GET` | Retrieve a representation | View a news article |
+| `POST` | Submit data, often creating a resource or starting an operation | Create a user account or submit a login form |
+| `PUT` | Create or replace the state of a resource at a known URI | Update a user resource |
+| `DELETE` | Request removal of a resource | Remove an uploaded picture |
 
-Authentication establishes who the user is. Authorisation determines what that user is allowed to do. A valid session does not mean every record or endpoint should be accessible. The server must check permissions for each sensitive action.
+A real application may use methods differently, and a server may reject a method that the application does not support. The room's questions use the conventional mappings above.
 
-## 5. HTTPS and TLS
+### Task 3: HTTP Methods, question-by-question
 
-HTTPS protects data in transit and helps the client verify the server's identity through certificate validation. It does not protect a server from application vulnerabilities, guarantee that a website is honest, or stop a user from submitting sensitive data to a malicious site with a valid certificate.
+**Question: “What method would be used to create a new user account?”**
 
-Certificate warnings should not be ignored casually. In a lab using a self-signed certificate, follow the lab's instructions and understand the reason for the warning rather than disabling verification globally.
+Use `POST`. Account creation usually submits new data to the server.
 
-## 6. Common web security mistakes
+**Question: “What method would be used to update your email address?”**
 
-- Trusting user input without validation or contextual output encoding.
-- Building SQL queries by concatenating untrusted input.
-- Missing authorisation checks on object IDs.
-- Exposing debug information or stack traces.
-- Storing session identifiers insecurely.
-- Allowing dangerous cross-origin behaviour without a clear need.
-- Treating a client-side check as if it enforced server-side access control.
+Use `PUT` in the room's simplified method mapping.
 
-When testing, use the lab scope and document the request, response, expected behaviour, and observed behaviour. A finding should explain the security impact, not merely state that a response looked unusual.
+**Question: “What method would be used to remove a picture you've uploaded to your account?”**
 
-## 7. Work through the room
+Use `DELETE`.
 
-For each question, identify whether it refers to request methods, headers, response codes, cookies, or HTTPS. Read the exact request or response shown in the task. If a status code appears, interpret it in context rather than assuming it proves the whole operation succeeded.
+**Question: “What method would be used to view a news article?”**
 
-## What I took from this room
+Use `GET`.
 
-HTTP is easier to troubleshoot when I separate the request, response, headers, body, and transport security. It is also a security boundary: the server must validate input, enforce authorisation, and protect sessions regardless of what the browser displays.
+The lesson is to identify the intended action, then match it to the conventional method. In a real application, verify the documented API rather than assuming that every endpoint follows these conventions.
+
+## Phase 3: HTTP status codes
+
+The first line of an HTTP response includes the status code. The first digit indicates a broad category:
+
+- **1xx:** informational; the request process is continuing.
+- **2xx:** success.
+- **3xx:** redirection or another action needed to complete the request.
+- **4xx:** client-side request or authorisation problem.
+- **5xx:** server-side failure.
+
+Common examples:
+
+| Code | Meaning | Practical interpretation |
+|---|---|---|
+| `200 OK` | Request succeeded | The response contains the requested result |
+| `201 Created` | Resource created | Common after successful creation |
+| `301 Moved Permanently` | Permanent redirect | Client should use the new URI |
+| `302 Found` | Temporary redirect | Client is redirected elsewhere |
+| `400 Bad Request` | Request is malformed or invalid | Inspect syntax and required fields |
+| `401 Unauthorized` | Authentication is required or failed | Provide valid authentication |
+| `403 Forbidden` | Server refuses the action | Identity may be known but access is not permitted |
+| `404 Not Found` | Resource not found or intentionally hidden | Check path and application behaviour |
+| `405 Method Not Allowed` | Method unsupported for this resource | Use the method allowed by the endpoint |
+| `500 Internal Server Error` | Unexpected server failure | Server logs are needed to identify the cause |
+| `503 Service Unavailable` | Service temporarily unavailable | May indicate maintenance or overload |
+
+A status code is a signal, not a full diagnosis. A 404 can be deliberately used to conceal a protected resource, and a 200 response can still contain an application-level error.
+
+## Phase 4: Headers
+
+Headers provide metadata about a request or response.
+
+### Request headers
+
+- `Host`: hostname requested by the client.
+- `User-Agent`: client software identifier.
+- `Content-Length`: length of the request body in bytes.
+- `Accept-Encoding`: compression formats the client can accept.
+- `Cookie`: cookies sent back to the server.
+
+### Response headers
+
+- `Set-Cookie`: instructs the browser to store a cookie.
+- `Content-Type`: identifies the type of content being returned.
+- `Content-Encoding`: indicates response compression.
+- `Cache-Control`: controls caching behaviour.
+
+### Task 5: Headers, question-by-question
+
+**Question: “What header tells the web server what browser is being used?”**
+
+The conventional answer is `User-Agent`.
+
+**Question: “What header tells the browser what type of data is being returned?”**
+
+The answer is `Content-Type`.
+
+**Question: “What header tells the web server which website is being requested?”**
+
+The answer is `Host`.
+
+These headers can be inspected in a browser's developer tools under the Network tab or with a command such as `curl -i`. User-Agent is client-supplied and can be changed, so it is not a trustworthy proof of a user's actual browser or identity.
+
+## Phase 5: Cookies and sessions
+
+HTTP is stateless: a server does not automatically remember a prior request. Cookies let a server and browser associate later requests with a session or preference.
+
+A server sends a cookie using `Set-Cookie`; the browser can then send it back in a `Cookie` request header. A session cookie may act as a bearer credential, so anyone who steals a valid session token may be able to impersonate its owner.
+
+### Task 6: Cookies, question-by-question
+
+**Question: “Which header is used to save cookies to your computer?”**
+
+The answer is `Set-Cookie`.
+
+To inspect cookies in a browser, open Developer Tools, select **Network**, reload the lab page, choose a request, and inspect its request and response headers or Cookies tab. The response's `Set-Cookie` header shows what the server asks the browser to store; the later request's `Cookie` header shows what the browser sends.
+
+Secure cookie configuration commonly includes:
+- `Secure`, so the cookie is sent only over HTTPS.
+- `HttpOnly`, so ordinary page JavaScript cannot read it.
+- `SameSite`, to control when the browser sends it in cross-site contexts.
+- A suitable `Path`, `Domain`, and lifetime.
+
+These attributes reduce risk but do not replace correct server-side authorisation and session management.
+
+## Phase 6: Interactive request emulator
+
+The room's final task uses a website emulator. Click **View Site** in the task and build each request using the method selector, URI path, query parameters, and body parameters. Do not confuse query parameters with body parameters.
+
+### Task 7: Making Requests
+
+**Question: “Make a GET request to /room page”**
+
+1. Select `GET`.
+2. Set the path to `/room`.
+3. Send the request.
+4. Confirm the emulator shows the request and response.
+
+**Question: “Make a GET request to /blog page and set the id parameter to 1”**
+
+1. Select `GET`.
+2. Set the path to `/blog`.
+3. Open the URI-parameter control (the gear button).
+4. Add parameter `id` with value `1`.
+5. Send the request.
+
+The request is conceptually `GET /blog?id=1`.
+
+**Question: “Make a DELETE request to /user/1 page”**
+
+1. Select `DELETE`.
+2. Set the path to `/user/1`.
+3. Send the request.
+
+**Question: “Make a PUT request to /user/2 page with the username parameter set to admin”**
+
+1. Select `PUT`.
+2. Set the path to `/user/2`.
+3. Open the body-parameter control.
+4. Add `username=admin`.
+5. Send the request.
+
+**Question: “Make a POST request to /login page with the username of thm and a password of letmein”**
+
+1. Select `POST`.
+2. Set the path to `/login`.
+3. Open the body-parameter control.
+4. Add `username=thm`.
+5. Add `password=letmein`.
+6. Send the request.
+
+These values are part of the room's local emulator. Do not reuse the example credentials on real services.
+
+## Phase 7: Troubleshooting and verification
+
+If the emulator rejects a request, check the method first, then the path, then whether each value belongs in the query string or body. A query parameter appears after `?` in the URI; body parameters are sent in the request body. In a real application, the server may also require cookies, CSRF tokens, or authentication.
+
+Useful local inspection command:
+
+```bash
+curl -i -X GET 'https://example.com/'
+```
+
+Here, `-X GET` explicitly sets the method, although GET is already curl's default for a plain URL. Use this as a learning example, not as a replacement for the task emulator.
+
+## Phase 8: Key takeaways and mitigation
+
+- Use HTTPS for confidentiality and server authentication in transit.
+- Validate input on the server and enforce authorisation for every action.
+- Do not treat HTTP methods as security controls.
+- Set cookies with appropriate security attributes.
+- Avoid exposing detailed internal errors to unauthenticated users.
+- Log relevant request metadata without unnecessarily recording secrets.
+- Use correct cache controls for sensitive responses.
+
+The main lesson is that HTTP is structured communication. Once I can read the method, path, headers, body, and status code separately, I can understand what a browser is asking for and what the server is returning.

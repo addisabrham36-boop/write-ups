@@ -69,3 +69,37 @@ A production service should validate the input and return a generic client-facin
 ## Key takeaways
 
 Security misconfiguration can expose sensitive information without a complex exploit. The room's practical is solved by comparing a normal API request with an invalid one and reading the leaked flag from the error response. The fix is to validate input and keep detailed diagnostics out of client-facing responses.
+
+## Expanded configuration audit
+
+### 1. Establish the intended secure baseline
+
+Record the exposed application, server, framework, and deployment configuration. Identify which features are needed and which are unnecessary. Misconfiguration may include default accounts, directory listings, debug mode, verbose errors, permissive cross-origin rules, open administrative endpoints, weak security headers, or excessive permissions.
+
+### 2. Observe externally visible evidence
+
+Inspect the page and response headers using the room's browser or a simple request:
+
+```bash
+curl -i http://TARGET_HOST/
+```
+
+The `-i` option displays headers and response body. Use the exact scheme, hostname, and port provided by the lab. A server banner can reveal implementation details, but a banner alone is not proof of an exploitable weakness.
+
+### 3. Inspect errors and defaults
+
+Trigger only the invalid input permitted by the room and examine whether the response exposes stack traces, filesystem paths, framework details, SQL errors, or secrets. Detailed logs should remain in protected server-side storage, while client-facing errors should be concise and non-sensitive.
+
+Check default credentials only when the room explicitly provides that task and target. Do not attempt default logins on real systems.
+
+### 4. Validate impact
+
+For a suspected directory listing, debug endpoint, or open file, establish what data is actually accessible and whether it is sensitive. Do not claim compromise from the presence of a feature alone. Preserve a sanitized response excerpt as evidence.
+
+### 5. Remediation
+
+Disable debugging in production, remove unused components, change defaults, enforce authentication and authorization, reduce service privileges, apply security headers where appropriate, keep dependencies updated, and centralize logs safely. Maintain a repeatable hardened baseline and review configuration changes.
+
+### 6. Room tasks
+
+Use the live response to identify the specific misconfiguration and answer requested fields exactly. Distinguish server-side evidence from what is merely visible in the browser. Redact flags as `flag{hidden}`.

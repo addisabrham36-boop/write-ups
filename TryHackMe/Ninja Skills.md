@@ -158,3 +158,52 @@ If a command says a file does not exist, check spelling and case. Linux filename
 ## Key takeaways
 
 Ninja Skills is a compact exercise in selecting efficient filesystem commands. Instead of reading every file manually, use metadata, pattern matching, hashes, line counts, numeric IDs, and permission bits to answer each question from direct evidence.
+
+## Expanded filesystem enumeration workflow
+
+### 1. Work from the supplied files
+
+Start with the files or directory tree the room gives you. Confirm the current location and inspect entries, including hidden files:
+
+```bash
+pwd
+ls -la
+find . -maxdepth 3 -type f -print
+```
+
+`pwd` prints the current directory; `ls -la` shows hidden entries and metadata; `find` lists files within the chosen depth. Restrict searches to the challenge workspace rather than scanning unrelated system directories.
+
+### 2. Search by metadata and content
+
+The room may ask for a file based on name, extension, content, size, or metadata. Use the property stated in the question to choose the command. Examples include `find` with `-name`, `grep -R` for text, `wc -l` for line counts, and `stat` for file metadata.
+
+```bash
+find . -type f -name '*.txt' -print
+grep -Rni 'SEARCH_TERM' .
+wc -l path/to/file
+stat path/to/file
+```
+
+Replace placeholders with the exact term or path from the task. `grep -Rni` searches recursively, ignores case, and prints line numbers; it can produce a lot of output, so narrow the search when possible.
+
+### 3. Inspect archives and hashes
+
+List archive contents before extracting. Record file hashes if the room asks for a digest, and ensure you hash the exact target file. Distinguish a checksum from a file size or inode number. Use a safe temporary directory for extraction and avoid overwriting existing files.
+
+### 4. Interpret permissions and identifiers
+
+Linux permission bits describe read, write, and execute rights for owner, group, and others. Numeric IDs identify users and groups in system metadata, but the mapping to names depends on the target's account database. Preserve leading zeros if the task treats an identifier as a string.
+
+### 5. Common mistakes
+
+- Forgetting hidden files.
+- Searching the wrong starting directory.
+- Confusing a filename with its full path.
+- Counting bytes where the question asks for lines.
+- Hashing a copy instead of the named original.
+- Ignoring case sensitivity in a path.
+- Treating one permission bit or metadata field as proof of malicious activity.
+
+### 6. Complete every task from evidence
+
+For each question, write the requested property and the exact command that reveals it. Verify the result by opening the corresponding file or checking its metadata. This room is driven by its supplied filesystem; do not invent file names or answers that are not present in your instance.

@@ -1,4 +1,4 @@
-# Metasploit: Introduction — TryHackMe Walkthrough
+# Metasploit: Introduction — Complete TryHackMe Walkthrough
 
 Official room: https://tryhackme.com/room/metasploitintro
 
@@ -6,183 +6,149 @@ Official room: https://tryhackme.com/room/metasploitintro
 
 **Category:** Penetration-testing tools  
 **Difficulty:** Beginner  
-**Focus:** Metasploit Framework, msfconsole, module search, exploit configuration, payloads, sessions, and verification.
+**Focus:** Metasploit Framework, msfconsole, module search, exploit configuration, payloads, sessions, and result verification.
 
-Metasploit organises security tests into modules. It includes exploit modules, auxiliary modules, payloads, encoders, and post modules. It is not a magic vulnerability scanner: the operator must identify the target, confirm the relevant weakness, choose a suitable module, and configure it correctly.
+Metasploit organises security tests into modules. It includes exploit modules, auxiliary modules, payloads, encoders, and post modules. It is not a magic vulnerability scanner: the operator must identify the target, confirm the relevant weakness, choose a suitable module, and configure it correctly. Use only a room target or another system you are explicitly authorised to test.
 
-Use only the room's deployed target or another system you are explicitly authorised to test.
+## Phase 1: Reconnaissance & Enumeration
 
-## Phase 1: Start the console
+### 1. Establish a baseline
 
-Launch the framework:
+Before selecting an exploit, identify the active target and its exposed services. A typical lab scan is:
 
-\`\`\`bash
+```bash
+nmap -sC -sV -oN metasploit-baseline.txt MACHINE_IP
+```
+
+- **-sC** runs Nmap's default scripts.
+- **-sV** probes discovered ports to identify services and versions.
+- **-oN** saves a readable report.
+- **MACHINE_IP** must be replaced with the active room address.
+
+A version banner is a lead, not proof of exploitability. Check the relevant service, configuration, and vulnerability preconditions.
+
+### 2. Start Metasploit
+
+Launch the console:
+
+```bash
 msfconsole
-\`\`\`
+```
 
 Useful console commands include:
 
-\`\`\`text
+```text
 help
 version
 search type:auxiliary
 show exploits
 show payloads
 exit
-\`\`\`
+```
 
-- **help** lists console commands.
-- **version** displays the installed framework version.
-- **search** looks for modules.
-- **show exploits** lists exploit modules available in the installed build.
-- **show payloads** lists payload modules.
-- **exit** closes the console.
+The help command lists available commands; version displays the framework build; search looks for modules; show exploits and show payloads list the modules in the installed version; exit closes the console. Module availability changes over time, so use the names returned by your local search rather than copying identifiers from an old screenshot.
 
-Module availability changes over time, so use the names returned by your local search rather than copying a module identifier from an old version.
+## Phase 2: Vulnerability Analysis & Module Selection
 
-## Phase 2: Understand module types
+### 3. Understand the module types
 
 - **Exploit module:** attempts to trigger a specific vulnerability.
-- **Auxiliary module:** performs support tasks such as scanning, enumeration, or service interaction.
+- **Auxiliary module:** performs supporting tasks such as scanning, enumeration, or service interaction.
 - **Payload:** behaviour delivered after an exploit succeeds.
-- **Post module:** performs authorised actions after a session exists.
+- **Post module:** performs authorized actions after a session exists.
 - **Encoder:** transforms payload bytes for a specific purpose; it does not reliably make code undetectable.
-
-Choose a module based on evidence from enumeration. A module that targets the wrong service or version will usually fail and may generate misleading errors.
-
-## Phase 3: Search and inspect a module
 
 Search by product, service, or vulnerability:
 
-\`\`\`text
+```text
 search apache
 search type:auxiliary ssh
-\`\`\`
+```
 
-Inspect a candidate module before using it:
+Inspect the candidate before using it:
 
-\`\`\`text
+```text
 info MODULE_PATH
 use MODULE_PATH
 show options
 show targets
-\`\`\`
+```
 
-Replace MODULE_PATH with a real module name returned by the local search. **info** explains the module, **use** selects it, **show options** lists configuration, and **show targets** lists supported target variants where applicable.
+Replace MODULE_PATH with a real module returned by search. The info command explains the module and requirements; use selects it; show options lists settings; show targets lists supported target variants where available.
 
-## Phase 4: Configure the target
+### 4. Configure the target carefully
 
 Common options include:
 
-- **RHOSTS:** remote target address or range.
-- **RPORT:** remote service port.
-- **LHOST:** local callback address for a reverse payload.
-- **LPORT:** local callback port.
-- **TARGET:** target implementation or version choice.
+| Option | Meaning |
+|---|---|
+| RHOSTS | Remote target address or range |
+| RPORT | Remote service port |
+| LHOST | Local callback address for a reverse payload |
+| LPORT | Local callback port |
+| TARGET | Target implementation or version choice |
 
 Example configuration:
 
-\`\`\`text
+```text
 set RHOSTS MACHINE_IP
 set RPORT TARGET_PORT
 show options
-\`\`\`
+```
 
-Use the actual IP and port from the room. Do not assume the default port is correct. If the payload requires a callback, LHOST must be an address reachable from the target. The loopback address 127.0.0.1 normally points back to the target itself, not the AttackBox.
+Use the IP and port from your own scan. Do not assume the default port is correct. If a payload requires a callback, LHOST must be reachable from the target. The loopback address 127.0.0.1 normally points back to the target, not the AttackBox.
 
-## Phase 5: Run and interpret the result
+Before running anything, confirm the target is in scope, required options are set, the version matches the module's prerequisites, and target and payload selections are compatible.
 
-Before launching a module, confirm the target is in scope, the service and version match the prerequisites, required options are set, and the selected target and payload are compatible.
+## Phase 3: Initial Access, Sessions & Post-Exploitation
 
-Some modules support a **check** command that tests whether a target appears vulnerable. Not all modules support it, and a negative check is not always conclusive.
+### 5. Run and interpret the result
 
-When the room instructs you to run the test, the console command is:
+Some modules support a check command that tests whether a target appears vulnerable. Not all modules support it, and a negative result is not always conclusive. When the room instructs you to run the test, use:
 
-\`\`\`text
+```text
 run
-\`\`\`
+```
 
-A successful console message is not enough by itself. Verify whether a session was opened and inspect the session's actual identity and capabilities.
+A message that the exploit was sent is not sufficient proof of success. Verify whether a session was opened and inspect the session's actual identity and capabilities.
 
-## Phase 6: Manage sessions
+### 6. Manage sessions
 
-If a module opens a session, Metasploit reports a session identifier. Common session commands are:
+If the module opens a session, Metasploit reports a session identifier. Common console commands are:
 
-\`\`\`text
+```text
 sessions
 sessions -i SESSION_ID
 background
-\`\`\`
+```
 
-Use the actual session ID printed by the framework. **sessions** lists active sessions; **sessions -i** interacts with the selected session; **background** returns to the console without closing the session. Syntax can vary by session type and framework version.
+Use the actual session ID printed by the framework. sessions lists active sessions; sessions -i interacts with the selected session; background returns to the console without closing the session. Syntax and behaviour can vary by session type and version.
 
-Do not assume a shell runs as root or administrator. Verify the identity inside the session and stop once the lab objective is complete.
+Do not assume a shell runs as root or administrator. Verify identity in the session before claiming elevated privileges. Perform only the post-exploitation steps required by the room.
 
-## Phase 7: Troubleshooting
+### 7. Troubleshoot failures
 
-- **No module found:** update the search terms and inspect the installed module list.
-- **Missing required option:** run **show options** and set the required value.
-- **Connection failure:** verify the target IP, port, lab state, and VPN/AttackBox connectivity.
+- **No module found:** revise the search terms and inspect the installed module list.
+- **Missing required option:** run show options and set the required value.
+- **Connection failure:** verify target IP, port, lab state, and VPN/AttackBox connectivity.
 - **Exploit failure:** re-check version, architecture, target selection, and prerequisites.
-- **No callback:** check that LHOST is reachable and that the listener and payload ports match.
-- **Unexpected privileges:** confirm the identity; exploit success does not imply elevated privileges.
+- **No callback:** verify LHOST reachability and match the payload and listener ports.
+- **Unexpected privilege level:** confirm identity; exploit success does not imply privilege escalation.
 
-## Phase 8: Remediation and responsible use
+Record the tool version, module path, target options, result, and any error message. Change one assumption at a time instead of repeating the same unsuccessful command.
 
-Metasploit is a testing framework, not a mitigation. Fix the vulnerability the module targets, patch affected software, disable unnecessary services, restrict network access, and use least privilege. Keep an evidence record of the module, options, target, result, and remediation.
+## Phase 4: Room Questions & Result Verification
 
-## Key takeaways
+The room introduces the framework and its module workflow rather than one fixed exploit chain. For each task:
+1. Read the requested module category or console command.
+2. Use the installed console to retrieve the exact value.
+3. Inspect the module's description and required options.
+4. Verify the target and setting before executing.
+5. Confirm the result from a real session or observed response.
+6. Submit the value requested by the live room.
 
-Metasploit is most effective after reconnaissance. Search for a module, read its requirements, configure the correct target, run only the authorised test, and verify the result. A tool's output should support a conclusion, not replace reasoning.
+No fixed exploit result or flag should be invented. Module names and available options can change between framework versions, so the live console and room's current task are the authority.
 
-## Expanded module workflow and evidence collection
+## Phase 5: Key Takeaways & Remediation
 
-### 1. Establish a baseline
-
-Before choosing a Metasploit module, identify the lab's active target and enumerate its exposed services:
-
-```bash
-nmap -sC -sV -oN metasploit-baseline.txt TARGET_IP
-```
-
-`-sC` runs Nmap's default scripts, `-sV` probes discovered ports to identify services and versions, and `-oN` saves human-readable results. A version banner is a lead, not proof of exploitability. Confirm the service, configuration, and vulnerability preconditions.
-
-### 2. Launch and inspect the console
-
-Start Metasploit:
-
-```bash
-msfconsole
-```
-
-Inside the console, search for the vulnerability or service identified in the scan. Inspect a candidate module before using it:
-
-```text
-search TYPE_OR_CVE
-info MODULE_PATH
-use MODULE_PATH
-show options
-show targets
-```
-
-Replace placeholders with the exact search term and module in the lab. `info` explains the module and its requirements; `show options` lists the settings it needs; `show targets` lists supported target types where the module provides them.
-
-### 3. Configure options deliberately
-
-Set the target address and service port from the room's evidence, not from an old walkthrough. If a payload is required, select one compatible with the module and target. Before execution, re-read the options and verify that the target IP is the assigned lab machine.
-
-### 4. Execute and verify
-
-Run the module only when the room calls for it. A message that an exploit was attempted does not prove success. Check whether a session was actually created, interact with it only as instructed, and verify the identity and host context. Separate initial access from privilege escalation; an unprivileged session is not root.
-
-### 5. Record and interpret results
-
-Save the baseline scan, module path, relevant options, tool version, and the meaningful output. Redact credentials and tokens. If the module fails, investigate target reachability, version/configuration differences, required options, and supported targets instead of repeating the same command without a hypothesis.
-
-### 6. Cleanup and mitigation
-
-Close any session when the task is complete and remove artifacts only as the lab instructs. Defenders should patch vulnerable software, disable unnecessary services, restrict network exposure, run services with least privilege, and monitor exploit indicators.
-
-### 7. Room answers
-
-Use the room's current instance to determine exact service versions, module names, options, and flags. Do not invent an exploit result or claim a session was obtained without evidence. Redact public flags as `flag{hidden}`.
+Metasploit is most effective after reconnaissance. Search for a module, read its requirements, configure the correct target, run only the authorised test, and verify the result. Then fix the vulnerability itself: patch affected software, disable unnecessary services, restrict network exposure, run services with least privilege, and monitor exploitation indicators. Keep a reproducible evidence record and close sessions when the task is complete.

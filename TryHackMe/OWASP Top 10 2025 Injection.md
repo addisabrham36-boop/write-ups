@@ -1,43 +1,78 @@
 # OWASP Top 10 2025: Injection
 
-Room: https://tryhackme.com/room/owasptopten2025three
+Official room: https://tryhackme.com/room/owasptopten2025three
 
-The official OWASP Top 10 2025 room titled Insecure Data Handling covers cryptographic failures, injection, and software or data integrity failures. This note focuses on injection, where untrusted input is interpreted as part of a command, query, template, or other executable language instead of being handled as ordinary data.
+## Room Overview & Information
 
-## 1. Understand the vulnerability
+**Category:** Web application security  
+**Difficulty:** Beginner  
+**OWASP category:** A05 Injection  
+**Practical:** Server-Side Template Injection (SSTI) against the room's deliberately vulnerable web application.
 
-Common forms include SQL injection, operating-system command injection, and server-side template injection (SSTI). They differ in the interpreter involved, but the underlying mistake is similar: user-controlled input reaches a parser in a way that changes the intended program structure.
+The official room is titled **OWASP Top 10 2025: Insecure Data Handling** and also covers cryptographic failures and software/data integrity failures. This file focuses on the injection task so the vulnerability and its practical steps are easy to find.
 
-For SQL, parameterised queries keep values separate from query syntax. For operating-system commands, avoid invoking a shell with concatenated user input. For templates, do not treat user-supplied text as a trusted template expression.
+## Phase 1: Understand the vulnerability
 
-## 2. Start the practical
+Injection occurs when untrusted input is interpreted as part of a command, query, template, or other language. The application has accidentally allowed data to influence program structure.
 
-Deploy the room's lab machine and use the AttackBox or a machine connected to the TryHackMe VPN. The injection practical is available at port 8000 of the target. Open http://MACHINE_IP:8000, replacing MACHINE_IP with the address shown for your instance.
+Examples include SQL injection, operating-system command injection, and Server-Side Template Injection (SSTI). The interpreter differs, but the core question is the same: did user-controlled data remain data, or was it evaluated as instructions?
 
-The task demonstrates SSTI in a vulnerable application. It asks you to retrieve the contents of flag.txt located in the same directory as the web application. Read the task instructions and inspect how the application renders the input you control.
+## Phase 2: Start the practical
 
-## 3. Identify server-side template evaluation
+Deploy the lab machine. Use the TryHackMe AttackBox or a testing machine connected to the TryHackMe VPN. The SSTI practical is available at:
 
-A normal template engine replaces placeholders with values according to its syntax. SSTI occurs when user-controlled input is interpreted as template code rather than inserted as plain text. A useful test distinguishes ordinary reflection from actual evaluation. A page echoing your input does not prove SSTI; evidence that the server evaluates a harmless expression is stronger.
+```text
+http://MACHINE_IP:8000
+```
 
-Use only the supplied lab. Test the smallest harmless expression needed to identify the template behaviour, then follow the room's intended steps to access the requested file. The exact syntax depends on the template engine, so do not assume one expression works across all frameworks.
+Replace `MACHINE_IP` with the current address shown by the room. Do not use a value from an old instance.
 
-## 4. Verify the result
+Inspect the web form and identify the field that controls dynamic content. Submit ordinary input first so you understand the normal response. Then use the room's instructions to test whether the server evaluates a harmless template expression.
 
-Record the input, response, and evidence that the server evaluated it. If the room asks for the file's flag, obtain it from the live practical and submit it there. This public note does not include a guessed flag or a payload claimed to have been tested in an instance I did not run.
+## Phase 3: Confirm SSTI instead of ordinary reflection
 
-## 5. Prevent injection
+A reflected string is simply input echoed back to the browser. SSTI occurs when a server-side template engine evaluates user-controlled template syntax.
 
-- Keep untrusted input separate from executable syntax.
-- Use parameterised SQL queries.
-- Avoid shell invocation where a safe API is available.
-- Do not render user-controlled strings as trusted templates.
-- Use strict input validation appropriate to the expected data.
-- Run the application with least privilege and restrict filesystem access.
-- Keep frameworks patched and add regression tests for the vulnerable input path.
+A sound test compares:
+1. Ordinary text, which should be displayed as text.
+2. A harmless expression supported by the template engine, which may be evaluated.
+3. The response, to establish whether the server performed evaluation.
 
-Escaping rules differ between contexts. A filter that is safe for HTML may not be safe for SQL or a shell. Use the protection designed for the specific interpreter.
+The exact syntax depends on the template engine. Do not assume that an expression from Jinja, Twig, or another engine works in every framework. Follow the active task's hint and keep testing within the lab.
 
-## What I took from this room
+## Phase 4: Retrieve the requested file
 
-Injection happens when data crosses into a language interpreter without the right boundary. The reliable fix is to use safe APIs and context-specific protections, then verify that the original input is treated as data rather than executable syntax.
+### Task question
+
+**“Perform an SSTI attack on the practical. You need to read the contents of flag.txt that is located within the same directory as the web application.”**
+
+Procedure:
+1. Identify the template behaviour using the room's supplied application.
+2. Follow the task's intended SSTI method to access a file in the application's directory.
+3. Read the contents of `flag.txt` as instructed by the lab.
+4. Verify that the returned value is the file content, not a string echoed from your input.
+5. Submit the flag to TryHackMe.
+
+This public note does not include a guessed flag. The exact value should come from the active practical, and in a public repository it should be redacted as `flag{hidden}`.
+
+## Phase 5: Evidence and impact
+
+Record the endpoint, the input that caused template evaluation, the resulting response, and the privileges of the application process. Access to one file does not automatically mean full server compromise. State only the impact the lab demonstrates.
+
+SSTI can be severe because template engines may expose application objects, configuration, or file access depending on the engine and environment. The impact varies by framework, sandboxing, and process permissions.
+
+## Phase 6: Remediation
+
+- Do not compile or evaluate user-controlled strings as templates.
+- Use fixed templates and pass user input as data.
+- Apply framework-supported sandboxing where appropriate, while recognising that sandboxing is not a substitute for safe design.
+- Run the web process with least privilege and restrict filesystem access.
+- Avoid storing secrets in files accessible to the web process.
+- Add regression tests that ensure user input is rendered literally.
+- Keep frameworks and template engines patched.
+
+Escaping must be context-aware. HTML output encoding does not automatically protect SQL, shell, or template contexts.
+
+## Key takeaways
+
+SSTI is an injection vulnerability in which input crosses into a server-side template interpreter. The lab's objective is to prove evaluation and retrieve the specified file. The durable fix is to keep user input separate from executable template syntax and minimise the application's permissions.

@@ -97,3 +97,73 @@ The exact library source and path must match your lab environment. Do not use th
 ## What I took from this room
 
 Road demonstrates how several ordinary flaws can chain into full compromise. The password-change endpoint crosses an authorisation boundary, the upload feature crosses from file storage into code execution, database exposure reveals another account's credentials, and LD_PRELOAD turns a privileged utility into root access. Each stage needs its own fix.
+
+## Phase 1 continued: Web and database enumeration
+
+The path /v2 is the key web-application clue in this room. Inspect visible features after registering a normal lab user and preserve a baseline request before modifying it. A service scan and focused directory discovery help identify the app without guessing endpoints:
+
+```bash
+nmap -sC -sV -oN road-nmap.txt TARGET_IP
+gobuster dir -u http://TARGET_IP/ -w /path/to/wordlist.txt -o road-web.txt
+```
+
+Use a wordlist installed in the AttackBox. Confirm the actual path and response before treating a result as the admin panel.
+
+## Phase 2 continued: Confirm the broken access control
+
+Capture the ordinary password-change request in Burp Suite. Record the request method, route, session cookie, account identifier, and new-password fields. Change only the identifier to the administrator address exposed by the application, then send the request inside the lab.
+
+The critical evidence is whether the server changes the targeted account's password despite the request originating from another account. A 200 response is not enough; use the normal login form to verify the resulting account context. This is a missing server-side authorization check, commonly described as broken access control or IDOR depending on the exact design.
+
+## Phase 2 continued: Upload handling
+
+The profile-image form should accept images only, but the vulnerable application permits a PHP file to be stored in a web-accessible location where the server executes it. This combines weak server-side validation with dangerous file placement.
+
+Use only the room's test file and callback address. Before triggering it, start the listener:
+
+```bash
+nc -lvnp 4444
+```
+
+If the callback arrives, establish the initial context:
+
+```bash
+whoami
+id
+hostname
+pwd
+```
+
+The shell typically runs as the web-server account, not as root. Restore or remove the uploaded proof file when the lab permits cleanup.
+
+## Phase 3: MongoDB and sudo configuration
+
+From the shell, check the application's configuration and local listening ports rather than immediately scanning the entire network:
+
+```bash
+ss -lntup
+find /var/www -maxdepth 4 -type f -readable 2>/dev/null
+```
+
+Review relevant configuration files for database connection settings. If MongoDB is reachable locally and the room permits it, inspect the specific application database for stored credentials. Do not dump unrelated collections or data.
+
+The intended later escalation depends on a sudo rule for a backup utility that preserves the LD_PRELOAD environment variable. Inspect the current policy:
+
+```bash
+sudo -l
+```
+
+A preserved LD_PRELOAD can cause a privileged process to load a shared library from a user-controlled location, unless the environment is sanitized and the binary is protected. Verify the exact permitted command and environment setting first. Use only the proof of concept provided or directed by the room, and validate root access with id.
+
+## Phase 4: Flag workflow
+
+Read the user flag after locating it in the intended webdeveloper home path. Obtain the root flag only after the sudo escalation is verified. Use the live target values; this section does not invent flags or assume the current deployment matches an older run.
+
+## Phase 5: Remediation
+
+- Enforce authorization on password changes using the authenticated account, not a client-supplied email alone.
+- Validate uploaded file content and store uploads outside executable paths.
+- Run the web application as a dedicated unprivileged service account.
+- Protect database credentials and restrict database listeners.
+- Remove unnecessary sudo permissions and never preserve attacker-controlled environment variables for privileged programs.
+- Review the application for secrets, disable debugging in production, and monitor account changes and file uploads.

@@ -1,49 +1,135 @@
 # MD2PDF: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/md2pdf
+Official room: https://tryhackme.com/room/md2pdf
 
-MD2PDF is a web application challenge built around converting Markdown content into a PDF. Document conversion services are a useful security case study because they accept user-controlled content and pass it through parsers, templates, renderers, or other helper tools. The exact vulnerability must be established from the active target.
+## Room Overview & Information
 
-## 1. Enumerate the target
+**Category:** Web exploitation  
+**Difficulty:** Easy  
+**Primary vulnerability:** Server-Side Request Forgery (SSRF) through HTML accepted by a Markdown-to-PDF converter.  
+**Goal:** Retrieve the flag from an internal administrative page that is not directly accessible from the outside.
 
-Start the room and record the assigned IP. Run a service scan:
+MD2PDF accepts Markdown and renders a PDF on the server. The key security issue is that the rendering process handles raw HTML and can fetch referenced resources. If the renderer can access internal services, a user may be able to make the server request content that the external browser cannot reach.
 
-    nmap -sC -sV -oN md2pdf-nmap.txt TARGET_IP
+## Phase 1: Reconnaissance
 
-Open the web service and inspect the converter interface, form fields, upload options, and response behaviour. Check the page source and any public paths referenced by the application. If directory discovery is required, use a wordlist available in the lab and inspect results manually.
+Start the lab machine and record the assigned IP. Scan the target:
 
-## 2. Understand the conversion pipeline
+```bash
+nmap -sC -sV -oN md2pdf-nmap.txt MACHINE_IP
+```
 
-A converter may accept Markdown text or a file, parse it, render HTML, and then generate a PDF. Each step has different risks. Markdown may allow embedded links or HTML, the renderer may load local or remote resources, and a helper process may run with filesystem permissions.
+- `-sC` runs Nmap's default scripts.
+- `-sV` attempts service-version detection.
+- `-oN` saves the normal report.
+- `MACHINE_IP` is the current address supplied by TryHackMe.
 
-Map the input to the output: what can the user control, which component processes it, and what does the response reveal? Do not assume the service has command injection, server-side template injection, or server-side request forgery until the evidence supports it.
+The intended target exposes a public web application and a second web service on port 5000. Confirm the actual scan results from your instance; do not reuse another user's IP or assume the service versions are identical.
 
-## 3. Test inputs carefully
+Open the main web service in the browser. It provides a Markdown input and a PDF conversion function. First submit harmless Markdown, such as:
 
-Use the lab's intended test cases and change one property at a time. Compare the output PDF, error message, response time, and any observable network or file behaviour. A failed conversion may indicate invalid Markdown rather than a security weakness.
+```markdown
+# Test document
 
-If the task reveals that local files or remote resources are being accessed, confirm the behaviour with the smallest safe proof. Do not read unrelated files or probe external hosts beyond the scope.
+This is **bold text**.
+```
 
-## 4. Review file and process permissions
+Confirm that the application produces a PDF. This establishes the normal workflow before testing how HTML is handled.
 
-If authorised access to the host is part of the room, identify the user under which the converter runs and what directories it can access. A conversion service should not run with root privileges or have access to secrets unrelated to its task.
+## Phase 2: Enumerate web paths
 
-Temporary files should be created in a controlled directory and cleaned up safely. User-provided filenames should not be allowed to escape the intended storage path. Helper processes should use fixed executables and structured arguments rather than concatenated shell commands.
+Use a content-discovery tool against the authorised lab target:
 
-## 5. Document the vulnerability
+```bash
+gobuster dir -u http://MACHINE_IP/ -w /usr/share/wordlists/dirb/common.txt -o md2pdf-gobuster.txt
+```
 
-Record the affected input, the observed behaviour, why the behaviour crosses a security boundary, and the impact. Distinguish a confirmed finding from a hypothesis. If the room provides a flag, obtain it from the live instance and redact it as flag{hidden} in the public version.
+- `dir` performs directory and file discovery.
+- `-u` sets the target URL.
+- `-w` selects a wordlist.
+- `-o` saves the results.
 
-## 6. Remediation
+Use a wordlist that exists in your AttackBox; adjust the path if necessary. Review the results manually and investigate the `/admin` route. The room's admin endpoint responds with a forbidden message indicating it can only be accessed internally on `localhost:5000`.
 
-- Run the converter with least privilege.
-- Isolate document rendering from sensitive files and internal services.
-- Disable unnecessary external resource loading.
-- Validate file type and size, and use safe temporary-file handling.
-- Avoid shell invocation and unsafe template evaluation.
-- Patch the renderer and its dependencies.
-- Add tests for malicious Markdown, path traversal, and unexpected resource requests.
+Verify the response directly:
 
-## What I took from this room
+```bash
+curl -i http://MACHINE_IP/admin
+```
 
-A file-conversion feature is still an application attack surface. The security review needs to follow untrusted content through parsing, rendering, helper processes, and file access, then restrict each component to only what it needs.
+The `-i` option includes response headers. A 403 response is evidence of an access restriction, not evidence that the route is nonexistent.
+
+## Phase 3: Identify the rendering trust boundary
+
+The converter accepts Markdown, but Markdown renderers may also permit raw HTML. If the PDF renderer loads external resources, HTML elements such as `img`, `iframe`, or `object` can trigger requests during document generation.
+
+This creates two distinct request origins:
+1. The browser sends Markdown to the public converter.
+2. The server-side renderer processes the Markdown and fetches referenced resources.
+
+If the second request originates from the server, it may reach a service bound to localhost that an external client cannot access. This is the core SSRF trust-boundary failure.
+
+## Phase 4: Test controlled HTML rendering
+
+Use the room's converter and submit the following HTML as Markdown:
+
+```html
+<iframe src="http://localhost:5000/admin" width="1000" height="800"></iframe>
+```
+
+The URL points to the internal service from the PDF renderer's perspective. Generate the PDF and open the downloaded document. If the renderer fetches the resource and embeds its response, the internal admin page will appear in the PDF.
+
+The important observation is not merely that the application accepts an iframe. It is that the server-side rendering process can fetch a localhost-only resource and include its content in the output.
+
+If the page does not appear, verify:
+- The correct target IP and public converter are being used.
+- The URL uses the internal port specified by the lab.
+- Raw HTML is being processed by the renderer.
+- The conversion completed and the generated PDF is the newest output.
+
+Do not substitute a flag from another instance.
+
+## Phase 5: Retrieve and verify the flag
+
+The internal admin content is rendered into the generated PDF. Open the PDF and locate the flag displayed by the lab. If text extraction is useful, install or use `pdftotext` in the AttackBox:
+
+```bash
+pdftotext generated.pdf -
+```
+
+- `pdftotext` extracts readable text from a PDF.
+- `generated.pdf` is the downloaded file from your current run.
+- `-` sends extracted text to standard output.
+
+If the PDF is image-based or the content is not extractable, inspect the document visually. Submit the flag shown by the live lab. This public write-up intentionally uses `flag{hidden}` rather than publishing an unverified value.
+
+## Phase 6: Explain the vulnerability chain
+
+The complete chain is:
+
+1. The application accepts user-controlled Markdown.
+2. The Markdown renderer permits raw HTML or otherwise processes embedded resource references.
+3. The PDF renderer makes a request to the URL embedded in the content.
+4. The renderer runs on the server and can reach `localhost:5000`.
+5. The internal admin service trusts localhost requests.
+6. The response is embedded in the generated PDF.
+7. The user reads information that should not have been exposed.
+
+This is SSRF combined with unsafe HTML rendering. It is not simply a browser-side XSS issue because the sensitive request is made by the server-side renderer.
+
+## Phase 7: Remediation
+
+- Disable raw HTML in Markdown when it is not required.
+- Sanitize content using a well-maintained allowlist-based HTML sanitizer.
+- Configure the PDF renderer to disable local file access and external network requests where possible.
+- Isolate the renderer in a sandbox with no access to internal administrative services.
+- Block loopback, link-local, private, and metadata-service destinations at the network layer, while accounting for redirects and DNS rebinding.
+- Bind administrative services to an appropriate interface and require authentication rather than trusting source address alone.
+- Apply least privilege and keep the rendering library updated.
+- Add regression tests that submit HTML references to internal destinations and confirm that they are rejected.
+
+A URL filter alone is not enough if the renderer can follow redirects or resolve a hostname to a private address after validation. Enforce policy at the point where the network request is made.
+
+## Key takeaways
+
+MD2PDF demonstrates how a document-conversion feature can become a route into internal services. Enumerate the exposed endpoints, inspect the 403 response, test how the server renders HTML, and verify the internal response in the generated PDF. The fix is to restrict both the content that is rendered and the network access available to the renderer.

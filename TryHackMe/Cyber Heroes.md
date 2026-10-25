@@ -1,54 +1,89 @@
-# Cyber Heroes: TryHackMe Walkthrough
+# CyberHeroes: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/cyberheroes
+Official room: https://tryhackme.com/room/cyberheroes
 
-Cyber Heroes is a themed challenge, so I should solve each task from the artefacts and clues actually supplied rather than assume the title tells me the answer. The reliable method is to identify the data type, choose a suitable tool, and verify the result before moving to the next clue.
+## Room Overview & Information
 
-## 1. Set up and inspect the evidence
+**Category:** Web application security  
+**Difficulty:** Easy  
+**Objective:** Find a way to log in to the CyberHeroes page and uncover the flag.
 
-Start the room and read the full task prompt. Note whether it provides a file, a webpage, a message, a code fragment, or an encoded string. Save any downloadable artefact in the lab directory and inspect it without executing unknown content.
+This is a small client-side authentication challenge. The key weakness is that the login decision is implemented in JavaScript delivered to the browser. Client-side code is visible and can be inspected or modified by the user, so it must never be the authority that protects a secret page.
 
-For a file, basic first checks are:
+## Phase 1: Start the lab and open the website
 
-    file sample
-    sha256sum sample
-    strings -n 5 sample | head -n 40
+Start the machine and copy the current IP address shown by TryHackMe. Do not reuse the address from another walkthrough.
 
-Replace sample with the actual filename. These commands identify the file type, calculate a hash, and print some readable strings. They do not prove a file is safe or malicious; they are initial triage.
+Open the site in the AttackBox browser:
 
-## 2. Follow the evidence type
+\`\`\`text
+http://MACHINE_IP/
+\`\`\`
 
-If the clue is a text string, inspect its character set and structure before decoding it. Base64 commonly uses a restricted alphabet and may include padding, while hexadecimal uses characters 0-9 and a-f. Neither format is encryption by itself.
+If the page does not load, confirm the machine has finished booting and that the AttackBox or VPN is connected. Open the login page from the site's own link or navigate to:
 
-If the clue is an image, inspect visible details and metadata. Metadata may be missing or misleading, so compare it with the image itself. If the clue is a web page, examine links, page source, request paths, and response behaviour within the lab.
+\`\`\`text
+http://MACHINE_IP/login.html
+\`\`\`
 
-If the task provides a network capture, identify the protocol and endpoints first, then filter the traffic to the relevant conversation. Avoid assuming a packet contains a secret until you have decoded the correct protocol layer.
+The page asks for login details. Before guessing passwords, inspect how the page performs authentication.
 
-## 3. Break puzzles into small steps
+## Phase 2: Inspect the source code
 
-Write down each clue and the transformation applied to it. If a value appears encoded, decode one layer and inspect the result before trying another. If a result looks random, do not keep applying every decoder available; revisit the evidence and determine which format is plausible.
+Open the login page source using the browser's **View Page Source** option or press Ctrl+U. Search the source for the login form and JavaScript function named `authenticate`.
 
-A simple evidence table can help:
+The room's script checks two variables:
+- `a` represents the username input.
+- `b` represents the password input.
 
-| Item | Observation | Interpretation | Confidence |
-|---|---|---|---|
-| File or clue | What is directly visible | What it may mean | Low, medium, or high |
-| Follow-up | What the next tool revealed | How it connects to the clue | Based on evidence |
+The comparison includes the username `h3ck3rBoi` and a call to a string-reversal function for the password. This is the important clue: the password is not being verified by a server-side authentication endpoint. The browser receives the logic needed to decide whether the login is accepted.
 
-This keeps a guess from quietly becoming a claimed fact.
+## Phase 3: Reverse the password string
 
-## 4. Use tools safely
+The source contains the string:
 
-Use the AttackBox or the environment provided by TryHackMe. Do not execute unknown scripts on your personal system. Keep all network testing within the assigned target and do not upload private or sensitive artefacts to public services.
+\`\`\`text
+54321@terceSrepuS
+\`\`\`
 
-If a tool is missing, check the lab instructions and use an available equivalent. Do not install random scripts from untrusted sources just to reproduce a command.
+The function reverses the string before comparing it with the supplied password. Reverse the characters from end to beginning:
 
-## 5. Verify each answer
+\`\`\`text
+SuperSecret@12345
+\`\`\`
 
-When a task asks for a specific value, trace it back to the artefact or command output that produced it. Check spelling, case, punctuation, and whether the platform expects a phrase, number, filename, or flag. The answer field may require an exact string.
+This gives the password expected by the client-side function. The username shown in the same comparison is:
 
-This public write-up does not invent the room's output or expose a flag that has not been verified. When completing the live room, submit the exact value shown by the evidence and keep the public note focused on the method.
+\`\`\`text
+h3ck3rBoi
+\`\`\`
 
-## What I took from this room
+These are credentials for the intentionally vulnerable CyberHeroes lab only. Do not reuse them on other services.
 
-Themed CTFs reward disciplined evidence handling. Identify the clue type, use a tool that fits it, follow the output logically, and verify the final value instead of guessing from the story.
+## Phase 4: Log in and retrieve the flag
+
+Return to the login form and enter the values found in the source:
+- Username: `h3ck3rBoi`
+- Password: `SuperSecret@12345`
+
+Submit the form. If the page accepts the credentials, follow the resulting page and read the flag displayed by the active room. Submit the flag in TryHackMe. This public write-up deliberately uses `flag{hidden}` instead of publishing the live flag value.
+
+## Why this works
+
+The application treats JavaScript running in the user's browser as a security boundary. That is a design flaw. Users can inspect page source, alter JavaScript, change form values, or bypass the client-side function entirely. Obfuscating or reversing a string does not protect a password when the comparison and the data are shipped to the client.
+
+A secure implementation would submit credentials to a server over HTTPS. The server would verify a salted password hash, create a session after successful authentication, and enforce authorisation on every protected request. The protected content should not be delivered merely because client-side code sets a success variable.
+
+## Phase 5: Remediation
+
+- Move authentication decisions to the server.
+- Store password hashes using a suitable password-hashing algorithm such as Argon2id, scrypt, or bcrypt.
+- Use secure session cookies and invalidate sessions on logout.
+- Enforce authorisation on every protected route and API request.
+- Do not embed passwords, API keys, or secret flags in HTML or JavaScript.
+- Use HTTPS and appropriate rate limiting.
+- Add tests proving that directly requesting the protected page without a valid session is rejected.
+
+## Key takeaways
+
+CyberHeroes is solved by inspecting the login page source rather than brute-forcing the form. The JavaScript exposes both the expected username and the reversible password check. The deeper lesson is that client-side checks are for user experience, not security; the server must make and enforce the authentication decision.

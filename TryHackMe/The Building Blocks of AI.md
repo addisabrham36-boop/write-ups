@@ -63,3 +63,29 @@ Use the terminology and examples provided by the active room. Do not assume the 
 ## What I took from this room
 
 AI is a collection of approaches, not one single technology. Understanding data, training, inference, evaluation, and model limitations makes it easier to recognise both the useful capabilities and the security risks of AI systems.
+
+## Expanded AI concepts and security workflow
+
+### 1. Distinguish the terminology
+
+Artificial intelligence is the broad field of systems performing tasks associated with intelligent behaviour. Machine learning learns patterns from data. Deep learning uses multi-layer neural networks. Generative AI produces content such as text, images, code, or audio. These categories overlap but are not interchangeable.
+
+### 2. Training, inference, and evaluation
+
+Training adjusts model parameters using data and an optimization procedure. Inference uses a trained model to produce output for an input. Evaluation measures behaviour against a dataset or criteria. A model can perform well on its evaluation set and still fail on unusual, biased, or adversarial inputs.
+
+### 3. Data and model behaviour
+
+Training data quality, labels, preprocessing, architecture, model parameters, prompts, and runtime settings influence outcomes. A surprising answer can result from a normal model limitation, missing context, malicious input, unsafe retrieval, or a compromised component. Identify the mechanism rather than assuming one cause.
+
+### 4. Common risks
+
+Risks include biased outputs, hallucinated facts, privacy leakage, prompt injection, unsafe tool calls, poisoned data, compromised model supply chains, and service abuse. The surrounding application determines whether a model error becomes a security incident.
+
+### 5. Security controls
+
+Use data provenance, access controls, secure deployment, model versioning, human review for high-impact decisions, output validation, and monitoring. Do not let generated code or tool arguments bypass normal authorization or validation.
+
+### 6. Room answers
+
+Use definitions and examples from the active room. When a question asks about training versus inference or AI versus machine learning, identify the process or scope described instead of relying on loose everyday language. Redact flags as flag{hidden}.

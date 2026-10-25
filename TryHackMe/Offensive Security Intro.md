@@ -1,19 +1,41 @@
-# Offensive Security Intro — TryHackMe
+# Offensive Security Intro: TryHackMe Walkthrough
 
 Room: https://tryhackme.com/room/offensivesecurityintro
 
-Offensive security means testing systems from an attacker's perspective so that weaknesses can be found and fixed. The legal and ethical boundary matters: I should only test systems that I own or have explicit permission to assess.
+Offensive security tests systems from an attacker's perspective so weaknesses can be found before someone abuses them. The work must be authorised and scoped. The point is to provide evidence that helps the owner improve security, not to damage systems or access data without permission.
 
-## The basic process
+## 1. Understand the objective
 
-A simple engagement may include reconnaissance, enumeration, vulnerability analysis, controlled exploitation, and reporting. Reconnaissance collects information. Enumeration investigates discovered services in more detail. Vulnerability analysis looks for weaknesses that may apply to those services. Exploitation demonstrates impact within the agreed scope.
+An engagement may focus on a web application, host, network, or a particular security control. Before testing, identify the target and the permitted actions. In TryHackMe, use the assigned machine and the room's instructions rather than a random public target.
 
-The order is not always perfectly linear. New information can send the tester back to an earlier step. The goal is to work from evidence instead of trying random attacks and hoping something works.
+## 2. Reconnaissance and enumeration
 
-## Why reporting matters
+Start by discovering what is exposed. For a lab host, a basic scan pattern is:
 
-A useful finding explains the affected asset, the evidence, the potential impact, and a practical recommendation. Saying “the server is insecure” is not enough for someone who has to fix it. The report should make the problem reproducible without exposing unnecessary sensitive information.
+    nmap -sC -sV -oN scan.txt TARGET_IP
+
+Replace TARGET_IP with the address provided by the room. This checks common ports, runs default scripts, and attempts service-version detection. Read the output and identify which services deserve further investigation.
+
+For a web service, inspect the homepage, links, source, headers, and paths that the application exposes. Use a directory-discovery tool only if needed and only against the assigned target. An open port or a discovered directory is a clue, not a vulnerability by itself.
+
+## 3. Validate a weakness
+
+Use the evidence from enumeration to form a hypothesis. If a service version appears outdated, check the relevant advisory and the conditions needed for exploitation. If an application accepts input, determine how that input is processed and whether the server enforces the expected rules.
+
+Change one thing at a time and record the response. Avoid running a destructive exploit just to see what happens. A safe proof should be sufficient to demonstrate the weakness without affecting unrelated data or service availability.
+
+## 4. Understand impact
+
+A vulnerability's impact depends on what an attacker can actually do. Reading another user's record, executing a command as a low-privilege account, and obtaining root access are different levels of impact. Verify the identity and permission context before reporting a result.
+
+## 5. Learn from the result
+
+A useful finding includes the affected component, evidence, preconditions, impact, and remediation. Fixes might involve patching software, enforcing server-side access control, removing exposed secrets, or reducing service permissions. Retest after the fix to confirm the original behaviour is no longer possible.
+
+## 6. Working through the room
+
+Follow the task's guided activity and pay attention to the difference between reconnaissance, exploitation, and defensive remediation. If a question asks what a tool does, explain its role in the workflow. If it asks for a value from the target, use the live lab output rather than an invented example.
 
 ## What I took from this room
 
-Offensive security is not simply breaking things. It is a controlled process for identifying and demonstrating weaknesses so the owner can improve security. Strong fundamentals in networking, Linux, Windows, and web applications make the testing more reliable and the report more useful.
+Offensive security is a controlled way to discover weaknesses and prove their impact. Good testing requires permission, a methodical process, minimal disruption, and clear reporting that turns findings into fixes.

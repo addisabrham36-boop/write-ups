@@ -74,3 +74,29 @@ For interactive tasks, follow the room's current UI and use its feedback to conf
 ## What I took from this room
 
 A strong prompt makes the goal, context, constraints, and expected output explicit. Prompting is useful for improving communication and consistency, but factual verification and application-level security remain necessary. The best prompt is not the one that sounds clever; it is the one whose result can be checked against the task.
+
+## Expanded experimental method
+
+### 1. Define a measurable objective
+
+State what a successful response must contain, what it must avoid, and how it will be evaluated. Keep a known baseline prompt. Vague goals such as "make it better" are difficult to test because they provide no observable success criterion.
+
+### 2. Establish a baseline and change one variable
+
+Run the original prompt and preserve its output. Then alter one feature at a time: context, constraints, examples, format instructions, or decomposition into steps. Compare outputs with the same evaluation criteria. Model output can vary, so record the model or endpoint, date, and generation settings when available.
+
+### 3. Use context and structure deliberately
+
+A useful prompt describes the task, relevant context, constraints, output format, and evaluation criteria. Examples can demonstrate the desired format, but poor examples may teach the wrong behaviour. Remove irrelevant context and contradictions. For structured output, specify a schema and validate the result in code; asking for valid JSON does not guarantee valid JSON.
+
+### 4. Evaluate rather than trust
+
+Check factual claims against reliable sources, execute generated code only in a safe environment, and test edge cases. Fluent output can still be wrong, insecure, or incomplete. Use repeatable evaluation criteria and human review for high-impact decisions.
+
+### 5. Security considerations
+
+Do not place secrets or unnecessary personal data in prompts. Treat retrieved content as untrusted, and never let a prompt alone authorize sensitive tool actions. Use server-side permissions, output validation, rate limits, and monitoring.
+
+### 6. Room tasks
+
+For each task, retain the prompt and relevant output, then explain which prompt feature caused the observed improvement or failure. Do not fabricate model output because it seems likely. Redact public flags as flag{hidden}.

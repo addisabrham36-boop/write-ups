@@ -115,3 +115,49 @@ Complete the tasks and submit any flags shown by the active room. No additional 
 ## Key takeaways
 
 The room teaches practical navigation of Windows Settings, the filesystem, Task Manager, and Microsoft Defender. The exact flags are obtained from the onboarding file and application in the live VM; they are redacted in this public write-up.
+
+## Expanded Windows administration and security workflow
+
+### Workstation identity and system inventory
+
+The Settings application provides a user-friendly view of computer identity and OS details. A comparable PowerShell inventory command is:
+
+    Get-ComputerInfo | Select-Object CsName, WindowsProductName, WindowsVersion, OsBuildNumber, CsTotalPhysicalMemory
+
+The fields shown depend on the Windows version. For room answers, use the exact Settings field requested instead of substituting a PowerShell property with similar meaning.
+
+### Users and process context
+
+Task Manager's Users tab lists logged-in sessions. The Processes and Details tabs can help identify process names, resource use, and user context. A logged-in username does not mean every process is elevated; Windows uses access tokens and integrity levels to determine what a process can do.
+
+When the task asks which account is logged in, read the Users tab. Do not guess from the machine name or assume the administrator account is always the active user.
+
+### Defender and the EICAR test
+
+The EICAR test string is a harmless standardized antivirus test artifact, not a live malware sample. Use only the file provided by the room. Defender may quarantine it as soon as it is created or scanned, so the item may appear in Protection history rather than in the original folder.
+
+To investigate the task, open Windows Security, navigate to Virus & threat protection and Protection history, select the named detection, and inspect the Affected items field. Copy the filename exactly as displayed in the lab.
+
+### Installer and onboarding folder
+
+Run only the software explicitly supplied by the authorized room. Inspect the folder and expected publisher before installation, then read the message displayed by the installed training application. Do not execute random installers found in an untrusted download folder.
+
+### Task answer verification
+
+Keep each answer tied to a field or artifact:
+
+| Task type | Evidence source |
+|---|---|
+| Device name | Settings → System → About → Device specifications |
+| Installed RAM | Settings → System → About |
+| Windows Server version | Windows specifications |
+| Regional setting | Settings → Time & Language → Language & Region |
+| Active user | Task Manager → Users |
+| EICAR detection filename | Defender → Protection history → detection details |
+| Onboarding flag | Room-supplied file/application |
+
+Some values such as the device name and flags may vary by deployment. Use the live machine as the authority.
+
+### Defensive lessons
+
+Keep Windows and applications updated, use least privilege, enable endpoint protection, review Defender detections, verify software source, and protect administrative sessions. Treat device names and system specifications as inventory values rather than authentication secrets.

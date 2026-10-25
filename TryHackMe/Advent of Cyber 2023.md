@@ -696,11 +696,21 @@ Use the room's authorised enumeration and access path. Verify which account and 
 
 ## Day 12 — Defence in depth
 
-- **“Which security model is being used to analyse the breach and defence strategies?”** Answer: **Diamond Model**.
-- **“Which defence capability is used to actively search for signs of malicious activity?”** Answer: **Threat hunting**.
-- **“What are our main two infrastructure focuses? (Answer format: answer1 and answer2)”** Answer: **Firewall and Honeypot**.
-- **“Which firewall command is used to block traffic?”** Answer: **Deny**.
-- **“There is a flag in one of the stories. Can you find it?”** Answer: `THM{hidden}`.
+The room explains why several independent security layers are stronger than a single control. A control should limit an attacker's options even when another layer fails.
+
+- **Question: “There is a flag in one of the stories. Can you find it?”** Answer: `THM{hidden}`. Find the flag in the story supplied by the room and redact it in public notes.
+
+## Day 13 — Intrusion detection
+
+This task applies the Diamond Model of Intrusion Analysis and asks you to identify defensive capabilities and infrastructure controls.
+
+- **Question: “Which security model is being used to analyse the breach and defence strategies?”** Answer: **Diamond Model**.
+- **Question: “Which defence capability is used to actively search for signs of malicious activity?”** Answer: **Threat hunting**.
+- **Question: “What are our main two infrastructure focuses? (Answer format: answer1 and answer2)”** Answer: **Firewall and Honeypot**.
+- **Question: “Which firewall command is used to block traffic?”** Answer: **Deny**.
+- **Question: “There is a flag in one of the stories. Can you find it?”** Answer: `THM{hidden}`.
+
+The Diamond Model connects four facets: adversary, capability, infrastructure, and victim. Threat hunting proactively searches for activity that existing alerts may have missed. A firewall filters traffic according to policy, while a honeypot provides a controlled decoy that can reveal suspicious interaction.
 
 ## Day 14 — Machine learning fundamentals
 

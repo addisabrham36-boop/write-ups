@@ -1,19 +1,53 @@
-# Wi-Fi Fundamentals and Reconnaissance — TryHackMe
+# Wi-Fi Fundamentals and Reconnaissance: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/wifundamentals
+Room: https://tryhackme.com/room/wififundamentals
 
-Wi-Fi reconnaissance is about understanding wireless networks visible to a device and the information their access points advertise. It can help administrators map their own wireless environment, find rogue access points, and understand which security modes are in use.
+This note combines the fundamentals needed to interpret wireless reconnaissance. Wi-Fi uses radio communication to connect clients to an access point, but security depends on more than the SSID or signal strength. Authentication, encryption, client validation, and network segmentation all matter.
 
-## Wireless basics
+## 1. Identify a wireless network
 
-The SSID is the network name, while the BSSID identifies a specific access point radio. Channels determine where the radio operates, and the security configuration determines how clients authenticate and protect traffic.
+An SSID is the network name presented to users. A BSSID identifies a specific access point radio, often represented by a MAC address. One SSID can be provided by multiple access points, so the SSID alone does not uniquely identify the radio.
 
-In a controlled lab, tools such as a wireless scanner can display nearby access points and their advertised details. I should use the interface and commands specified by the room, because the available options depend on the adapter, driver, and operating system.
+A wireless scan may reveal SSIDs, BSSIDs, channels, supported security modes, and signal strength. These are observations, not proof that the network is vulnerable. Use only the lab network and values provided by TryHackMe.
 
-## Security lessons
+## 2. Understand the bands
 
-A hidden SSID is not a strong security control because the network may still be discoverable from other wireless traffic. Use modern WPA2-AES or WPA3 settings, strong unique credentials, current firmware, and network segmentation. Wireless testing should be limited to equipment and networks I own or am explicitly authorised to assess.
+Wi-Fi commonly uses 2.4 GHz and 5 GHz, with 6 GHz supported by newer equipment in regions where it is permitted. The 2.4 GHz band often has more range but is more crowded. Higher-frequency bands may offer more capacity but can have less range through walls.
+
+Channel use and interference affect performance. A strong signal does not guarantee a reliable connection, and a visible network name does not tell you whether the authentication configuration is secure.
+
+## 3. Authentication and encryption
+
+WEP is obsolete and insecure. WPA2 with AES-CCMP and WPA3 are modern options, depending on device compatibility and configuration. Enterprise Wi-Fi may use 802.1X and a central authentication service, while personal Wi-Fi often uses a shared passphrase.
+
+A long unique passphrase helps protect personal networks. Enterprise clients should validate authentication-server certificates; otherwise, a malicious access point may be able to impersonate a trusted network.
+
+## 4. Passive observation
+
+Passive wireless reconnaissance listens for frames without deliberately disrupting clients. Management frames help devices discover and associate with access points; control frames help coordinate wireless communication; data frames carry higher-layer traffic.
+
+A capture may show network metadata even when payloads are encrypted. Do not assume that capturing a frame reveals the application data. Interpret the frame type and the security mode before drawing conclusions.
+
+## 5. Active testing and scope
+
+Active testing transmits frames or interacts with the network and may disconnect clients or change state. Only perform active tests specifically authorised by the room. Never use a real nearby network as a substitute for the training target.
+
+If the lab provides a wireless interface, follow its instructions to select the correct device and channel. Adapter and driver support vary, so an unavailable feature may be a hardware limitation rather than a mistake in the command.
+
+## 6. Defensive checks
+
+- Use WPA2-AES or WPA3 and disable obsolete modes.
+- Set a unique, strong passphrase or use enterprise authentication.
+- Validate certificates for enterprise Wi-Fi.
+- Update access-point firmware and change administrative defaults.
+- Separate guest clients from trusted internal devices.
+- Monitor for rogue access points and unusual association attempts.
+- Avoid exposing router administration to untrusted networks.
+
+## 7. Working through the room
+
+Read the task and identify whether it asks for an SSID, BSSID, channel, frequency, security protocol, or observation from a capture. Use the exact values displayed in the active lab. If the task asks you to infer a weakness, explain which configuration or behaviour supports that conclusion.
 
 ## What I took from this room
 
-Wireless reconnaissance reveals useful configuration information, but detection of a network does not grant permission to attack it. The goal is to understand the environment and improve security while keeping the testing authorised and controlled.
+Wireless reconnaissance provides useful clues, but each clue needs context. The network name, radio identifier, frame type, authentication method, and encryption configuration answer different questions and should not be treated as interchangeable.

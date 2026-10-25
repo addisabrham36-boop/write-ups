@@ -2,69 +2,87 @@
 
 Room: https://tryhackme.com/room/internal
 
-Internal is a black-box penetration-testing challenge. The brief authorises an external, web application, and internal assessment of the assigned virtual machine, with user and root flags as proof of impact. The scope is the IP assigned by the room, and the hostname internal.thm must resolve to that target.
+Internal is a black-box penetration-testing challenge. The brief allows an external, web application, and internal assessment of the assigned virtual machine. The required proof is the user and root flags. Only the IP assigned by TryHackMe is in scope, and the hostname internal.thm must point to that address.
 
-## 1. Confirm scope and hostname
+## 1. Configure the hostname and scan
 
-Start the target and record the assigned IP. Add the following mapping to /etc/hosts on the AttackBox or testing machine:
+Start the machine and record its current IP. Add this mapping to /etc/hosts on the AttackBox or testing machine:
 
     MACHINE_IP internal.thm
 
-Replace MACHINE_IP with the current target address. Verify resolution before using the hostname. Only the assigned target is in scope; do not scan unrelated systems.
-
-## 2. Enumerate ports and services
-
-Start with a version and default-script scan:
+Replace MACHINE_IP with the address assigned by the room. Then scan the target:
 
     nmap -sC -sV -oN internal-nmap.txt MACHINE_IP
 
-If needed, scan all TCP ports:
+The intended environment exposes SSH and HTTP. Confirm the actual output from your own instance. Open the web service and inspect the default page, then enumerate paths:
 
-    nmap -p- --min-rate 1000 -oN internal-allports.txt MACHINE_IP
+    gobuster dir -u http://internal.thm/ -w /path/to/wordlist.txt
 
-Run a focused scan against discovered ports after the broad scan. Save the results and identify web services, SSH, and any other exposed services. A version banner is a lead; verify whether the relevant vulnerability or misconfiguration applies.
+Use a wordlist available in the AttackBox. The target's web content leads to a WordPress installation. Keep the hostname mapping in place because the application may expect internal.thm rather than the raw IP.
 
-## 3. Inspect the web application
+## 2. Enumerate WordPress
 
-Browse to the target hostname. Inspect the homepage, robots.txt, source comments, directories, login pages, and any exposed content management system. Use the room's clues to identify relevant paths instead of blindly trusting an old wordlist result.
+Inspect the WordPress pages and use WPScan in the authorised lab to identify the version, visible users, plugins, themes, and other public information. For example:
 
-If a WordPress instance is present, note its public version clues, user-facing pages, login endpoint, and any configuration exposure. Do not assume the administrator username or password. Enumerate usernames and authentication behaviour only within the authorised target and at a controlled rate.
+    wpscan --url http://internal.thm/wordpress/ --enumerate u
 
-## 4. Validate the initial access path
+Adjust the URL to match the actual WordPress path found on the target. The enumeration output may reveal usernames that can be used for the next authentication test. Do not treat a discovered username as proof that the account is compromised.
 
-The room may require a chain involving a web application weakness or credentials. Establish the path from evidence: identify the affected endpoint, determine what input or authentication weakness exists, and verify the resulting access. If a reverse shell is part of the task, use only the lab-provided environment and ensure the callback address and port are reachable from the target.
+## 3. Test the WordPress login
 
-Record the exact request, response, and evidence of the resulting access. A successful-looking web response is not enough; verify the shell identity and target host.
+The intended path uses a weak WordPress administrator password. Use the username and endpoint identified during enumeration. If the room calls for a password test, use WPScan's password-attack function or another controlled method with a lab wordlist and a conservative request rate.
 
-## 5. Enumerate the user context
+Do not copy a password from another walkthrough or test unrelated services. Confirm any candidate by logging in through the intended WordPress interface. The lesson is that weak passwords and insufficient rate limiting can turn a public login page into an initial-access path.
 
-After obtaining a shell, collect basic information:
+## 4. Obtain a web shell through the theme editor
 
-    whoami
-    id
-    hostname
-    pwd
-    ls -la
+Once the WordPress administrator account is available, inspect the theme-editing functionality. In the vulnerable lab, the ability to modify a PHP theme file provides a path to server-side execution. The usual proof is to modify a file that is executed by the web server and then trigger it through the browser.
 
-Inspect application configuration and environment files only where permitted and relevant to the room. Credentials found in configuration should be treated as sensitive and used only to validate the intended lab path. Never copy real secrets into a public write-up.
+Use only the provided lab and a callback address reachable from the AttackBox. Start a listener if the room's instructions call for a reverse shell, then trigger the modified page. Verify the resulting shell identity with whoami and id. A web shell typically runs with the web-server account, not root.
 
-Search for privilege escalation opportunities by reviewing sudo permissions, SUID binaries, scheduled tasks, writable scripts, and service configuration:
+Do not make this change to a real WordPress site. In production, theme editing should be disabled for ordinary administrators and file integrity should be protected.
 
-    sudo -l
-    find / -perm -4000 -type f 2>/dev/null
+## 5. Find the user flag and enumerate the host
 
-The results are specific to the live target. Verify a candidate weakness before using it.
+After obtaining the initial shell, inspect the filesystem and application configuration. Record the current user, working directory, and host. Look for the user flag in the path indicated by the room and submit it in TryHackMe. The flag value is not included in this public note.
 
-## 6. Escalate and verify
+Continue enumeration by checking readable configuration files, running processes, network listeners, and application directories. Keep the scope limited to the assigned machine. Do not assume that database credentials found in a configuration file automatically work as Linux credentials; test each credential only against the service it belongs to and within the lab.
 
-If the lab's intended path allows root access, perform the minimum required action and verify the identity with whoami and id. Then locate the root flag according to the room instructions. The flag itself is not included here; submit the value from your own instance.
+The intended chain includes a note revealing that Jenkins is available internally. This is a clue to investigate the host's network and internal services rather than scanning unrelated machines.
 
-Document how the weakness enabled escalation and what control would prevent it. Common fixes may include patching the application, removing exposed configuration, rotating credentials, limiting sudo rights, and correcting unsafe file permissions.
+## 6. Discover the internal Jenkins service
 
-## 7. Write the assessment findings
+From the shell, inspect network interfaces, routes, and listening or connected services. A service that is bound to an internal interface or container network may not be reachable directly from the AttackBox. The note in the lab provides the clue to the Jenkins service and its internal address.
 
-For each vulnerability, record the affected component, evidence, preconditions, impact, and remediation. Keep the chain clear: initial exposure, user access, local enumeration, privilege escalation, and verified impact. Avoid claiming a step worked unless the target output supports it.
+Use SSH port forwarding to expose only the intended internal service through your authorised shell. The general pattern is:
+
+    ssh -L 8080:INTERNAL_JENKINS_IP:8080 USERNAME@TARGET_IP
+
+Replace the placeholders with the values discovered in the room. Keep the tunnel open, then access the forwarded service at http://127.0.0.1:8080 from the machine where the tunnel runs. Do not assume the internal address or port from another instance.
+
+## 7. Authenticate to Jenkins and obtain the next shell
+
+The room's intended path requires discovering weak Jenkins credentials. Inspect the login page and use the evidence from the lab to identify the correct account. If the exercise requires password testing, keep it limited to the Jenkins service and use the supplied wordlist or hints. Verify the credential by logging in through the forwarded local endpoint.
+
+Jenkins can execute build steps and scripts, so administrative or job-configuration permissions may lead to code execution in the environment where Jenkins runs. In this lab, use the task's intended mechanism to obtain the next shell and verify the account and host. Do not assume a Jenkins shell is automatically root on the host; it may run inside a container.
+
+## 8. Escalate from the internal environment
+
+Once the second shell is established, inspect the filesystem, running services, and configuration for the final privilege boundary. The room's intended chain includes credentials stored in an accessible file. Follow the actual file path and evidence from the active machine rather than inventing a credential.
+
+Verify root access with whoami and id before reading the root flag. The flag is omitted from the public write-up; retrieve it from the live instance and submit it in TryHackMe.
+
+## 9. Reporting and remediation
+
+The findings in this chain demonstrate several separate controls that failed:
+- Weak WordPress administrator credentials and inadequate login protection.
+- Excessive ability to edit executable theme files from the web interface.
+- Sensitive credentials or internal service information stored in accessible files.
+- An internal Jenkins service protected by weak authentication or unsafe permissions.
+- A container or service boundary that does not sufficiently restrict the impact of Jenkins execution.
+
+Fix each weakness independently. Enforce MFA and rate limits, disable production theme editing, restrict file permissions, keep secrets out of web-accessible files, protect Jenkins with strong authentication, limit job permissions, and isolate containers and internal services.
 
 ## What I took from this room
 
-Internal is best approached as a real engagement: confirm scope, enumerate systematically, follow evidence, verify each stage of access, and document the weaknesses so the owner can fix them. Metasploit is optional; understanding the target and the chain is more important than a particular tool.
+Internal is a chain rather than a single exploit: web enumeration leads to WordPress, WordPress leads to a web shell, host enumeration reveals an internal Jenkins service, and Jenkins access leads to the final privilege boundary. Each step should be supported by evidence from the live machine, and both flags should be redacted as flag{hidden} in a public write-up.

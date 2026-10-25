@@ -17,11 +17,11 @@ Evidence may include endpoint logs, authentication records, network captures, DN
 
 Preserve original evidence where possible and analyse working copies. Hashes help verify whether a file changed after collection, but a hash alone does not prove that evidence was collected correctly. Provenance and handling records still matter.
 
-\`\`\`bash
+```bash
 file suspicious.bin
 sha256sum suspicious.bin
 stat suspicious.bin
-\`\`\`
+```
 
 - **file** identifies the likely file type.
 - **sha256sum** calculates a SHA-256 digest.

@@ -1,71 +1,120 @@
 # Google Dorking: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/googledorking
+Official room: https://tryhackme.com/room/googledorking
 
-Google dorking is the use of search operators to narrow public search results. Security researchers use it to discover indexed pages, exposed documents, forgotten subdomains, and publicly accessible files. It is passive reconnaissance: the search engine returns information it has already indexed, although opening a result may contact the target site.
+## Room Overview & Information
 
-## 1. Build a query from operators
+**Category:** OSINT / web reconnaissance  
+**Difficulty:** Beginner  
+**Focus:** Search-engine crawlers, indexing, robots.txt, sitemaps, search operators, and finding publicly indexed content.
 
-Useful operators include:
+Google dorking uses advanced search operators to narrow results to a site, file type, exact phrase, or other characteristic. It does not magically bypass access controls: it finds content that the search engine has discovered and indexed. The technique is useful for authorised asset discovery and for checking whether an organisation accidentally exposed documents.
 
-- site: limits results to a domain or subdomain.
-- filetype: limits results to a file format.
-- intitle: searches for terms in page titles.
-- inurl: searches for terms in URLs.
-- quoted phrases search for a specific sequence of words.
-- A minus sign excludes a term from results.
+Only investigate assets within the room or an explicitly authorised scope. Do not use search results to access private information or exploit an exposed system.
 
-Examples:
+## Phase 1: Search engines and crawlers
 
-    site:example.com
-    site:example.com filetype:pdf
-    site:example.com intitle:"index of"
-    site:example.com inurl:login
-    "specific phrase" site:example.com
+A search engine discovers URLs, fetches publicly reachable pages, extracts information, and indexes selected content so it can be retrieved by queries. Crawlers may discover pages from links, sitemaps, and other known sources. Indexing is not instantaneous and does not include every page.
 
-Replace example.com with the domain specified by the room or a domain you are authorised to investigate. Search results are not exhaustive and can be stale, so a missing result does not prove that a resource does not exist.
+A page can be reachable but not indexed, indexed but later removed, or indexed with a stale snippet. Search results are therefore evidence of what the search engine knows, not a complete inventory of the current website.
 
-## 2. Search for public documents
+### Task 1: Ye Ol' Search Engine
 
-Filetype searches can reveal PDFs, spreadsheets, presentations, or text documents that a site owner did not expect to be easy to find. If a document appears sensitive, do not download, redistribute, or use its contents beyond the authorised scope. Record the result URL and report the exposure responsibly.
+The task introduces search engines as large indexes of web content. The core idea is that search queries can be refined to make the results more useful. Rather than guessing a URL, an analyst can use search operators to narrow the index.
 
-An indexed file is not necessarily a vulnerability. It may be intended for public release. The important questions are whether the information is meant to be public, whether it contains secrets or personal data, and whether the organisation has approved its publication.
+## Phase 2: Crawlers and site discovery
 
-## 3. Understand directory-listing results
+Crawlers follow links and retrieve pages. They may inspect metadata, headings, links, and page content. The data they collect is processed and stored in a search index.
 
-Queries such as a search for pages titled “index of” may surface web servers with directory listing enabled. Directory listings can expose filenames and application structure. They are not automatically exploitable, but they may reveal backups, old archives, configuration files, or source code that should not be public.
+### Task 2: Let's Learn About Crawlers
 
-Never assume that a search result proves a file is accessible now. Open only resources within the permitted scope and verify the response without attempting to access unrelated private data.
+When a crawler discovers a page, it can follow links found on that page to discover other pages. This makes a site's internal linking structure important to discoverability. A sitemap can provide a direct list of intended URLs, while robots.txt communicates crawl preferences to compliant crawlers.
 
-## 4. Subdomain and login discovery
+Robots.txt is not an access-control mechanism. A disallowed path can still be visited directly if the server does not enforce authentication and authorisation. Publishing a sensitive path in robots.txt may even draw attention to it.
 
-A site-limited query can help identify public pages on a domain, including login portals, staging sites, documentation, and legacy endpoints. Search engines do not provide a complete asset inventory. Organisations should combine passive search with authorised DNS, certificate, and asset-management checks.
+## Phase 3: Robots.txt and sitemaps
 
-Do not use a discovered login page as permission to test credentials. Finding a public endpoint and having permission to attack it are separate things.
+A robots.txt file is normally located at the root of a website:
 
-## 5. Record findings
+```text
+https://example.com/robots.txt
+```
 
-For each useful result, record:
+It contains rules for compliant crawlers, such as which paths they should avoid crawling. It does not protect the contents of those paths.
 
-1. The query used.
-2. The result URL and date.
-3. What the page appears to expose.
-4. Whether the content is actually public and relevant.
-5. The potential impact if the exposure is unintended.
-6. The recommended fix, such as removing a file, changing access controls, or requesting de-indexing after the source is secured.
+A sitemap is commonly an XML file that lists URLs intended for discovery. Its typical structure is XML, often at a path such as `/sitemap.xml`, though a site may use another location and can list a sitemap in robots.txt.
 
-Search engine removal alone does not fix a file that remains publicly accessible. Secure the origin first, then address cached or indexed copies.
+### Task 4: Beepboop: Robots.txt
 
-## 6. Working through the room
+The task asks about the purpose of robots.txt and sitemaps. The key distinctions are:
+- robots.txt expresses crawler instructions.
+- a sitemap lists URLs to help crawlers discover content.
+- neither feature replaces server-side access control.
 
-Read the task's objective and construct a query that uses the requested operator. If it asks for a file type, use filetype; if it limits results to a domain, use site; if it asks about a title or URL path, use intitle or inurl. Inspect the results and apply the question's exact criteria rather than guessing an answer from the operator alone.
+If the task asks for a sitemap's typical structure, inspect the example shown by the room. A conventional sitemap is an XML document with a `urlset` root and `url` entries, often containing `loc` elements.
 
-Search results vary by region, time, and indexing. If the room uses a specific domain or example, use that domain rather than copying the generic examples here.
+If the task asks what a sitemap is comparable to, think of a map or directory of routes to website content. If it asks for the keyword describing a path through a site, use the exact terminology presented in the room's example and verify it against the task text.
 
-## 7. Defensive lessons
+## Phase 4: Search operators
 
-Organisations should maintain an inventory of public assets, prevent secrets and backups from entering public web roots, disable unnecessary directory listings, and use appropriate authentication and access controls. Search operators can help identify exposure, but they cannot replace configuration review and continuous monitoring.
+Operators refine the query. Examples:
 
-## What I took from this room
+```text
+site:example.com
+site:example.com "incident response"
+filetype:pdf site:example.com
+intitle:"index of" site:example.com
+"exact phrase"
+site:example.com -www
+```
 
-Google dorking is a way to organise publicly indexed information, not a magical way to see every hidden file. The strongest workflow uses precise operators, verifies the finding, respects scope, and reports exposures without accessing data that is not needed.
+- `site:` restricts results to a domain or site.
+- Quotation marks search for an exact phrase.
+- `filetype:` narrows results by a file extension or type.
+- `intitle:` searches page titles.
+- A leading minus excludes a term.
+
+These examples use example.com and should be adapted only to an authorised target. Search-engine syntax and behaviour can change, and not every operator is supported identically across engines.
+
+### Task 6: What is Google Dorking?
+
+Google dorking combines ordinary terms with operators to make targeted searches. For example:
+
+```text
+site:example.com filetype:pdf
+```
+
+This searches the index for PDF results associated with example.com. It does not guarantee that every PDF on the site will appear.
+
+For a room question, copy the exact domain or phrase the task provides, apply the operator described by the task, and inspect the result title and URL. Do not assume the first result is always correct; the room may ask for a particular file, page, or value.
+
+## Phase 5: Common security uses
+
+Search operators can help authorised defenders find:
+- Public documents that should not have been published.
+- Old copies of pages or files.
+- Login or administrative pages that are publicly discoverable.
+- Publicly exposed error messages or directory listings.
+- File types that may contain metadata.
+
+Discovery is not proof of a vulnerability. A login page may be intentionally public, a document may be intended for publication, and a search snippet may be stale. Verify the actual exposure and report it responsibly.
+
+## Phase 6: Practical workflow for the room
+
+1. Read the task and identify the domain or sample site it names.
+2. Open the specified search or SEO tool.
+3. Use the exact query required by the task.
+4. Inspect the returned URL, title, and relevant snippet.
+5. If the task concerns robots.txt or a sitemap, open the file and inspect its contents.
+6. Copy only the value the question asks for.
+7. If a result is absent, verify the query syntax and use the room's alternative search tool as instructed.
+
+Some questions use interactive or external services. Their output may change, and access can depend on the network environment. Use the live room's data rather than inventing a result.
+
+## Phase 7: Defensive controls
+
+Do not rely on obscurity. Require authentication for sensitive pages, enforce authorisation on the server, disable directory listings where unnecessary, remove exposed files, and avoid placing secrets in publicly accessible documents. Use robots.txt only to guide compliant crawlers, not to protect resources.
+
+## Key takeaways
+
+Search engines are indexes, not security boundaries. Crawlers discover content, robots.txt gives crawl instructions, sitemaps aid discovery, and search operators narrow results. Dorking is useful for finding exposure, but every result must be validated against the current website and the authorised scope.

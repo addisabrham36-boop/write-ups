@@ -1,78 +1,84 @@
 # AI System Reconnaissance: TryHackMe Walkthrough
 
-Official room: https://tryhackme.com/room/aisystemreconnaissance
+Room: https://tryhackme.com/room/aisystemreconnaissance
 
 ## Room Overview & Information
 
-**Category:** AI security reconnaissance  
-**Focus:** Discovering AI-enabled services, mapping APIs, identifying model endpoints, and documenting trust boundaries.
+This note covers the practical workflow, evidence to collect, common interpretation errors, and defensive lessons for AI System Reconnaissance. Use the live room as the authority for task wording and machine-specific values. The repository does not include fabricated terminal output, credentials, or flags.
 
-AI reconnaissance follows familiar network and web-testing methodology, but the assets can include inference APIs, model registries, retrieval systems, document ingestion, plugins, and agent tools. Use only the target deployed by the room. Do not send private data or invoke high-impact actions during reconnaissance.
+## 1. Scope and reconnaissance plan
 
-## Phase 1: Establish scope and scan
+Room: https://tryhackme.com/room/aisystemreconnaissance
 
-Start the lab and record its current IP. Use the room's hostname mapping if one is provided. An initial scan can identify reachable services:
+Start the room and identify the assets and scope stated in its briefing. Reconnaissance should establish what the AI application exposes before any active testing. Record the base URL, permitted endpoints, test account, and restrictions. Do not probe external systems that are merely mentioned by the target.
 
-```bash
-nmap -sC -sV -oN ai-recon-nmap.txt MACHINE_IP
-```
+The goal is to map the AI system's public surface: interface, API routes, model or provider information, documentation, authentication, file upload and retrieval features, plugins, and tool integrations. Separate confirmed facts from assumptions.
 
-- `-sC` runs Nmap's default scripts.
-- `-sV` attempts to identify service versions.
-- `-oN` saves a readable report.
-- `MACHINE_IP` is the active lab address.
+## 2. Passive inspection
 
-Use scan results as leads, not proof of a vulnerability. A banner may be missing or inaccurate, and a port alone does not prove the service is an AI endpoint.
+Open the provided application normally. Inspect the visible pages, page source, JavaScript bundles, robots.txt, sitemap, and any API documentation linked by the application. These can reveal route names or technology hints, but a route name does not prove that it is accessible or vulnerable.
 
-## Phase 2: Inspect the web/API surface
-
-Open the web service and inspect the page, headers, and browser Network tab. Look for request paths, methods, JSON fields, authentication requirements, file uploads, API documentation, model metadata, retrieval routes, and administrative functions.
-
-For a basic HTTP check:
+Useful checks against the in-scope host include:
 
 ```bash
-curl -i http://MACHINE_IP/
+curl -i https://TARGET_HOST/
+curl -i https://TARGET_HOST/robots.txt
+curl -i https://TARGET_HOST/sitemap.xml
 ```
 
-The `-i` option includes response headers. Use the exact scheme, port, and hostname provided by the room.
+Replace TARGET_HOST with the hostname explicitly provided by the room and use HTTP if that is what the lab uses. The `-i` option displays response headers with the body. Record status codes, redirects, cookies, and server headers without publishing session tokens.
 
-Record each endpoint you actually observe. Do not invent paths based on a familiar framework.
+If browser developer tools are available, inspect the Network tab while using the application's normal features. Note which API endpoint is called, the HTTP method, and the shape of the request and response. Redact authorization headers and tokens from notes.
 
-## Phase 3: Identify AI components
+## 3. Map the application and API
 
-An AI-enabled service may expose a chat endpoint, an inference API, a model identifier, a document-search interface, or a tool/plugin configuration. Identify what the evidence supports. A chatbot-like response does not reveal which model is running, and a model name in a response may not be a verified deployment version.
+Create a simple endpoint inventory. For each endpoint, record its purpose, method, authentication requirement, user-controlled fields, and whether it invokes a model, retrieval system, or external tool.
 
-For each endpoint, record:
-- URL and HTTP method.
-- Required authentication.
-- Input and output format.
-- Model or service identifier, if exposed.
-- Error behaviour and rate limits.
-- Whether the endpoint retrieves documents or invokes tools.
-- Timestamp and evidence source.
+| Item | Questions to answer |
+|---|---|
+| Chat endpoint | What input is sent? Is conversation state stored? |
+| Retrieval endpoint | Which documents can the current user access? |
+| Upload endpoint | Which types and sizes are accepted? |
+| Tool or plugin | What action can it perform and under whose identity? |
+| Admin or debug route | Is it documented, authenticated, and in scope? |
+| Model metadata | Is the information intentionally public? |
 
-## Phase 4: Map trust boundaries
+Use the routes actually observed in the lab. Do not fabricate endpoints or blindly scan a production service. If the room provides an API collection or source file, inspect it as the authoritative lab artifact.
 
-Trace how user-controlled data moves through the application. A typical flow may include a frontend, API, model server, retrieval database, document store, and tools. Mark where untrusted prompts or documents enter and which component has permission to access sensitive data.
+## 4. Identify AI-specific exposure
 
-Useful questions:
-- Can an unauthenticated user query the service?
-- Does retrieval enforce the current user's permissions?
-- Can the model invoke tools that change state?
-- Are model files or configuration exposed?
-- Does the application enforce authorisation independently of the model?
-- Are debug endpoints or stack traces public?
+An AI application can expose more than a traditional web application. Look for the model identifier, system prompt handling, retrieval sources, conversation history, tool definitions, file-processing components, and external provider requests. The existence of one of these components is not automatically a vulnerability.
 
-Do not test a high-impact action just to see if it is available. Use the room's safe examples.
+Test whether access controls are enforced at the server. For example, if a chat interface displays only a user's documents, determine whether the retrieval API also enforces ownership. If a model can call tools, determine whether each tool independently checks authorization and validates its arguments.
 
-## Phase 5: Work through the room
+Prompt injection becomes a security issue when untrusted content can influence an action that crosses a trust boundary. Record the input and resulting behaviour, and distinguish a harmless answer change from unauthorized data access or an unsafe tool call.
 
-For each task, identify the requested endpoint or asset, use the active lab target, inspect the response, and submit the value requested. Distinguish service discovery from vulnerability confirmation. If a question asks for a live value, read it from the current instance rather than copying a result from another learner.
+## 5. Active enumeration within scope
 
-## Phase 6: Defensive recommendations
+If the room authorises active enumeration, use a small, controlled request rate and stay on the supplied host. For HTTP services, a service scan can help identify exposed ports:
 
-Require authentication and server-side authorisation for sensitive endpoints. Keep model registries and administrative interfaces private, apply rate limits, isolate model execution, restrict retrieval sources, and log tool calls. Monitor unusual request volume, repeated failures, and access to sensitive data.
+```bash
+nmap -sC -sV -oN ai-recon-nmap.txt TARGET_IP
+```
 
-## Key takeaways
+Here, `-sC` runs Nmap's default scripts, `-sV` attempts service-version detection, and `-oN` saves human-readable output. Only run this against the lab IP and only if port scanning is permitted by the room. A web-only challenge may not require Nmap at all.
 
-AI system reconnaissance is asset discovery plus trust-boundary mapping. Identify the exposed services, inspect their interfaces, document evidence, and avoid assuming that a service is vulnerable simply because it uses AI.
+If you encounter authentication, do not try random credentials unless the task explicitly authorises credential testing. Instead, document the access boundary and use the supplied lab account.
+
+## 6. Evidence and answer workflow
+
+For each task question, identify the relevant page, header, route, configuration, or observed behaviour. Save the exact request and a sanitized response when permitted. Avoid claiming a route is vulnerable because it returns 200 OK; the status code only says the server returned a successful HTTP response.
+
+Use the active lab for exact model names, endpoint values, tokens, and flags. Those values can change and should not be invented. Redact flags in the public write-up as `flag{hidden}`.
+
+## 7. Hardening recommendations
+
+Reduce the exposed surface, remove debug routes from production, authenticate administrative APIs, enforce per-user retrieval authorization, restrict tool permissions, validate uploaded content, rate-limit expensive model calls, and avoid leaking secrets in client-side bundles or logs. Maintain an endpoint inventory and retest it when the model, plugin set, or orchestration code changes.
+
+## What I took from this room
+
+AI reconnaissance is ordinary application reconnaissance with extra attention to model, retrieval, and tool boundaries. The best result is an evidence-based map of what exists, who can access it, and which components deserve deeper testing.
+
+## Phase 5: Key Takeaways & Remediation
+
+The main goal is to connect every conclusion to observable evidence and enforce security controls at the correct trust boundary. Keep the original artefacts, record the exact commands and outputs from your own run, and redact any flag in public notes as `flag{hidden}`.

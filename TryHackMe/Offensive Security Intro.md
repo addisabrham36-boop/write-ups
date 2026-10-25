@@ -1,41 +1,49 @@
 # Offensive Security Intro: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/offensivesecurityintro
+Official room: https://tryhackme.com/room/offensivesecurityintro
 
-Offensive security tests systems from an attacker's perspective so weaknesses can be found before someone abuses them. The work must be authorised and scoped. The point is to provide evidence that helps the owner improve security, not to damage systems or access data without permission.
+## Room Overview & Information
 
-## 1. Understand the objective
+**Category:** Offensive security fundamentals  
+**Difficulty:** Easy  
+**Objective:** Learn what offensive security means and use the room's simulated bank website to see a basic authorised attack in action.
 
-An engagement may focus on a web application, host, network, or a particular security control. Before testing, identify the target and the permitted actions. In TryHackMe, use the assigned machine and the room's instructions rather than a random public target.
+This room introduces offensive security through a deliberately vulnerable, fictional bank. The practical is a simulation, not a real banking service. Only interact with the website deployed by TryHackMe.
 
-## 2. Reconnaissance and enumeration
+## Task 1: Hacking your first website
 
-Start by discovering what is exposed. For a lab host, a basic scan pattern is:
+Open the room's **View Site** link to launch the simulated bank website. Review the page and locate the interactive question. The goal is to connect the general definition of offensive security to the activity shown by the lab.
 
-    nmap -sC -sV -oN scan.txt TARGET_IP
+### Question: “Which of the following options better represents the process where you simulate a hacker's actions to find vulnerabilities in a system?”
 
-Replace TARGET_IP with the address provided by the room. This checks common ports, runs default scripts, and attempts service-version detection. Read the output and identify which services deserve further investigation.
+**Answer: Offensive Security.**
 
-For a web service, inspect the homepage, links, source, headers, and paths that the application exposes. Use a directory-discovery tool only if needed and only against the assigned target. An open port or a discovered directory is a clue, not a vulnerability by itself.
+Offensive security uses authorised attacker-style testing to find and validate weaknesses before a real attacker exploits them. The work should stay within the agreed scope and should produce evidence and recommendations.
 
-## 3. Validate a weakness
+After submitting the correct answer, look above the account balance on the simulated bank page. The site displays a message indicating that the exercise succeeded.
 
-Use the evidence from enumeration to form a hypothesis. If a service version appears outdated, check the relevant advisory and the conditions needed for exploitation. If an application accepts input, determine how that input is processed and whether the server enforces the expected rules.
+### Question: “Above your account balance, you should now see a message indicating the answer to this question. Can you find the answer you need?”
 
-Change one thing at a time and record the response. Avoid running a destructive exploit just to see what happens. A safe proof should be sufficient to demonstrate the weakness without affecting unrelated data or service availability.
+**Answer: BANK-HACKED**
 
-## 4. Understand impact
+This is the message displayed by the room's simulation. It is not a real bank compromise; it is a deliberately scripted learning exercise.
 
-A vulnerability's impact depends on what an attacker can actually do. Reading another user's record, executing a command as a low-privilege account, and obtaining root access are different levels of impact. Verify the identity and permission context before reporting a result.
+## How the exercise works
 
-## 5. Learn from the result
+The room uses a simple web interface to show that an application can reveal information after a particular action. In a real assessment, the tester would inspect the request and response, identify what control failed, and verify the impact without accessing unrelated data.
 
-A useful finding includes the affected component, evidence, preconditions, impact, and remediation. Fixes might involve patching software, enforcing server-side access control, removing exposed secrets, or reducing service permissions. Retest after the fix to confirm the original behaviour is no longer possible.
+A useful process is:
+1. Read the task and define the lab scope.
+2. Inspect the page and the available interaction.
+3. Submit the answer requested by the room.
+4. Read the message displayed by the simulated application.
+5. Record what the application demonstrated.
+6. Stop once the task is complete.
 
-## 6. Working through the room
+## Offensive security versus unauthorised hacking
 
-Follow the task's guided activity and pay attention to the difference between reconnaissance, exploitation, and defensive remediation. If a question asks what a tool does, explain its role in the workflow. If it asks for a value from the target, use the live lab output rather than an invented example.
+The techniques may look similar, but authorisation and scope are what distinguish a penetration test from unauthorised activity. A professional tester has permission, follows rules of engagement, minimises impact, preserves evidence, and reports the findings so the owner can fix them.
 
-## What I took from this room
+## Key takeaways
 
-Offensive security is a controlled way to discover weaknesses and prove their impact. Good testing requires permission, a methodical process, minimal disruption, and clear reporting that turns findings into fixes.
+Offensive security simulates attacker behaviour to find weaknesses in a controlled and authorised way. The room's answer is **Offensive Security**, and the simulated site displays **BANK-HACKED** after the correct interaction. The lesson is about the method and its boundaries, not about attacking a real bank.

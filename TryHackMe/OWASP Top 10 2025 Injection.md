@@ -77,28 +77,19 @@ Escaping must be context-aware. HTML output encoding does not automatically prot
 
 SSTI is an injection vulnerability in which input crosses into a server-side template interpreter. The lab's objective is to prove evaluation and retrieve the specified file. The durable fix is to keep user input separate from executable template syntax and minimise the application's permissions.
 
-## Expanded injection testing methodology
+## Phase 7: Task evidence checklist
 
-### 1. Identify the interpreter
+For the practical, record the normal response before testing the template field. Submit the harmless expression or test value required by the room, then compare the rendered output.
 
-Injection occurs when untrusted data is interpreted as part of a command or query. Identify the sink: SQL engine, operating-system shell, template renderer, LDAP query, or another interpreter. The correct test and remediation depend on the sink.
+| Test result | Interpretation |
+|---|---|
+| Input appears exactly as typed | Reflection alone; SSTI not yet proven |
+| Template expression is evaluated | Evidence that input reached a template interpreter |
+| File content appears after the task's permitted test | Evidence of file-read impact in the lab |
+| Error or blank response only | Investigate syntax, encoding, engine, and route before concluding |
 
-### 2. Establish a baseline
+Use only the endpoint and target file specified by the active lab. Do not assume that an expression from one template engine applies to another. The room's final flag should be copied from the live result and redacted as THM{hidden} in the public notes.
 
-Capture a normal request and response from the room. Identify exactly which input is under test and how it reaches the backend. Change one input at a time and compare response content, errors, timing, and state changes. Do not infer injection from an error string alone.
+## Final remediation checklist
 
-### 3. Use controlled validation
-
-Follow the room's prescribed benign payloads. Confirm that the result is caused by the input and is repeatable. For database queries, a difference in returned rows or a controlled boolean condition may be relevant; for shell or template injection, use only the harmless proof specified by the lab. Do not use destructive commands or test unrelated systems.
-
-### 4. Find the root cause
-
-The central failure is usually mixing data with executable syntax or relying on incomplete filtering. Encodings and alternate syntax may expose a filter that checks the wrong representation, but the durable fix is not to add more blacklist entries.
-
-### 5. Remediation
-
-Use parameterized SQL statements, safe APIs, structured arguments, context-aware output encoding, and least-privilege service accounts. Avoid shell interpretation for user-controlled values. Where templates support raw expressions, restrict the features and run rendering in an isolated environment.
-
-### 6. Record room answers accurately
-
-For every task, preserve the input, output, affected sink, and demonstrated effect. Use the live room to obtain exact values; do not fabricate payload output. Redact public flags as `flag{hidden}`.
+Use fixed templates and pass user input as data, disable dynamic evaluation of untrusted template strings, run the renderer under a low-privilege identity, and restrict filesystem and network access. Add regression tests showing that template syntax is escaped or rejected and that ordinary content still renders correctly.

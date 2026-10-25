@@ -2,8 +2,6 @@
 
 > **Author:** Abrham Addis  
 > **Topic:** Linux Fundamentals, Networking Architecture, LAN Essentials & Network Recon  
-> **Course:** INSA Cyber Security & CTC Fundamentals  
-
 ---
 
 ## 📑 Overview & Objectives

@@ -1,54 +1,75 @@
 # OWASP Top 10 2025: A01 Broken Access Control
 
-Room: https://tryhackme.com/room/owasptopten2025one
+Official room: https://tryhackme.com/room/owasptopten2025one
 
-Broken Access Control occurs when an application does not enforce what an authenticated user is allowed to view or do. The issue is usually in server-side authorisation: the browser may hide a button, but the server must still reject a request the user is not permitted to make.
+## Room Overview & Information
 
-## 1. Understand identity, authentication, authorisation, and accountability
+**Category:** Web application security  
+**Difficulty:** Beginner  
+**OWASP category:** A01 Broken Access Control  
+**Scenario:** Inspect a simulated banking site, identify another user's account through a client-controlled account identifier, and understand why the server must enforce object-level permissions.
 
-These concepts are related but different:
+This is a focused task within TryHackMe's IAAA Failures room. The static website is a deliberately vulnerable lab. Only manipulate the identifiers in that lab, not a real banking website.
 
-- **Identity:** the account or service that represents an actor.
-- **Authentication:** evidence that the actor controls that identity.
-- **Authorisation:** the actions and data that identity is allowed to access.
-- **Accountability:** records that show who did what and when.
+## Phase 1: Understand the IAAA model
 
-A user can authenticate successfully and still be unauthorised to access another user's records. A valid session does not grant access to every object.
+- **Identity:** the account representing a person or service.
+- **Authentication:** proving control of that identity.
+- **Authorisation:** deciding what the identity may read or change.
+- **Accountability:** recording who did what, when, and from where.
 
-## 2. Test object-level access in the room
+These stages depend on one another. A user can be authenticated correctly and still be forbidden from viewing another customer's account. A session cookie proves something about the session; it does not grant unlimited access.
 
-The room's practical uses an account identifier in the URL. Start the static site supplied by the task and inspect the account page. Note the accountID value and the data displayed for the logged-in user.
+## Phase 2: Inspect the account page
 
-In the authorised exercise, change the identifier to another value and observe whether the application returns a different user's account. The question asks you to identify the account with more than one million dollars and read the note attached to that account. Use the actual values shown by the live lab; do not copy an account ID or note from another version.
+Start the static site attached to the room. Inspect the URL while viewing your account. The task uses an `accountID` value in the URL. Record the initial value and the information shown for your current account.
 
-The vulnerability is an Insecure Direct Object Reference (IDOR) when the application accepts a user-controlled object reference without checking that the current user is allowed to access that object. The identifier does not have to be numeric; changing a UUID or encoded value can expose the same design flaw if authorisation is missing.
+For a real assessment, I would use browser Developer Tools or Burp Suite to inspect the request. The relevant question is whether the server checks the current session's ownership of the requested account, rather than blindly trusting the client-supplied identifier.
 
-## 3. Distinguish horizontal and vertical escalation
+## Phase 3: Test object-level authorisation
 
-- **Horizontal privilege escalation:** a user accesses another user's data or actions at roughly the same privilege level.
-- **Vertical privilege escalation:** a user performs actions reserved for a more privileged role, such as an administrator.
+Within the lab, change the `accountID` value to another value and inspect the returned account. Change only that identifier so the comparison is controlled. If the application returns another user's data without an authorisation check, it demonstrates an Insecure Direct Object Reference (IDOR), a common form of broken access control.
 
-Changing an account ID and viewing another customer's data is generally horizontal access-control failure. Reaching an admin-only function as a normal user is vertical escalation.
+Continue the task until you identify the account with more than one million dollars. Open that account and read the note attached to it. Do not guess the ID or note from another guide; use the current lab's displayed values.
 
-## 4. Test each sensitive action
+### Question 1
 
-For every relevant endpoint, test the authorised user's own resource, another user's resource, and an action that requires a higher role. Keep the request the same except for the identity or object reference being tested. Verify both read and write operations where the lab allows it.
+**“If you don't get access to more roles but can view the data of another users, what type of privilege escalation is this?”**
 
-Do not assume that hiding an identifier, using a random UUID, or encoding an ID is a substitute for an access check. The server should validate the current identity's permission for every object and action.
+Answer: **Horizontal privilege escalation.**
 
-## 5. Remediation
+The user remains at the same general privilege level but accesses another user's resources. Vertical escalation would involve gaining a higher role or performing an administrator-only action.
 
-- Enforce authorisation on the server for every request.
-- Derive the current user from the authenticated session rather than trusting a client-supplied user ID.
-- Check ownership or role before returning or modifying an object.
-- Use centralised authorisation logic and test it consistently.
-- Log denied access attempts and alert on repeated cross-account access.
-- Add automated tests for horizontal and vertical access control.
+### Question 2
 
-## 6. Working through the room
+**“What is the note you found when viewing the user's account who had more than $ 1 million?”**
 
-Start the static practical, inspect the accountID parameter, and compare the accounts as the task instructs. Submit the account note requested by the room using the live site's value. This write-up explains the method but intentionally does not invent or publish the flag.
+Procedure:
+1. Continue testing the `accountID` value in the supplied static site.
+2. Identify the account whose balance exceeds $1 million.
+3. Open that account's page.
+4. Read the note field.
+5. Submit the exact note text shown by the lab.
 
-## What I took from this room
+The note is instance-specific lab content, so this public write-up intentionally explains how to obtain it rather than inventing a value.
 
-Access control is enforced by the server, not by the interface. The safest test changes one object reference at a time and verifies whether the server checks the current user's permissions before returning data.
+## Phase 4: Validate the finding
+
+A valid finding needs more than a changed URL. Verify that the account data belongs to a different user and that the server returns it despite the current user's lack of permission. Keep a record of the original and modified request, the relevant response, and the impact.
+
+Do not attempt to alter balances or access more data than the room requires. Read-only proof is sufficient for this task.
+
+## Phase 5: Remediation
+
+- Derive the acting user from the authenticated server-side session.
+- Check ownership or role permissions on every request.
+- Do not trust a client-supplied account identifier as proof of authorisation.
+- Apply the same checks to read, update, delete, export, and API operations.
+- Add automated tests for cross-user and cross-role access.
+- Log repeated denied access attempts and alert on suspicious patterns.
+
+Random IDs and encoded IDs may reduce guessing but do not replace authorisation checks.
+
+## Key takeaways
+
+Broken access control is a server-side decision failure. The practical demonstrates horizontal privilege escalation: a normal user can see another user's data by manipulating an object reference. The correct fix is to check the current user's permission for every requested object and action.

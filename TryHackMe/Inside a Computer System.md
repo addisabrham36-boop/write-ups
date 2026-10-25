@@ -117,3 +117,41 @@ Exact implementation details vary by device and firmware, but the room's sequenc
 ## Key takeaways
 
 The motherboard connects components, the CPU executes instructions, RAM holds active data, storage retains data, and the network adapter enables communication. During startup, firmware checks the system, selects a boot device, and launches the bootloader. These basics help security analysts understand hardware trust, boot integrity, and where evidence may exist.
+
+## Expanded practical study guide
+
+### 1. CPU, memory, and storage
+
+The CPU executes instructions. RAM holds working data for active processes and is normally volatile, while persistent storage retains data across shutdowns. The operating system coordinates access to these resources and isolates processes from one another.
+
+A CPU core can execute instructions, and modern processors use caches to reduce the time needed to access frequently used data. The operating system schedules runnable threads, handles interrupts, and provides system calls so applications can request privileged services safely.
+
+### 2. Input, output, and buses
+
+Input devices provide data to the system; output devices present results. Storage, network, display, and peripheral controllers communicate through buses and device interfaces. A device driver lets the operating system interact with a particular device.
+
+Hardware faults can resemble software problems. When diagnosing an issue, record the symptoms and determine whether they occur before the operating system loads, only in one application, or across multiple applications.
+
+### 3. Operating-system responsibilities
+
+The OS manages processes, memory, filesystems, device access, users, permissions, networking, and logs. User applications normally run with limited privileges. The kernel mediates sensitive operations, helping prevent one process from directly controlling another process's memory or system resources.
+
+### 4. Files and data representation
+
+Files contain bytes interpreted according to a format. The extension is a naming convention, not proof of content. Use `file` to identify likely formats and a suitable parser to inspect them. Never execute an unknown file merely to learn what it does.
+
+### 5. Security implications
+
+Least privilege limits the damage caused by a compromised account or application. Secure boot and code-signing mechanisms can help establish trust in the boot chain and software, while updates fix known vulnerabilities. Disk encryption protects data at rest when implemented and keyed correctly, but it does not protect data from an already-authorized process running on an unlocked system.
+
+### 6. Answering room tasks
+
+Map each question to the component or responsibility it describes: CPU execution, volatile memory, persistent storage, device I/O, kernel services, or application behaviour. Use the exact terminology in the room and distinguish a hardware component from the operating-system function that manages it.
+
+### 7. Review and troubleshooting
+
+When a computer behaves unexpectedly, change one variable at a time and note when the symptom occurs. Check system logs, resource usage, device status, and recent changes. Do not assume every performance issue is a malware incident or every crash is a hardware failure.
+
+### 8. Key takeaway
+
+A computer system is a coordinated set of hardware and software layers. Understanding the responsibility of each layer helps explain performance, reliability, and security problems without jumping to unsupported conclusions.

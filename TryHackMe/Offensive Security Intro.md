@@ -1,4 +1,4 @@
-# Offensive Security Intro: TryHackMe Walkthrough
+# Offensive Security Intro: Complete TryHackMe Walkthrough
 
 Official room: https://tryhackme.com/room/offensivesecurityintro
 
@@ -6,74 +6,60 @@ Official room: https://tryhackme.com/room/offensivesecurityintro
 
 **Category:** Offensive security fundamentals  
 **Difficulty:** Easy  
-**Objective:** Learn what offensive security means and use the room's simulated bank website to see a basic authorised attack in action.
+**Objective:** Understand authorised offensive security and complete the simulated vulnerable-bank interaction.
 
-This room introduces offensive security through a deliberately vulnerable, fictional bank. The practical is a simulation, not a real banking service. Only interact with the website deployed by TryHackMe.
+This is an interactive introduction rather than a boot-to-root target. There is no real bank, no shell, and no privilege-escalation stage. The practical demonstrates how an intentionally scripted website responds when a user submits the required answer.
 
-## Task 1: Hacking your first website
+## Phase 1: Understand Offensive Security
 
-Open the room's **View Site** link to launch the simulated bank website. Review the page and locate the interactive question. The goal is to connect the general definition of offensive security to the activity shown by the lab.
+Offensive security uses attacker-style testing to discover and validate security weaknesses before they are abused by criminals. Examples include penetration testing, red teaming, and vulnerability research. A professional test has explicit permission, a defined scope, safety rules, evidence collection, and a report that helps the owner remediate findings.
+
+The distinction between offensive security and unauthorised hacking is not the tool being used. It is the permission, scope, and conduct of the activity.
+
+## Phase 2: Complete the simulated bank task
+
+### 1. Open the lab site
+
+Open the room's **View Site** link. This launches the fictional banking website used by the practical. Read the prompt, inspect the interactive controls, and do not navigate to a real bank site.
 
 ### Question: “Which of the following options better represents the process where you simulate a hacker's actions to find vulnerabilities in a system?”
 
-**Answer: Offensive Security.**
+**Answer:** **Offensive Security**.
 
-Offensive security uses authorised attacker-style testing to find and validate weaknesses before a real attacker exploits them. The work should stay within the agreed scope and should produce evidence and recommendations.
+The question asks for the professional discipline that simulates attacker behaviour to discover weaknesses. The aim is to identify issues in a controlled, authorised manner so they can be fixed before a real attack.
 
-After submitting the correct answer, look above the account balance on the simulated bank page. The site displays a message indicating that the exercise succeeded.
+### 2. Verify the simulated result
+
+After submitting the correct answer, the page displays a message above the account balance.
 
 ### Question: “Above your account balance, you should now see a message indicating the answer to this question. Can you find the answer you need?”
 
-**Answer: BANK-HACKED**
+**Answer:** **BANK-HACKED**.
 
-This is the message displayed by the room's simulation. It is not a real bank compromise; it is a deliberately scripted learning exercise.
+This is the text deliberately displayed by the simulation. It is not evidence that a real banking system was compromised.
 
-## How the exercise works
+## Phase 3: How to Document an Offensive Test
 
-The room uses a simple web interface to show that an application can reveal information after a particular action. In a real assessment, the tester would inspect the request and response, identify what control failed, and verify the impact without accessing unrelated data.
+Although the room is very simple, a professional record should still separate action from result:
 
-A useful process is:
-1. Read the task and define the lab scope.
-2. Inspect the page and the available interaction.
-3. Submit the answer requested by the room.
-4. Read the message displayed by the simulated application.
-5. Record what the application demonstrated.
-6. Stop once the task is complete.
+1. **Objective:** identify what the task asks you to demonstrate.
+2. **Scope:** use only the site deployed by the room.
+3. **Action:** submit the room's required input.
+4. **Evidence:** record the output displayed by the page.
+5. **Interpretation:** explain what the application showed and what it did not prove.
+6. **Cleanup:** stop when the task is complete and avoid interacting with unrelated services.
 
-## Offensive security versus unauthorised hacking
+The displayed message proves only that the simulated task accepted the answer. It does not prove a general vulnerability exists in an external system.
 
-The techniques may look similar, but authorisation and scope are what distinguish a penetration test from unauthorised activity. A professional tester has permission, follows rules of engagement, minimises impact, preserves evidence, and reports the findings so the owner can fix them.
+## Phase 4: Question and Answer Summary
 
-## Key takeaways
+| Exact question | Answer |
+|---|---|
+| Which option represents simulating a hacker's actions to find vulnerabilities? | **Offensive Security** |
+| What message appears above the account balance after the correct interaction? | **BANK-HACKED** |
 
-Offensive security simulates attacker behaviour to find weaknesses in a controlled and authorised way. The room's answer is **Offensive Security**, and the simulated site displays **BANK-HACKED** after the correct interaction. The lesson is about the method and its boundaries, not about attacking a real bank.
+## Phase 5: Key Takeaways & Remediation
 
-## Expanded room workflow
+Offensive security is an authorised process for identifying weaknesses. A useful test should produce reproducible evidence, explain impact, and recommend a fix. In a real assessment, confirm permission and scope before testing, use the least disruptive method that proves the issue, protect any sensitive data encountered, and report findings clearly.
 
-### 1. Understand the legal boundary
-
-Offensive security uses attacker techniques to discover weaknesses under explicit authorization. The scope defines the hosts, applications, methods, time window, and prohibited actions. A public IP or accessible login page is not permission to test it.
-
-### 2. Follow a repeatable methodology
-
-A controlled assessment typically proceeds through scoping, reconnaissance, enumeration, vulnerability validation, exploitation where permitted, impact assessment, cleanup, and reporting. Not every task requires every phase. Avoid running an exploit before understanding the service and the risk.
-
-### 3. Reconnaissance and enumeration
-
-Passive reconnaissance gathers information from public sources. Active reconnaissance sends traffic to the target. Enumeration identifies concrete services, users, shares, routes, or application behaviour. Keep a record of commands, timestamps, and outputs so findings can be reproduced.
-
-### 4. Validate a vulnerability
-
-A version number or banner is only a lead. Check whether the affected feature is enabled, whether the target configuration is vulnerable, and whether the proof of concept applies. Prefer a minimal, non-destructive validation and stop once the task objective is demonstrated.
-
-### 5. Initial access and privilege boundaries
-
-Initial access means obtaining a foothold under the permissions granted by the vulnerable path. Privilege escalation means increasing those permissions. Verify the current identity before and after a step with the appropriate command. Do not call a user shell root access unless the effective identity confirms it.
-
-### 6. Report and remediate
-
-A useful report contains the affected asset, steps to reproduce within scope, evidence, impact, severity rationale, and specific remediation. Remove temporary files, restore lab changes when required, and do not expose credentials or flags in public notes.
-
-### 7. Complete the room tasks
-
-Read the scenario and identify which phase or role the question describes. Use the official room's definitions where exact wording matters. This room is an introduction, so the goal is to understand the workflow and ethics rather than to force an exploit where none is required.
+The practical's lesson is about the method and its boundaries, not about attacking a real bank.

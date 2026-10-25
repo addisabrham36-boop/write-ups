@@ -75,40 +75,17 @@ Use WPA3 or properly configured WPA2, disable obsolete protocols, set unique cre
 
 Wi-Fi is a radio-based network link with its own discovery, authentication, and encryption mechanisms. Security depends on modern protocols, strong credentials, careful client configuration, and network segmentation. SSID hiding and MAC filtering should never be treated as the primary security boundary.
 
-## Expanded wireless practical guide
+## Room task checklist
 
-### 1. Identify the network elements
+When a question asks for an SSID, BSSID, channel, frequency, authentication method, or security protocol, read the exact field in the lab output. Do not infer the frequency from the channel number without checking the band, and do not confuse the network name with the radio identifier.
 
-The SSID is the network name presented to users. The BSSID identifies a particular access point radio, usually by its MAC address. A client scans supported channels, discovers beacons or probe responses, associates with an access point, and completes the configured authentication and key-establishment process.
+| Concept | Correct interpretation |
+|---|---|
+| SSID | Human-readable wireless network name |
+| BSSID | Identifier of a specific access-point radio |
+| Channel | Radio channel within a band |
+| Authentication | How a client proves it may connect |
+| Encryption | How wireless traffic is protected in transit |
+| Hidden SSID | Broadcast behaviour, not access control |
 
-### 2. Frequency bands and channels
-
-Wi-Fi can operate in the 2.4 GHz, 5 GHz, and supported 6 GHz bands. Available channels and power rules depend on region and hardware. The 2.4 GHz band often has more interference and fewer non-overlapping channels; higher bands can provide more capacity but differ in propagation and compatibility.
-
-Do not infer the frequency from the channel number alone because channel numbering differs by band. Use the lab output or access-point configuration.
-
-### 3. Check a Linux wireless device
-
-```bash
-ip link
-iw dev
-iw list
-```
-
-These commands list interfaces, wireless devices, and reported device capabilities. Results depend on the driver and adapter. If the lab provides a preconfigured attack machine, do not change your everyday Wi-Fi configuration unnecessarily.
-
-### 4. Authentication and encryption
-
-WEP is obsolete. WPA2-Personal commonly relies on a pre-shared passphrase, while WPA3-Personal uses SAE. Enterprise networks commonly use 802.1X/EAP and an authentication server. Correct encryption helps protect wireless traffic, but weak credentials, vulnerable firmware, and poor network segmentation can still expose systems.
-
-### 5. Troubleshoot by layer
-
-If a client cannot connect, check whether it can see the SSID, whether the radio supports the band, whether authentication succeeds, whether DHCP assigns an address, and whether DNS resolves names. Each stage indicates a different class of issue. A wrong password and a missing DHCP response should not be diagnosed the same way.
-
-### 6. Use the active room as evidence
-
-For each task, identify the exact item being requested: SSID, BSSID, frequency, channel, protocol, authentication method, or security property. Read the relevant field from the lab instead of guessing from a network name or a generic example. Do not copy values from another environment.
-
-### 7. Secure configuration
-
-Use current firmware, modern WPA settings, a unique passphrase, protected administrator access, guest-network isolation, and monitoring for unexpected access points. Disable WPS when not required. Segment wireless clients according to trust, and restrict access from guest networks to internal resources.
+For defensive deployments, use current WPA settings, unique passphrases, modern firmware, guest isolation, and certificate validation for enterprise networks. Review client behaviour as well as AP configuration.

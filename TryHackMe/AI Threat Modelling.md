@@ -1,98 +1,113 @@
 # AI Threat Modelling: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/aithreatmodelling
+Official room: https://tryhackme.com/room/aithreatmodelling
 
-This room applies structured threat modelling to systems that include AI. The central idea is simple: before choosing controls, map the assets, components, data flows, trust boundaries, and actions. An AI model is only one component in that system.
+## Room Overview & Information
 
-## 1. Understand the scenario and assets
+**Category:** AI security architecture  
+**Difficulty:** Beginner to intermediate  
+**Focus:** Assets, trust boundaries, attacker goals, LLM threat categories, attack paths, and mitigations.
 
-The room scenario describes enterprise AI deployments, including a customer-facing assistant, a recommendation engine, and a fraud-detection system. Each system has different assets and consequences if it fails.
+Threat modelling is a structured way to identify how a system can fail before an attacker finds the weakness. For AI systems, the model itself is only one component. Data sources, retrieval, prompts, tools, identity, APIs, model artifacts, and the deployment pipeline all affect risk.
 
-I start an inventory with:
+## Phase 1: Define the system
 
-- User prompts and uploaded documents.
-- System instructions and application configuration.
-- Training data, model weights, and model versions.
-- Retrieved documents, embeddings, and vector stores.
-- API keys, service identities, and tool permissions.
-- Logs, monitoring records, and evaluation datasets.
-- Business actions triggered by model output.
+Start by describing the system's purpose and boundaries. Identify:
+- Users and their roles.
+- The frontend and API.
+- The model or inference service.
+- Training and fine-tuning data.
+- Retrieval sources and vector databases.
+- Tools or plugins the model can invoke.
+- Secrets and sensitive records.
+- External dependencies and update channels.
+- Logging, monitoring, and administrative interfaces.
 
-For each asset, record its owner, sensitivity, where it is stored, who can access it, and what depends on it. This prevents the assessment from focusing only on the visible chatbot while ignoring the database or tools behind it.
+Do not begin with a list of attacks before you know what the system contains. A threat model without assets and data flows quickly becomes a list of generic security slogans.
 
-## 2. Draw the architecture and trust boundaries
+## Phase 2: Identify assets and trust boundaries
 
-Map the request path. A retrieval-augmented assistant might receive a user prompt, retrieve documents, add those documents to model context, generate an answer, and optionally call a tool. Each transition is a possible trust boundary.
+High-value assets may include credentials, customer records, proprietary documents, model weights, API keys, training data, and the ability to perform actions through connected tools.
 
-Ask these questions at every boundary:
+Draw the data flow from user input to output. Mark where untrusted text is retrieved, where the model sees privileged context, where tool calls are authorised, and where data leaves the environment. A key trust boundary exists whenever information from a less-trusted source enters a component with more privilege.
 
-1. Who can supply the input?
-2. Is the input trusted or untrusted?
-3. Is access checked before data is retrieved?
-4. Can the data influence instructions or trigger an action?
-5. What identity and permissions does the next component use?
-6. What is logged, and could the log itself expose secrets?
+For each boundary, ask:
+- Who controls the input?
+- What validation occurs?
+- Which identity is used?
+- What can the next component access?
+- Is the action authorised independently of the model?
+- What evidence is logged?
 
-The key is to document actual flows rather than assume the model is isolated. If the system has a plugin, database, API, or shell tool, include it in the diagram.
+## Phase 3: Map AI-specific risks
 
-## 3. Apply STRIDE with AI-specific examples
+The OWASP Top 10 for LLM applications provides useful categories. Examples include:
 
-STRIDE provides six broad threat categories:
+- **Prompt injection:** user input or retrieved content attempts to change model behaviour.
+- **Sensitive information disclosure:** private data is revealed through output, retrieval, logs, or memorisation.
+- **Supply-chain compromise:** a model, dataset, plugin, or dependency is tampered with.
+- **Data/model poisoning:** manipulated data influences training or model behaviour.
+- **Improper output handling:** model output is trusted as safe code, HTML, SQL, or commands.
+- **Excessive agency:** the model can invoke tools or actions beyond what its task requires.
+- **System prompt leakage:** hidden instructions or secrets are exposed.
+- **Vector/RAG weaknesses:** retrieval returns unauthorised or attacker-controlled content.
+- **Misinformation:** unreliable output is presented as authoritative.
+- **Resource exhaustion:** expensive queries or repeated requests degrade availability.
 
-- **Spoofing:** an attacker impersonates a user, service, or data source.
-- **Tampering:** an attacker alters prompts, retrieved documents, training data, model artifacts, or outputs.
-- **Repudiation:** an action cannot be reliably attributed because audit records are missing or incomplete.
-- **Information disclosure:** the system exposes confidential prompts, documents, records, or credentials.
-- **Denial of service:** excessive or costly requests exhaust model, API, or infrastructure resources.
-- **Elevation of privilege:** an AI tool or service performs an action beyond the caller's authority.
+Map each risk to a specific component and attack path rather than marking every category as applicable to every system.
 
-AI examples need context. Prompt injection may contribute to tampering or privilege escalation; a poorly protected vector store can cause information disclosure; and unrestricted agent loops can contribute to denial of service. Do not force every issue into one category if several apply.
+## Phase 4: Construct attack scenarios
 
-## 4. Add AI-specific frameworks
+A useful scenario includes a threat actor, entry point, weakness, impact, and evidence. For example:
 
-MITRE ATLAS provides a catalogue of adversarial techniques targeting AI and machine-learning systems. OWASP's LLM guidance helps identify application risks such as prompt injection, insecure output handling, sensitive information disclosure, excessive agency, and weaknesses in the supply chain.
+**Scenario: Indirect prompt injection through retrieved documents**
+1. An attacker can influence a document that the application later retrieves.
+2. The retrieval system includes the document in the model's context.
+3. The document contains instructions intended to redirect the model.
+4. The model requests a tool call or exposes information.
+5. The application fails to enforce permissions independently.
+6. A sensitive action or disclosure occurs.
 
-Use frameworks as a vocabulary, not as a substitute for analysis. For each threat, connect the technique to a specific component and explain the consequence in this deployment.
+The root cause is not just “the model followed instructions.” It is the combination of untrusted retrieved content, model behaviour, tool authority, and missing application-level authorisation.
 
-## 5. Score and prioritise risks
+Another scenario is a compromised model artifact entering through an unverified registry. The key controls are provenance, signature verification, dependency review, and monitoring.
 
-For each threat, record:
+## Phase 5: Rate and prioritise risk
 
-| Field | What to write |
-|---|---|
-| Asset | What needs protection |
-| Threat scenario | What an attacker could do and how |
-| Weakness | Which control is missing or unreliable |
-| Impact | Confidentiality, integrity, availability, safety, or business impact |
-| Likelihood | How feasible the path is in this environment |
-| Existing controls | What already reduces the risk |
-| Recommended action | A specific control and owner |
-| Verification | How the team will test that the control works |
+Prioritise threats by likelihood, impact, exposure, and existing controls. A public endpoint with access to financial or administrative tools deserves more attention than an isolated model that only generates draft text.
 
-Do not assign a high severity merely because a threat sounds sophisticated. Consider exposure, required access, ease of exploitation, and the consequence of success. A public chatbot with unrestricted access to sensitive internal documents deserves different priority from an offline prototype with synthetic data.
+Record the assumptions behind each rating. A threat model is a working document, not a claim that every possible attack has been proven.
 
-## 6. Choose controls that enforce policy
+## Phase 6: Test the model and application separately
 
-Examples of practical controls include:
+Model evaluation can test whether prompts influence the output. Application testing must verify whether the system permits an unauthorised action. These are different questions.
 
-- Enforce document-level authorisation before retrieval.
-- Give each tool a narrow, explicit permission set.
-- Validate tool arguments and perform authorisation checks inside the tool service.
-- Require confirmation for high-impact actions.
-- Separate secrets from prompts and model context.
-- Version and verify models, datasets, and dependencies.
-- Limit request rate, token budgets, and recursive agent calls.
-- Log security-relevant actions while minimising sensitive content in logs.
-- Test prompt injection, data leakage, unsafe tool use, and denial-of-service scenarios.
+For a controlled lab:
+1. Use a harmless prompt-injection test supplied by the room.
+2. Observe the model's response.
+3. Inspect whether a tool call was requested.
+4. Verify whether the application authorised or rejected the action.
+5. Confirm the actual result in the system that owns the data.
+6. Record the evidence and any uncertainty.
 
-Prompt wording can improve behaviour, but it cannot guarantee that the model will obey policy. The application must enforce security rules independently.
+A model saying it has accessed a file does not prove the file was accessed. A tool call is not proof the tool executed successfully. Verify the action in the underlying system.
 
-## 7. Work through the room tasks
+## Phase 7: Mitigations
 
-Read the scenario in each task and identify the component being discussed. Map the risk to the correct threat category or framework, then explain why the risk applies to that component. In the assessment scenario, do not produce a generic list of every AI risk. Tie each finding to a data flow, permission, or trust boundary in the described architecture.
+- Apply least privilege to model accounts and tools.
+- Enforce authorisation in application code.
+- Treat user input and retrieved content as untrusted.
+- Separate data from instructions where possible and test for indirect injection.
+- Require approval for destructive or high-impact actions.
+- Use trusted model and dataset sources and record provenance.
+- Validate model output before passing it to interpreters.
+- Monitor tool calls, retrieval access, and anomalous query patterns.
+- Red-team the full workflow, not only the model response.
 
-For the final assessment, check that every finding has a concrete mitigation and a way to verify it. “Make the AI safer” is not an actionable recommendation; “check the user's document permissions before retrieval and add a test for cross-user access” is.
+## Working through the room
 
-## What I took from this room
+Use the task's system description and diagrams to identify assets, data flows, and trust boundaries. For each question, match the scenario to the specific threat and control. Do not invent an attack path that the task does not support.
 
-Threat modelling turns general AI concerns into a prioritised engineering plan. STRIDE helps classify failure modes, ATLAS helps describe AI-specific adversary techniques, and OWASP helps locate application risks. The useful output is a system map, specific threat scenarios, prioritised findings, and controls that can be tested.
+## Key takeaways
+
+Threat modelling is a repeatable process: define the system, identify assets, trace data flows, find trust boundaries, create attack scenarios, prioritise risk, and assign controls. AI-specific risks become clearer when they are mapped to the surrounding application rather than treated as mysterious model behaviour.

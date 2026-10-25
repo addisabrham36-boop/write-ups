@@ -119,41 +119,21 @@ Do not rely on obscurity. Require authentication for sensitive pages, enforce au
 
 Search engines are indexes, not security boundaries. Crawlers discover content, robots.txt gives crawl instructions, sitemaps aid discovery, and search operators narrow results. Dorking is useful for finding exposure, but every result must be validated against the current website and the authorised scope.
 
-## Expanded search workflow
+## Phase 8: Search task verification
 
-### 1. Define the question and target
+For each task, translate the question into an operator and a source, then verify the original result.
 
-Search operators narrow publicly indexed results. They are useful for OSINT and for finding accidentally exposed files, but search results can be stale. Keep the exercise within the room's target and avoid accessing or redistributing private data.
+| Task focus | Useful approach | Evidence to preserve |
+|---|---|---|
+| Find pages for a domain | site:example.com | The result URL and title |
+| Find exact wording | Quoted phrase | Original page containing the phrase |
+| Find exposed documents | filetype:pdf site:example.com | Document title and URL |
+| Find paths named admin | site:example.com inurl:admin | The indexed URL, not a guessed route |
+| Find directory listing pages | intitle:"index of" plus an in-scope term | Result title and accessible directory contents |
+| Check indexing instructions | /robots.txt and sitemap.xml | The exact directives or URL list |
 
-### 2. Core operators
+Search results can be stale, and a Google snippet may omit important context. Open the source where permitted and verify the requested value on the page. Don't turn a public search discovery into active testing without explicit authorization.
 
-- `site:example.com` limits results to a domain or host.
-- `filetype:pdf` searches for a particular file extension.
-- `intitle:login` searches page titles.
-- `inurl:admin` searches URLs for a term.
-- Quoted text such as `"exact phrase"` searches for an exact phrase.
-- A minus sign excludes a term, for example `site:example.com -jobs`.
+## Final defensive checklist
 
-Combine one or two operators at a time so the effect is clear. If a query returns nothing, loosen the most restrictive condition rather than changing every part at once.
-
-### 3. Investigate public exposure responsibly
-
-A useful workflow is to search the room's specified domain, identify the result that matches the task, open the original source, and verify the requested field. Search snippets can omit context or show content that has since changed. Do not assume a result is current just because it appears near the top.
-
-If a search reveals a potentially sensitive document, do not download or share it unless the lab explicitly requires it. Record the minimum evidence needed to report the exposure and recommend removal, access control, or credential rotation as appropriate.
-
-### 4. Common mistakes
-
-- Searching a broad term without the required domain restriction.
-- Treating a search snippet as authoritative when the source page is available.
-- Confusing a URL path with a hostname.
-- Assuming a hidden or unindexed page is protected.
-- Publishing credentials, personal information, or tokens discovered during research.
-
-### 5. Complete the room questions
-
-For each question, translate the requested answer into a search strategy. If it asks for a document type, use `filetype:`; if it asks for a title or URL clue, use `intitle:` or `inurl:`; if it limits the organization, use `site:`. Open the result and verify the exact answer. Use the room's active values, not an unrelated example.
-
-### 6. Defensive lessons
-
-Search engines index content they can discover; they are not access-control systems. Keep sensitive data behind authentication, remove secrets from public repositories, configure indexing controls where appropriate, and rotate any credential that was exposed. Robots.txt can suggest which paths a site does not want indexed, but it does not prevent direct access.
+Do not publish secrets or private files on a public web root. Use authentication and server-side authorization, disable directory listings when unnecessary, remove stale files, and review search-index results after a sensitive exposure has been fixed. Robots.txt and sitemaps support discovery; they do not protect the underlying content.

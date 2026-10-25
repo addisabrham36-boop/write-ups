@@ -24,9 +24,9 @@ The key learning objectives are:
 
 Start the room's AttackBox and target environment. Use the script supplied by the task to start the simulated page. Run it from the directory where the room's file is stored:
 
-\`\`\`bash
+```bash
 ./server.py
-\`\`\`
+```
 
 If execution is denied, check the file permissions and follow the room's instructions for running the provided script. Do not replace it with a public phishing kit or host it outside the lab.
 
@@ -72,9 +72,9 @@ The next task asks you to open the factory mailbox and determine whether the har
 
 Browse to the mailbox service at the target address shown by the room:
 
-\`\`\`text
+```text
 http://MACHINE_IP
-\`\`\`
+```
 
 Replace MACHINE_IP with the active target address. Sign in with the fictional factory account details supplied by the room and the password retrieved in the previous task. Do not test these credentials against any other system.
 

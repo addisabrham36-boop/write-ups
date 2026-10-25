@@ -6,132 +6,160 @@ Official room: https://tryhackme.com/room/linuxfundamentalspart1
 
 **Category:** Linux fundamentals  
 **Difficulty:** Beginner  
-**Focus:** Linux shell, filesystem navigation, reading files, searching, shell operators, and basic system interaction.
+**Focus:** Linux history, terminal commands, users, directory navigation, reading files, searching logs, background jobs, and output redirection.
 
 Linux is common on servers, cloud infrastructure, containers, and security tools. The terminal is a way to issue commands to the shell, which starts programs and connects their input and output. A command should be understood as a program plus its arguments, not as a magic phrase to copy.
 
-## Phase 1: Open a terminal and understand the prompt
+## Task 1: Introduction
 
-A prompt may show the username, hostname, current directory, and shell. The exact appearance varies by distribution and shell configuration.
+The room introduces Linux and its use in cybersecurity. Linux is an operating-system family built around the Linux kernel and a large collection of user-space tools.
 
-Check the current identity and directory:
+### Question: “Research: What year was the first release of a Linux operating system?”
 
-```bash
+**Answer:** **1991**.
+
+Linus Torvalds announced the Linux kernel in 1991. Modern Linux distributions combine the kernel with system tools, libraries, package managers, and applications.
+
+## Task 2: A Bit of Background on Linux
+
+### Question: “If we wanted to output the text "TryHackMe", what would our command be?”
+
+**Answer:**
+
+\`\`\`bash
+echo "TryHackMe"
+\`\`\`
+
+The `echo` command prints its arguments to standard output. Quotes keep the text together as one argument and are useful when the text contains spaces.
+
+## Task 3: Interacting With Your First Linux Machine
+
+Start the room's deployed Linux machine and open its terminal. The exercise uses an account and a simple directory tree.
+
+### Question: “What is the username of who you're logged in as on your deployed Linux machine?”
+
+**Answer:** `tryhackme`.
+
+Check the active user with:
+
+\`\`\`bash
 whoami
-pwd
-id
-```
+\`\`\`
 
-- `whoami` prints the effective username.
-- `pwd` prints the current working directory.
-- `id` shows user and group identifiers.
+The command prints the effective username. Always verify the current environment instead of assuming the account name.
 
-The tilde (`~`) usually represents the current user's home directory.
+### Question: “On the Linux machine that you deploy, how many folders are there?”
 
-## Phase 2: Navigate the filesystem
+**Answer:** **4**.
 
-```bash
-ls
+Use `ls` to inspect the provided directory. If the task refers to the exercise folders, count those entries in the active machine. Directory contents can vary if you are in the wrong location.
+
+### Question: “Which directory contains a file?”
+
+**Answer:** `folder4`.
+
+Inspect the folders and identify which one contains the supplied file. Use:
+
+\`\`\`bash
 ls -la
-cd /etc
-cd ..
-cd ~
-```
+find . -maxdepth 2 -type f
+\`\`\`
 
-- `ls` lists visible entries.
-- `-l` shows details such as permissions, owner, size, and modification time.
-- `-a` includes hidden entries whose names begin with a dot.
+The first command includes hidden entries; the second lists files within the current directory and one level below it.
+
+### Question: “What is the contents of this file?”
+
+**Answer:** `Hello World`.
+
+Read the file with `cat` or `less`. The task expects the exact text shown by the supplied file.
+
+### Question: “Use the cd command to navigate to this file and find out the new current working directory. What is the path?”
+
+**Answer:** `/home/tryhackme/folder4`.
+
+Navigate to the directory and check the current path:
+
+\`\`\`bash
+cd /home/tryhackme/folder4
+pwd
+\`\`\`
+
 - `cd` changes the current directory.
-- `..` means the parent directory.
-- `~` means the home directory.
+- `pwd` prints the absolute path of the current working directory.
 
-Absolute paths begin at the filesystem root, `/`. Relative paths are interpreted from the current directory. This distinction matters when a command says a file cannot be found.
+## Task 4: Running Your First Few Commands
 
-## Phase 3: Read and search files
+### Question: “Use grep on "access.log" to find the flag that has a prefix of "THM". What is the flag?”
 
-```bash
-cat notes.txt
-less /var/log/syslog
-head -n 20 notes.txt
-tail -n 20 notes.txt
-grep -n "error" notes.txt
-find . -type f -name "*.txt"
-```
+Search the log for the flag prefix:
 
-- `cat` prints a file.
-- `less` lets you page through a file.
-- `head` shows the first lines.
-- `tail` shows the last lines.
-- `grep -n` searches for a string and displays matching line numbers.
-- `find` searches the directory tree for matching paths.
+\`\`\`bash
+grep 'THM' access.log
+\`\`\`
 
-Use `sudo` only when the task requires elevated permissions. Do not change ownership or permissions just to silence an error without understanding the consequence.
+The room's log contains a flag. It is intentionally redacted in this public write-up as `THM{hidden}`. The important technique is using grep to search a file for a string rather than reading the entire log manually.
 
-## Phase 4: Files, directories, and permissions
+Useful options include:
+- `-n` to show line numbers.
+- `-i` for case-insensitive matching.
+- `-E` for extended regular expressions.
 
-Linux permissions distinguish read (`r`), write (`w`), and execute (`x`) for the owner, group, and others. For a file, execute permission allows it to be run as a program; for a directory, execute permission controls whether the user can traverse it.
+## Task 5: Interacting With the Filesystem
 
-```bash
-stat notes.txt
-chmod 640 notes.txt
-```
+### Question: “If we wanted to run a command in the background, what operator would we want to use?”
 
-`stat` inspects metadata. `chmod 640` sets owner read/write, group read, and no permissions for others. This is an example for a file that should not be executable; do not apply it indiscriminately to system files.
+**Answer:** `&`.
 
-Create or copy files with:
+Appending an ampersand to a command asks the shell to start it as a background job:
 
-```bash
-mkdir practice
-cp notes.txt practice/
-mv practice/notes.txt practice/notes-copy.txt
-```
+\`\`\`bash
+sleep 60 &
+jobs
+\`\`\`
 
-These commands create a directory, copy a file, and rename/move the copy.
+The example starts a harmless sleep process in the background and then lists shell jobs. The exact behaviour depends on the shell.
 
-## Phase 5: Redirects and pipes
+### Question: “If I wanted to replace the contents of a file named "passwords" with the word "password123", what would my command be?”
 
-The shell can redirect output and connect commands:
+**Answer:**
 
-```bash
-command > output.txt
-command >> output.txt
-command 2> errors.txt
-command1 | command2
-```
+\`\`\`bash
+echo password123 > passwords
+\`\`\`
 
-- `>` overwrites a file with standard output.
-- `>>` appends standard output.
-- `2>` redirects standard error.
-- `|` sends one program's standard output to another program's standard input.
+The single greater-than operator redirects standard output to the file and overwrites its existing contents. Be careful: it destroys the previous file contents immediately.
 
-Be careful with `>`: it overwrites the destination immediately. Use a temporary file or append mode when you need to preserve existing content.
+### Question: “Now if I wanted to add "tryhackme" to this file named "passwords" but also keep "passwords123", what would my command be”
 
-## Phase 6: Users, processes, and system information
+**Answer:**
 
-```bash
-ps aux
-top
-uname -a
-df -h
-free -h
-ip addr
-ip route
-```
+\`\`\`bash
+echo tryhackme >> passwords
+\`\`\`
 
-These commands inspect running processes, a live process view, kernel/system details, disk usage, memory, interface addresses, and routes. They are common starting points for both troubleshooting and defensive investigation.
+The double greater-than operator appends output to the end of the file without replacing existing content. In the room's question, the point is to keep the previous line while adding a new one.
 
-## Phase 7: Working through the room
+## Command reference
 
-Read each task carefully and use the terminal to inspect the exact path or value it asks about. If the room asks for a hidden file, include hidden entries with `ls -la`. If it asks for a command's output, run the command in the provided environment. Paths and file contents may differ across instances, so do not invent output.
+| Command or operator | Purpose |
+|---|---|
+| `whoami` | Display the current username |
+| `pwd` | Display the current working directory |
+| `ls -la` | List files, including hidden entries |
+| `cd PATH` | Change directory |
+| `cat FILE` | Print a file |
+| `grep TEXT FILE` | Search file contents |
+| `&` | Run a command in the background |
+| `>` | Redirect output and overwrite a file |
+| `>>` | Redirect output and append to a file |
 
 ## Troubleshooting
 
-- **Command not found:** check spelling and whether the tool is installed.
-- **No such file or directory:** check `pwd`, path spelling, and case.
-- **Permission denied:** inspect permissions and current identity before using `sudo`.
-- **Unexpected output:** read the command's manual with `man COMMAND` or use `COMMAND --help`.
-- **File overwritten:** remember that `>` replaces a file; use `>>` to append.
+- **No such file or directory:** check the current directory with `pwd` and confirm the filename's spelling and case.
+- **Wrong folder count:** make sure you are viewing the directory described by the task.
+- **Flag not found:** check the file path and search for the exact prefix used by the question.
+- **File contents disappeared:** remember that `>` overwrites, while `>>` appends.
 
 ## Key takeaways
 
-Linux fundamentals are the foundation for security work. Know where you are, understand file permissions, read the output of commands, and use pipes and redirection deliberately. These habits reduce mistakes when investigating logs or working in a lab.
+The room teaches the first practical Linux habits: check who you are, navigate with `cd`, confirm location with `pwd`, read files, search logs with `grep`, and understand background execution and redirection. These small skills become essential when analysing logs or working in a security lab.

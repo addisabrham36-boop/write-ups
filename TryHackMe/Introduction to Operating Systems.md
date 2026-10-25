@@ -57,3 +57,39 @@ For each task, identify the operating-system function described. Process schedul
 ## What I took from this room
 
 The operating system is both a resource manager and a security boundary. Processes, permissions, filesystems, services, and updates all affect how safely a computer operates.
+
+## Expanded operating-system study guide
+
+### 1. Purpose and kernel
+
+An operating system provides a consistent interface between applications and hardware. The kernel manages privileged operations, process scheduling, memory, devices, filesystems, and system calls. User-space programs request services from the kernel rather than directly controlling hardware.
+
+### 2. Process and memory management
+
+A process is an executing program with its own resources and address space. Threads are execution paths within a process. Virtual memory gives processes a controlled address space and helps isolate them from one another. RAM is volatile; disk or flash storage is persistent.
+
+### 3. Filesystems and permissions
+
+Filesystems organize data into directories and metadata. Linux commonly uses a single root directory, while Windows commonly exposes drive letters. Permissions and access-control lists determine which users and processes can access resources.
+
+On Linux, commands such as `whoami`, `id`, `ls -la`, `df -h`, and `free -h` can inspect identity, groups, file permissions, storage capacity, and memory. Run commands in the lab and interpret the actual output.
+
+### 4. Services and startup
+
+Services perform background functions such as networking, logging, and web hosting. Startup configuration determines which services run automatically. Unnecessary services increase attack surface, and services running with excessive privileges can amplify the impact of a compromise.
+
+### 5. Users and privilege
+
+Normal users should have only the permissions required for their tasks. Administrative accounts should be protected and used only when needed. On Linux, root is the superuser; on Windows, SYSTEM is a highly privileged service identity. They are not interchangeable names for the same account.
+
+### 6. Logs, patching, and security
+
+Logs record events such as authentication attempts, service failures, and system changes. Their usefulness depends on coverage, timestamps, retention, and integrity. Updates address known vulnerabilities, while secure configuration reduces unnecessary exposure.
+
+### 7. Answering room questions
+
+Determine whether the question refers to the kernel, shell, process, filesystem, memory, user permissions, or a service. Use the terminology from the active room. A shell is an interface for issuing commands; it is not the operating system itself.
+
+### 8. Practical takeaway
+
+The operating system mediates access to resources and enforces privilege boundaries. Understanding its responsibilities is essential for troubleshooting, hardening, and incident response.

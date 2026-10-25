@@ -1,59 +1,83 @@
 # Introduction to Cryptography Basics: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/cryptographybasics
+Official room: https://tryhackme.com/room/cryptographybasics
 
-Cryptography protects information through techniques such as encryption, hashing, and digital signatures. These techniques solve different problems, so the first step in a question is to identify whether it is asking about confidentiality, integrity, authentication, or proof of origin.
+## Room Overview & Information
 
-## 1. Encoding, encryption, and hashing
+**Category:** Cryptography fundamentals  
+**Difficulty:** Beginner  
+**Focus:** Encoding, encryption, hashing, symmetric and asymmetric cryptography, keys, and signatures.
 
-- **Encoding** changes how information is represented so it can be transported or interpreted. It is not intended to keep information secret. Base64 is a common example.
-- **Encryption** uses an algorithm and key to make data unreadable to someone who does not have the required key.
-- **Hashing** maps input data to a fixed-size digest. A secure hash is designed to make it infeasible to recover the original input or find a different input with the same digest.
-- **Digital signatures** use asymmetric cryptography to provide integrity and evidence that a signature was made with the corresponding private key.
+Cryptography helps protect confidentiality, integrity, and authenticity. The algorithms matter, but so do the keys, modes, implementation, and trust model. Strong cryptography can still fail if a key is hard-coded, a nonce is reused where uniqueness is required, or the application exposes plaintext before encryption.
 
-A Base64 string is not encrypted just because it looks unreadable. Likewise, a hash is not a reversible encoding.
+## Phase 1: Separate the core concepts
 
-## 2. Symmetric encryption
+**Encoding** changes representation so data can be transported or interpreted. It does not require a secret key.
 
-Symmetric encryption uses the same secret key to encrypt and decrypt data. It is efficient for large amounts of data, but the parties need a secure way to share or establish the key.
+**Encryption** transforms plaintext into ciphertext using an algorithm and key. Decryption requires the appropriate key or key pair.
 
-AES is a widely used symmetric cipher. Its security depends on using it correctly, including an appropriate mode of operation, nonce or IV handling, and authentication where required. Choosing a strong cipher does not rescue a system that leaks the key.
+**Hashing** maps input to a fixed-length digest. A cryptographic hash is designed to be one-way, so it is not “decrypted.”
 
-## 3. Asymmetric cryptography
+**Digital signatures** allow a verifier to check that data was signed by the holder of a private key and has not changed since signing, assuming the key and trust process are valid.
 
-Asymmetric cryptography uses a key pair: a public key and a private key. The public key can be shared, while the private key must remain protected. Depending on the algorithm and protocol, asymmetric cryptography can support key establishment, encryption, or signatures.
+These concepts can appear together in one protocol, but they solve different problems.
 
-A digital signature is created with the private signing key and verified with the corresponding public key. It does not automatically encrypt the signed message. Encryption and signing provide different properties.
+## Phase 2: Symmetric encryption
 
-## 4. Hashing and password storage
+Symmetric encryption uses the same secret key, or an equivalent shared secret, for encryption and decryption. It is efficient for large data sets, but both parties need a secure way to obtain the key.
 
-A cryptographic hash is useful for integrity checks and other security operations. Password storage needs a specialised password-hashing scheme such as Argon2id, scrypt, bcrypt, or PBKDF2, with a unique salt and appropriate cost settings. A fast general-purpose hash such as SHA-256 alone is not an ideal password-storage design because attackers can test guesses quickly.
+Modern authenticated-encryption schemes such as AES-GCM and ChaCha20-Poly1305 can protect confidentiality and detect tampering when used correctly. Nonces or IVs must follow the algorithm's requirements; misuse can seriously weaken security.
 
-A salt is not a secret key. It makes identical passwords produce different stored values and helps prevent precomputed attacks. Strong passwords and rate limiting still matter.
+Do not create a custom encryption algorithm. Use a trusted library and follow the library's guidance for key generation, nonce management, and authentication.
 
-## 5. Public-key trust and certificates
+## Phase 3: Asymmetric cryptography
 
-A public key is useful only if the user can establish that it belongs to the intended party. Certificates bind identity information to a public key through a certificate authority and a chain of trust. Clients validate the certificate chain, hostname, validity period, and other requirements.
+Asymmetric cryptography uses a public/private key pair. The public key may be shared, while the private key must remain protected. Depending on the algorithm and protocol, public-key cryptography can support key exchange, encryption, or digital signatures.
 
-HTTPS uses TLS to establish a protected connection. A certificate warning may indicate an expired certificate, a hostname mismatch, an untrusted issuer, or another validation problem. It should not be ignored without understanding the cause.
+SSH and TLS use public-key techniques in different ways. A public key's presence does not automatically prove who owns it; the trust model must bind that key to the intended person, server, or organisation.
 
-## 6. Common mistakes
+## Phase 4: Hashing and password storage
 
-- Reusing a key across unrelated systems.
-- Hardcoding keys or passwords in source code.
-- Using obsolete algorithms or insecure modes.
-- Reusing a nonce where the chosen algorithm requires uniqueness.
-- Treating Base64 as encryption.
-- Storing passwords with a fast unsalted hash.
-- Assuming a digital signature also hides the message.
-- Ignoring certificate validation failures.
+A hash function produces a fixed-length digest. SHA-256 is widely used for integrity checks. MD5 and SHA-1 still appear in legacy datasets but should not be relied on for modern collision-resistant security.
 
-## 7. Working through the room
+Password storage is a special case. Passwords should be processed with a password-hashing scheme such as Argon2id, scrypt, or bcrypt, using unique salts and an appropriate work factor. A fast general-purpose hash makes offline guessing much cheaper.
 
-When a question describes a security goal, match it to the correct primitive. Confidentiality generally points to encryption; integrity checking can use a hash or authenticated mechanism; proving that a message was signed by a key points to digital signatures; and converting data to a transport-friendly representation points to encoding.
+For a file-integrity check:
 
-Use the exact algorithm or terminology presented in the active room. If it asks you to decode a value, determine its format first and use a safe local tool. Never assume that every long hexadecimal string is a password hash or that every unreadable string is encrypted.
+```bash
+sha256sum file.bin
+```
 
-## What I took from this room
+Record the digest and compare it with a value obtained from a trusted source. A hash only tells you whether the bytes match the reference; it does not prove that the file itself is safe.
 
-Cryptography is not one single operation. Encryption, hashing, encoding, and signing solve different problems, and security depends on key management and correct implementation as much as on the algorithm itself.
+## Phase 5: Public-key trust and certificates
+
+A TLS certificate binds a public key to a hostname or identity under a certificate authority's trust process. The client checks that the certificate is valid for the hostname and that the chain leads to a trusted authority. A self-signed certificate can still be used in a controlled lab, but the user must establish trust through another channel.
+
+A valid HTTPS connection protects data in transit and helps authenticate the server. It does not prove that the website is honest or that its application is free from vulnerabilities.
+
+## Phase 6: Practical analysis workflow
+
+When a room presents an unfamiliar string or file:
+1. Determine whether it is encoded, encrypted, compressed, or hashed.
+2. Preserve the original bytes.
+3. Inspect the file type and surrounding task context.
+4. Identify the algorithm or format from evidence.
+5. Use the intended decoder or decryption method.
+6. If a key is required, obtain it from the authorised task rather than guessing.
+7. Verify the resulting data and record the transformation.
+
+Do not treat an unreadable string as proof of encryption. Base64, hex, and binary data can all appear opaque to a human reader.
+
+## Phase 7: Common failure modes
+
+- **Wrong key:** decryption fails or produces invalid data.
+- **Wrong mode or parameters:** the algorithm is correct but the ciphertext cannot be interpreted.
+- **Corrupted input:** whitespace or a missing byte changes the data.
+- **Encoding confusion:** the output is valid bytes but displayed using the wrong character encoding.
+- **Unauthenticated encryption:** modified ciphertext may not be detected.
+- **Poor key management:** the key is exposed alongside the data it protects.
+
+## Key takeaways
+
+Cryptography is not one operation. Encoding changes representation, encryption protects confidentiality, hashing supports integrity checks, and signatures support authenticity and integrity. Use established algorithms, protect keys separately, and verify the entire implementation rather than judging security by the algorithm name alone.

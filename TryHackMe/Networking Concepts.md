@@ -66,3 +66,61 @@ Match each question to the relevant layer or protocol. If the task describes loc
 ## What I took from this room
 
 Layered thinking prevents random troubleshooting. Each command should answer a specific question about addressing, routing, transport, or the application, and the result should guide the next step.
+
+## Phase 1: Inspect a live host
+
+For a practical networking task, start by recording the host and the interface through which traffic should travel. On Linux, the following commands answer different questions:
+
+```bash
+ip addr
+ip route
+ip neigh
+ss -lntup
+```
+
+- `ip addr` shows interface addresses and state.
+- `ip route` shows the routing table and default gateway.
+- `ip neigh` shows cached local neighbour mappings.
+- `ss -lntup` lists listening TCP/UDP sockets and the owning process where permissions allow it.
+
+A listening socket does not prove it is reachable remotely. A firewall may block it, or it may be bound only to loopback.
+
+## Phase 2: Diagnose connectivity layer by layer
+
+Use the following sequence rather than running unrelated commands at random:
+
+1. Check that the network interface is up and has an address.
+2. Verify the subnet prefix and route to the target.
+3. Test the gateway if permitted.
+4. Resolve the target hostname.
+5. Connect to the specific application port.
+6. Read the service response and logs where available.
+
+For DNS, use:
+
+```bash
+getent hosts TARGET_HOST
+dig TARGET_HOST A
+```
+
+For HTTP, use:
+
+```bash
+curl -i http://TARGET_HOST:PORT/
+```
+
+The HTTP request should use the scheme, hostname, and port that the task specifies. A failed ping is not proof that a host is offline, because ICMP may be filtered.
+
+## Phase 3: Addressing and protocol distinctions
+
+A MAC address is used for delivery on a local link. IP addressing enables routing between networks. TCP provides an ordered, reliable byte stream; UDP sends datagrams without TCP's retransmission and ordering guarantees. Ports identify application endpoints, but they are conventions rather than proof of which service is running.
+
+A subnet prefix is important because it tells the host which destinations are local and which should be reached through a router. Incorrect address or prefix configuration can make a valid host appear unreachable.
+
+## Phase 4: Answering the room questions
+
+For each room question, identify the concept being tested and find the direct evidence. A question about local delivery relates to MAC addresses and link-layer communication; forwarding between networks relates to IP and routing; reliable delivery relates to TCP; and name lookups relate to DNS. Preserve exact values from the current task rather than copying example IPs or ports.
+
+## Phase 5: Key takeaways and defensive use
+
+Use segmentation and firewall rules to limit unnecessary communication, remove unused listeners, monitor network changes, and log the connections that matter. Use layered troubleshooting: every command should answer a specific question, and its result should determine the next test.

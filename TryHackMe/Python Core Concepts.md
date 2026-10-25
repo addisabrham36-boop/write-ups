@@ -1,4 +1,4 @@
-# Python Core Concepts: TryHackMe Walkthrough
+# Python Core Concepts: Complete TryHackMe Walkthrough
 
 Official room: https://tryhackme.com/room/pythonbasics
 
@@ -6,66 +6,72 @@ Official room: https://tryhackme.com/room/pythonbasics
 
 **Category:** Programming fundamentals  
 **Difficulty:** Beginner  
-**Focus:** Python syntax, variables, data types, collections, conditionals, loops, functions, file handling, and using scripts for security work.
+**Focus:** Python syntax, variables, data types, collections, conditions, loops, functions, file handling, and debugging.
 
-Python is useful in cybersecurity because it can automate repetitive tasks such as parsing logs, validating indicators, transforming data, and making HTTP requests. A script should make the work more repeatable, but it must still be tested and should not silently make assumptions about the data.
+Python is useful in cybersecurity because it can automate log parsing, indicator validation, data transformation, and HTTP requests. A script makes work more repeatable, but it still needs tests and must not silently make assumptions about input data.
 
-## Phase 1: Run Python
+This is a programming room, not a boot-to-root target. Reconnaissance, initial access, and privilege escalation are not applicable unless the live task adds a specific authorized lab.
 
-Check the installed version:
+## Phase 1: Reconnaissance & Environment Setup
 
-\`\`\`bash
+Check the Python version and start the interpreter:
+
+```bash
 python3 --version
 python3
-\`\`\`
+```
 
-The first command prints the version. The second starts the interactive interpreter. Exit the interpreter with `exit()` or Ctrl+D.
+The first command displays the installed version; the second opens the interactive interpreter. Exit with exit() or Ctrl+D.
 
-A Python file commonly ends in `.py`. Run it with:
+Save code in a file with the .py extension and run it using:
 
-\`\`\`bash
+```bash
 python3 script.py
-\`\`\`
+```
 
-Indentation is part of Python's syntax. Code inside a function, loop, or conditional must be indented consistently.
+Indentation is part of Python syntax. Code inside a function, loop, or conditional must be indented consistently. Read the complete traceback when an error occurs rather than changing unrelated lines at random.
 
-## Phase 2: Variables and data types
+## Phase 2: Core Syntax and Input Validation
 
-\`\`\`python
+### 1. Variables and data types
+
+```python
 username = "analyst"
 attempts = 3
 success = False
 score = 8.5
-\`\`\`
 
-A variable name refers to a value. Strings hold text, integers hold whole numbers, floats hold decimal values, and booleans represent True or False.
+print(type(username))
+print(type(attempts))
+```
 
-Check a type with `type(value)`. Convert values deliberately: converting untrusted text to an integer can raise a ValueError if it is not numeric.
+A variable name refers to a value. Strings hold text, integers hold whole numbers, floats hold decimal values, and booleans represent True or False. Convert input deliberately: converting untrusted text to an integer can raise ValueError when the input is not numeric.
 
-## Phase 3: Lists and dictionaries
+### 2. Lists and dictionaries
 
 A list stores an ordered collection:
 
-\`\`\`python
+```python
 ports = [22, 80, 443]
 print(ports[0])
 ports.append(8080)
-\`\`\`
+```
 
-Indexes begin at zero, so `ports[0]` is the first item. Appending adds an item to the end.
+Indexes begin at zero, so the item at index 0 is the first element. append() adds an item to the end.
 
 A dictionary stores key-value pairs:
 
-\`\`\`python
+```python
 event = {"user": "alice", "status": "failed"}
 print(event["user"])
-\`\`\`
+print(event.get("source_ip"))
+```
 
-Dictionaries are useful for structured log records. Use `event.get("source_ip")` when a field may be absent, rather than assuming every record contains it.
+Dictionaries are useful for structured log records. Use get() when a field may be absent rather than assuming every record contains it.
 
-## Phase 4: Conditions
+### 3. Conditions
 
-\`\`\`python
+```python
 status_code = 401
 
 if status_code == 200:
@@ -74,68 +80,61 @@ elif status_code == 401:
     print("Authentication required")
 else:
     print("Other response")
-\`\`\`
+```
 
-- `if` checks the first condition.
-- `elif` checks another condition if earlier conditions were false.
-- `else` handles the remaining cases.
-- `==` compares values; `=` assigns a value.
+if checks the first condition, elif checks another condition if earlier conditions were false, and else handles remaining cases. Double equals compares values; a single equals assigns a value. Security scripts should distinguish known cases without assuming every unexpected value is safe.
 
-For security scripts, conditions should distinguish known cases without treating every unexpected value as safe.
+### 4. Loops
 
-## Phase 5: Loops
-
-\`\`\`python
+```python
 failed_users = ["alice", "bob", "carol"]
 
 for user in failed_users:
     print(user)
-\`\`\`
+```
 
-A `for` loop processes each item. A `while` loop repeats while a condition remains true. Ensure while loops can terminate, especially when reading network data or retrying a request.
+A for loop processes each item. A while loop repeats while its condition remains true. Ensure a while loop can terminate, especially when retrying a network request or reading input.
 
-## Phase 6: Functions
+### 5. Functions
 
-\`\`\`python
+```python
 def is_failed_login(event):
     return event.get("status") == "failed"
 
 sample = {"user": "alice", "status": "failed"}
 print(is_failed_login(sample))
-\`\`\`
+```
 
-A function groups reusable logic. Parameters provide input and `return` gives the result back to the caller. Small functions are easier to test than one long script.
+A function groups reusable logic. Parameters provide input and return sends a result back to the caller. Small functions are easier to test than one long script.
 
-## Phase 7: File handling
+## Phase 3: File Handling, Debugging & Security Use
 
-\`\`\`python
+### 6. Read a file safely
+
+```python
 with open("events.txt", "r", encoding="utf-8") as handle:
     for line in handle:
         line = line.strip()
         if "failed" in line.lower():
             print(line)
-\`\`\`
+```
 
-The `with` block closes the file even if an error occurs. `strip()` removes surrounding whitespace, and `lower()` makes a simple case-insensitive check. This example is intentionally basic; structured logs should be parsed using their real format rather than searching raw text alone.
+The with block closes the file even if an error occurs. strip() removes surrounding whitespace, and lower() makes a simple case-insensitive check. Structured logs should be parsed using their actual format rather than searched only as raw text.
 
-## Phase 8: Errors and debugging
+### 7. Handle expected errors
 
-Use exceptions to handle expected failures:
-
-\`\`\`python
+```python
 try:
     attempts = int("three")
 except ValueError:
     print("The input is not an integer")
-\`\`\`
+```
 
-Do not catch every exception and ignore it. Broad exception handling can hide bugs or cause a security script to report a false success. Print a useful error message and exit safely when the required input is invalid.
+Do not catch every exception and ignore it. Broad exception handling can hide bugs or cause a security script to report false success. Print a useful message and stop safely when required input is invalid.
 
-## Phase 9: A small security-oriented example
+### 8. Build a small security-oriented example
 
-This script reads a text file and counts lines containing the word failed:
-
-\`\`\`python
+```python
 from pathlib import Path
 
 path = Path("events.txt")
@@ -149,63 +148,22 @@ with path.open("r", encoding="utf-8", errors="replace") as handle:
             count += 1
 
 print(f"Lines containing failed: {count}")
-\`\`\`
-
-It checks that the file exists, reads it safely, tolerates decoding problems by replacing invalid characters, and counts matching lines. It is a learning example, not a full log parser or a reliable incident detector.
-
-## Working through the room
-
-For each question, identify whether it tests syntax, a data type, a collection, a condition, a loop, or a function. Run the example in the room's interpreter and inspect the result. If the task asks for output, use the actual interpreter output rather than copying a value from another environment.
-
-## Key takeaways
-
-Python becomes useful when the basics are clear: values, conditions, loops, functions, files, and exceptions. In security work, scripts should validate inputs, handle errors explicitly, and produce results that can be checked against the original evidence.
-
-## Expanded Python practical guide
-
-### 1. Run code and inspect errors
-
-Use the Python interpreter or the environment supplied by the room. Save scripts with a `.py` extension and run them with the intended Python version:
-
-```bash
-python --version
-python script.py
 ```
 
-Read the full traceback when an error occurs. The final line identifies the exception type and message; the preceding lines show the call path. Fix the first meaningful error rather than changing unrelated lines.
+This checks that the file exists, tolerates decoding problems by replacing invalid characters, and counts matching lines. It is a learning example, not a full log parser or reliable incident detector.
 
-### 2. Variables and types
+## Phase 4: Room Questions & Task Walkthrough
 
-Python variables refer to objects. Common built-in types include integers, floats, strings, booleans, lists, tuples, dictionaries, and sets. Use `type(value)` when unsure of a value's type. A string such as `"5"` is not the same as integer `5`; convert deliberately with `int()` or `str()` where appropriate.
+For each task, identify whether it tests syntax, a data type, a collection, a condition, a loop, a function, file handling, or exception behaviour. Run the example in the room's interpreter and inspect the result. If the task asks for output, use the actual interpreter output rather than copying a value from another environment.
 
-### 3. Conditions and loops
+Check typical failure points:
+- A wrong indentation level changes the program structure.
+- A string containing digits is not the same as an integer.
+- List indexes start at zero.
+- A dictionary key may be absent.
+- A loop may run forever if its exit condition never becomes true.
+- An unhandled exception can stop a script before it finishes.
 
-Conditions use `if`, `elif`, and `else`. Loops repeat work: `for` iterates over an iterable, while `while` continues while a condition is true. Indentation defines code blocks, so inconsistent indentation changes program structure or raises an error.
+## Phase 5: Key Takeaways & Remediation
 
-### 4. Functions and scope
-
-Functions package reusable behaviour. Parameters receive values, and `return` sends a result back to the caller. A local variable normally exists within its function's scope. Use descriptive names and keep functions small enough to test.
-
-### 5. Collections and iteration
-
-Lists are ordered and mutable; tuples are ordered and immutable; dictionaries map keys to values; sets store unique elements. Select the data structure that matches the task. Check whether a key exists before reading it when input is uncertain.
-
-### 6. Files and exceptions
-
-Use a context manager to ensure a file is closed:
-
-```python
-with open("notes.txt", "r", encoding="utf-8") as handle:
-    content = handle.read()
-print(content)
-```
-
-Catch specific exceptions where recovery is possible. Avoid broad exception handling that hides programming errors. Validate external input and do not execute untrusted strings as code.
-
-### 7. Debugging and testing
-
-Print small values, use a debugger, or write assertions to verify assumptions. Test normal input, empty input, unexpected types, and boundary values. Keep expected output separate from actual output so failures are easy to identify.
-
-### 8. Complete the room
-
-For each question, run the exact code or command in the room's environment and inspect the output. Preserve capitalization and punctuation when the answer is a literal string. Do not invent output from code that has not been run.
+Python becomes useful when the basics are clear: values, conditions, loops, functions, files, and exceptions. In security work, validate inputs, handle errors explicitly, protect secrets, and produce results that can be checked against the original evidence. Do not execute untrusted code or rely on a string-matching script as the sole basis for a security decision.

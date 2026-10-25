@@ -1,4 +1,4 @@
-# Cryptography for Dummies: TryHackMe Walkthrough
+# Cryptography for Dummies: Complete TryHackMe Walkthrough
 
 Official room: https://tryhackme.com/room/cryptographyfordummies
 
@@ -6,157 +6,139 @@ Official room: https://tryhackme.com/room/cryptographyfordummies
 
 **Category:** Cryptography fundamentals  
 **Difficulty:** Beginner  
-**Focus:** Symmetric and asymmetric cryptography, public/private keys, MD5 hashing, Base64 encoding, and decoding.
+**Topics:** Symmetric and asymmetric cryptography, public/private keys, hashing, MD5, and Base64 encoding.
 
-Cryptography protects information through different mechanisms. Encryption uses a key to protect confidentiality, hashing creates a one-way digest, and encoding changes representation. These are related but distinct operations.
+This is a learning room rather than a boot-to-root challenge. Port scanning, initial access, and privilege escalation are not applicable. The practical work is to classify the operation being used, apply a simple encoding or digest command, and verify the exact output.
 
-## Task 1: Introduction
+## Phase 1: Reconnaissance & Enumeration of the Task
 
-Read the room's introduction and open the practical where required. The tasks ask you to compare cryptography types and perform simple hash and Base64 operations.
+Read each question carefully and decide which property it describes. Confidentiality protects information from unauthorized reading; integrity helps detect modification; authentication establishes identity or origin within a trust model; encoding changes representation; hashing produces a digest; and encryption uses keys to protect data.
 
-## Task 2: Types of Cryptography
+The fastest way to make a mistake is to treat encoding, hashing, and encryption as interchangeable terms. They are not.
 
-### Question: “What type of cryptography is more secure?”
+## Phase 2: Cryptography Fundamentals
 
-**Room answer:** `asymmetric`.
+### Task 1: Introduction
 
-The room contrasts symmetric and asymmetric cryptography. Asymmetric systems use a related public/private key pair and can support authenticated key exchange or signatures. Security depends on the algorithm, key size, implementation, and how trust is established; asymmetric cryptography is not universally “more secure” for every use case.
+The room introduces basic cryptographic goals and a small practical exercise. Use the wording of each question to select the mechanism being asked about.
 
-### Question: “What type of cryptography is faster?”
+### Task 2: Types of Cryptography
 
-**Answer:** `symmetric`.
+**Question:** “What type of cryptography is more secure?”
 
-Symmetric algorithms are generally faster for encrypting large amounts of data. Modern protocols often use asymmetric techniques to establish or authenticate keys, then use symmetric encryption for the bulk data.
+**Room answer:** asymmetric.
 
-### Question: “What type of cryptography will a Bank site use?”
+This is the expected answer in the room's comparison, but “more secure” depends on the use case. Asymmetric methods use a related public/private key pair and can support key exchange and signatures. Symmetric algorithms are also secure when correctly selected and implemented.
 
-**Room answer:** `asymmetric`.
+**Question:** “What type of cryptography is faster?”
 
-The expected answer refers to the public-key cryptography used by HTTPS/TLS to authenticate a server and establish secure communication. In practice, TLS combines asymmetric cryptographic mechanisms with symmetric session encryption.
+**Answer:** symmetric.
 
-### Question: “What will you use to encrypt your messages in asymmetric cryptography?”
+Symmetric algorithms are generally faster for encrypting large amounts of data. Modern protocols often use asymmetric operations to authenticate parties or establish keys, then use symmetric encryption for the bulk traffic.
 
-**Answer:** `public key`.
+**Question:** “What type of cryptography will a Bank site use?”
 
-In a basic public-key encryption model, a sender encrypts a message using the recipient's public key. Only the matching private key should be able to decrypt it.
+**Room answer:** asymmetric.
 
-### Question: “What will you use to decrypt messages in asymmetric cryptography?”
+The expected concept is the public-key cryptography involved in HTTPS/TLS. In practice, TLS combines certificates and public-key mechanisms with symmetric session encryption rather than relying on asymmetric encryption for every byte.
 
-**Answer:** `private key`.
+**Question:** “What will you use to encrypt your messages in asymmetric cryptography?”
 
-The private key must remain secret. In a signature system, the roles differ: the sender signs with a private key and others verify with the public key.
+**Answer:** public key.
 
-### Question: “Does symmetric cryptography use two different keys for encryption/decryption? (aye/nay)”
+In the simple public-key encryption model, the sender encrypts using the recipient's public key.
 
-**Answer:** `nay`.
+**Question:** “What will you use to decrypt messages in asymmetric cryptography?”
+
+**Answer:** private key.
+
+The matching private key must be protected. Signature systems use the key pair differently: the sender signs with the private key and verifiers use the public key.
+
+**Question:** “Does symmetric cryptography use two different keys for encryption/decryption? (aye/nay)”
+
+**Answer:** nay.
 
 Symmetric encryption uses the same shared secret key, or an equivalent shared secret, for encryption and decryption.
 
-## Task 3: Hashing
+## Phase 3: Hashing and Encoding Practicals
 
-A cryptographic hash maps input data to a fixed-length digest. It is not designed to be decrypted. The room uses MD5 for a simple example, although MD5 is no longer suitable for security-sensitive integrity guarantees because of known collision weaknesses.
+### Task 3: Hashing
 
-### Question: “What's the MD5 hash of "hashes are cool"?”
+A cryptographic hash maps input bytes to a fixed-length digest. A hash is not normally decrypted. MD5 is used in this beginner exercise, but it is no longer suitable for security-sensitive integrity protection because collision attacks are practical.
+
+**Question:** “What's the MD5 hash of "hashes are cool"?”
 
 **Answer:** `f762d32e3c160900d94b683e927555b9`.
 
 Verify it locally:
 
-\`\`\`bash
+```bash
 printf '%s' 'hashes are cool' | md5sum
-\`\`\`
+```
 
-Use `printf` to avoid adding a newline to the input. An extra newline changes the resulting hash.
+The `printf` command does not add a newline. If you use `echo` instead, a newline may be included and the digest will differ.
 
-### Question: “What does MD5 stand for?”
+**Question:** “What does MD5 stand for?”
 
-**Answer:** **Message Digest 5**.
+**Answer:** Message Digest 5.
 
-### Question: “Who created MD5?”
+**Question:** “Who created MD5?”
 
-**Answer:** **Ronald Rivest**.
+**Answer:** Ronald Rivest.
 
-MD5 remains useful as a legacy identifier in some datasets, but use SHA-256 or a suitable modern alternative for new integrity-checking systems. For password storage, use a password-hashing scheme such as Argon2id, scrypt, or bcrypt rather than a fast hash.
+### Task 4: Encoding
 
-## Task 4: Encoding
+Base64 turns bytes into a printable text representation. It does not encrypt or protect the data.
 
-Base64 converts bytes into a printable character representation. It is encoding, not encryption, and it does not protect the data from someone who can read it.
-
-### Question: “Encode the string "cryptographyisuseful" with Base64”
+**Question:** “Encode the string "cryptographyisuseful" with Base64”
 
 **Answer:** `Y3J5cHRvZ3JhcGh5aXN1c2VmdWw=`.
 
-Verify it with:
+Verify:
 
-\`\`\`bash
+```bash
 printf '%s' 'cryptographyisuseful' | base64
-\`\`\`
+```
 
-### Question: “Decode the string "dGhlIHNlY3JldCB3b3JkIGlzIDogd2F0ZXJtZWxvbg==". What's the secret word?”
+**Question:** “Decode the string "dGhlIHNlY3JldCB3b3JkIGlzIDogd2F0ZXJtZWxvbg==". What's the secret word?”
 
-Decode it with:
+Use:
 
-\`\`\`bash
+```bash
 printf '%s' 'dGhlIHNlY3JldCB3b3JkIGlzIDogd2F0ZXJtZWxvbg==' | base64 --decode
-\`\`\`
+```
 
 **Answer:** `watermelon`.
 
-The decoded text says the secret word is watermelon. Base64 can be reversed without a key; do not use it to protect passwords or confidential data.
+The output reveals the secret word. Base64 can be reversed without a key; do not use it to protect passwords or confidential values.
 
-## Task 5: Practical distinctions
+### Task 5: Distinguish the operations
 
-| Operation | Purpose | Requires a secret key? | Reversible? |
+| Operation | Purpose | Key required? | Reversible? |
 |---|---|---|---|
-| Symmetric encryption | Confidentiality | Yes | With the correct key |
-| Asymmetric encryption | Confidentiality / key exchange | Public/private key pair | With the matching private key |
-| Hashing | Digest / integrity comparison | Usually no | Not designed to be reversed |
+| Symmetric encryption | Confidentiality | Shared secret | Yes, with the key |
+| Asymmetric encryption | Confidentiality or key establishment | Public/private pair | With matching private key |
+| Hashing | Digest and integrity comparison | Usually no | Not designed to reverse |
 | Base64 encoding | Data representation | No | Yes |
 
-## Key takeaways
+## Phase 4: Room Questions & Answer Summary
 
-Symmetric cryptography is generally faster; asymmetric cryptography supports public/private key operations; hashes are not encryption; and Base64 is only encoding. Use modern algorithms, protect private keys, and avoid MD5 for security-sensitive applications.
+| Question | Answer |
+|---|---|
+| What type of cryptography is more secure? | asymmetric (the room's intended comparison) |
+| What type of cryptography is faster? | symmetric |
+| What type of cryptography will a Bank site use? | asymmetric (TLS uses both asymmetric and symmetric mechanisms) |
+| What encrypts a message in asymmetric cryptography? | public key |
+| What decrypts the message? | private key |
+| Does symmetric cryptography use two different keys? | nay |
+| MD5 hash of “hashes are cool” | `f762d32e3c160900d94b683e927555b9` |
+| What does MD5 stand for? | Message Digest 5 |
+| Who created MD5? | Ronald Rivest |
+| Base64 of “cryptographyisuseful” | `Y3J5cHRvZ3JhcGh5aXN1c2VmdWw=` |
+| Secret word decoded from Base64 | `watermelon` |
 
-## Expanded cryptography walkthrough
+## Phase 5: Key Takeaways & Remediation
 
-### 1. Identify the security goal
+Use modern, reviewed cryptographic libraries. Do not invent a cipher, store passwords using MD5, or hard-code private keys in source code. Use dedicated password-hashing schemes such as Argon2id, scrypt, or bcrypt with salts and appropriate work factors. For encryption, choose authenticated encryption with correct nonce handling, protect keys separately from ciphertext, and rotate keys when exposure is suspected.
 
-Cryptography provides several different properties. Confidentiality prevents unauthorized reading; integrity detects unauthorized modification; authentication helps verify who or what sent a message; and digital signatures provide integrity and origin evidence under a trust model. Encoding and hashing are not encryption, despite frequent human efforts to make terminology optional.
-
-### 2. Distinguish encoding, hashing, and encryption
-
-- **Encoding** changes representation so data can be transported or displayed. Base64 is reversible and provides no secrecy.
-- **Hashing** maps data to a fixed-length digest. A secure hash is designed to make it impractical to recover the input or find collisions, but it is not decrypted.
-- **Symmetric encryption** uses a shared secret key to encrypt and decrypt data.
-- **Asymmetric cryptography** uses related public and private keys. It supports key agreement, encryption in some schemes, and digital signatures.
-- **Digital signatures** are verified with a public key; they do not make the signed content confidential.
-
-### 3. Inspect common encodings
-
-For a Base64 string supplied by the room, decode it with:
-
-```bash
-printf '%s' 'BASE64_VALUE' | base64 --decode
-```
-
-Use `printf` to avoid adding a newline to the encoded input. If decoding fails, check padding and whether the value is actually Base64. Hexadecimal can be inspected with `xxd -r -p`, but only when the data is truly hex-encoded.
-
-Do not keep decoding blindly. Identify the likely format from the alphabet, padding, output structure, and task clues. A successful decode can still produce another encoded layer or binary data.
-
-### 4. Understand weak password hashes
-
-Password storage should use a dedicated password-hashing scheme such as Argon2id, scrypt, or bcrypt with appropriate parameters and salts. Fast general-purpose hashes such as SHA-256 are unsuitable for direct password storage because attackers can test guesses rapidly.
-
-In a controlled lab, identify the hash format from its structure and use the room's provided wordlist or cracking tool. A candidate match is a hypothesis until it is validated in the intended task. Never test recovered credentials against systems outside the lab.
-
-### 5. Avoid common cryptographic mistakes
-
-Do not invent your own cipher. Use authenticated encryption, such as a well-reviewed AEAD mode, rather than encryption without integrity protection. Manage keys separately from ciphertext, rotate exposed keys, and do not hard-code secrets in public source repositories. A long key is not useful if it is stored next to the encrypted data or logged in plaintext.
-
-### 6. Complete the room tasks
-
-For each question, determine whether it asks about encoding, hashing, encryption, key exchange, or signatures. Use the method that matches the requested property. Record the transformation and check the result's structure. If the task provides a particular ciphertext or hash, use that exact value rather than an example from another guide.
-
-### 7. Defensive takeaway
-
-Cryptography is only as strong as the algorithm, parameters, key handling, and surrounding implementation. Correctly naming a primitive matters, but secure systems also require authenticated protocols, sound randomness, protected keys, and clear separation between encoding and encryption.
+Hashing is not encryption, Base64 is not secrecy, and asymmetric cryptography does not replace secure protocol design or key management.

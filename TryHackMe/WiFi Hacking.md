@@ -66,46 +66,18 @@ Use modern Wi-Fi security, strong unique credentials, enterprise certificate val
 
 Wireless testing combines radio reconnaissance with careful interpretation of authentication and configuration. The first job is to identify the exact authorised target and record evidence. The final conclusion should match what the lab actually demonstrates, not what a tool might theoretically be able to do.
 
-## Expanded wireless assessment workflow
+## Room task evidence checklist
 
-### 1. Confirm the lab boundary
+| Task focus | What to confirm before answering |
+|---|---|
+| Wireless adapter | The actual interface name and supported monitor-mode capabilities |
+| Access-point discovery | SSID, BSSID, channel, and security mode from the lab |
+| Authentication test | The exact authorised access point and task-supplied method |
+| Captured traffic | Whether the required frames are present and belong to the target BSSID |
+| Password or flag question | The value reported by the active lab, not a guessed or reused value |
 
-Wireless testing can affect nearby devices, so use the isolated access point and adapter supplied by the room. Record the target SSID, BSSID, channel, security mode, and permitted actions before collecting frames. Never capture or attack an unrelated network.
+A captured exchange is not the Wi-Fi passphrase. A failure to capture traffic may reflect the interface, channel, timing, or driver rather than a secure access point.
 
-### 2. Identify the adapter
+## Final remediation checklist
 
-On the provided Linux environment, inspect available interfaces:
-
-```bash
-ip link
-iw dev
-rfkill list
-```
-
-`ip link` lists network interfaces, `iw dev` lists wireless devices and their current configuration, and `rfkill list` shows whether software or hardware has disabled a radio. Adapter and driver capabilities vary; not every device supports monitor mode or packet injection.
-
-### 3. Understand the protocol
-
-WEP is obsolete and insecure. WPA2-Personal commonly derives session keys from a pre-shared passphrase. WPA3-Personal uses SAE to make offline password guessing more difficult. Enterprise networks typically use 802.1X/EAP rather than a shared household passphrase.
-
-A captured handshake is not the Wi-Fi password. Depending on the protocol and capture, it may provide material for testing candidate passphrases offline. The security weakness is often a weak or reused password, not the mere existence of a capture.
-
-### 4. Capture and validate only the lab traffic
-
-Follow the room's adapter, channel, and capture instructions exactly. Record the capture filename and inspect it with the tool provided by the lab. Before interpreting a result, confirm that the capture contains frames from the intended BSSID and the exchange required by the task.
-
-If no relevant frames appear, check the selected interface, channel, adapter support, signal, and capture timing. A failed capture does not prove the access point is secure; it may simply mean the required exchange was not recorded.
-
-### 5. Interpret findings carefully
-
-Distinguish network discovery from authentication and authentication from successful address assignment. A client may discover an SSID but fail to authenticate; it may authenticate but fail DHCP. Report the observed stage rather than describing every connection problem as a password issue.
-
-For a password-checking exercise, use only the room's supplied capture and wordlist. Validate a candidate through the room's intended method, and never publish credentials for a real network.
-
-### 6. Room questions and evidence
-
-For questions about an SSID, BSSID, channel, encryption standard, or captured event, read the value from the live lab's output. Save the relevant command, tool version, capture file hash, and a short output excerpt. Use `flag{hidden}` in public notes instead of exposing a flag.
-
-### 7. Remediation
-
-Use WPA3 when compatible, or properly configured WPA2-AES where needed. Choose a long, unique passphrase, update access-point firmware, disable WPS if unnecessary, isolate guest devices, protect administrative access, and monitor rogue access points. Hidden SSIDs and MAC filtering are not substitutes for strong authentication.
+Use WPA3 or properly configured WPA2-AES, strong unique credentials, current firmware, network segmentation, and secure administration. Disable unnecessary WPS, monitor for rogue access points, and never rely on a hidden SSID or MAC allowlist as the primary access-control mechanism.

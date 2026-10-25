@@ -1,102 +1,100 @@
-# Prompt Engineering: TryHackMe Walkthrough
+# Prompt Engineering: Complete TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/promptengineering
+Official room: https://tryhackme.com/room/promptengineering
 
-Prompt engineering is the practice of specifying a task and giving a language model enough context to produce a useful response. A good prompt defines the objective, audience, relevant input, output format, and constraints. It improves the odds of a useful answer, but it does not guarantee that the answer is true.
+## Room Overview & Information
 
-## 1. Give the model a clear objective
+**Category:** AI fundamentals and safe system design  
+**Difficulty:** Beginner  
+**Objective:** Build prompts with clear requirements, useful context, examples, output constraints, and a way to verify the result.
 
-A broad request such as “explain cybersecurity” leaves the model to choose the level, scope, and format. A more useful prompt identifies what the response must do.
+This is an interactive learning room, not a boot-to-root target. Network scanning, shell access, and privilege escalation are not applicable unless a particular live task explicitly introduces them. The right methodology is to test a prompt against the exercise's objective and compare the observed output with the acceptance criteria.
 
-Example:
+## Phase 1: Reconnaissance & Enumeration
 
-“Explain DNS to a beginner in five short sections. Describe what a resolver does, include one safe command-line example, explain what the output means, and list two limitations. Do not invent command output.”
+### 1. Understand the task and available context
 
-This specifies the audience, structure, required concepts, and a constraint. The result is easier to check than an open-ended answer.
+Before writing a prompt, determine the goal, audience, source material, expected format, constraints, and how success will be judged. If the model has tools or retrieval access, also identify what data and functions it can reach. A request such as “explain cybersecurity” is too vague to yield a predictable answer.
 
-## 2. Add context and examples
+Build a checklist before testing:
 
-Context tells the model what material it should use. Examples show the desired style or format. A prompt can also ask the model to state assumptions or separate verified facts from uncertain conclusions.
+| Prompt element | Question |
+|---|---|
+| Objective | What precise result is needed? |
+| Audience | What prior knowledge should be assumed? |
+| Context | Which source material or facts are in scope? |
+| Constraints | What must be included or avoided? |
+| Output | What structure, length, or schema is expected? |
+| Verification | How will correctness be checked? |
 
-A useful pattern is:
+### 2. Establish a baseline
 
-1. **Role or perspective:** what kind of help is needed.
-2. **Task:** the specific outcome required.
-3. **Context:** the input and constraints.
-4. **Output format:** table, checklist, explanation, or structured data.
-5. **Quality criteria:** what a correct answer must include.
-6. **Verification:** ask for uncertainty and assumptions to be identified.
+Run a simple prompt first and preserve its answer. This shows the model's default assumptions and helps isolate the effect of later changes. Record the model or endpoint and settings when the interface exposes them; model behaviour may vary between versions or runs.
 
-The role label alone does not create expertise. The task, context, and evaluation criteria usually matter more.
+## Phase 2: Prompt Analysis & Controlled Experimentation
 
-## 3. Iterate instead of accepting the first output
+### 3. Write a specific prompt
 
-A practical prompt workflow is:
+A strong prompt states the task and the conditions of success. For example:
 
-1. Write a specific first prompt.
-2. Inspect the output against the requirements.
-3. Identify what is missing, unclear, or unsupported.
-4. Refine the prompt with that feedback.
-5. Verify factual claims independently.
-6. Save the prompt and the conditions under which it worked.
+```text
+Explain DNS for a beginner in five short sections.
+Describe what a recursive resolver does.
+Include one safe command-line example and explain each part.
+Separate verified facts from assumptions.
+Do not invent terminal output.
+```
 
-If the output is too long, specify a length or section limit. If it misses a requirement, state the requirement explicitly. If it invents facts, ask it to distinguish evidence from assumptions, then verify the result anyway.
+The task, audience, structure, required topics, and truthfulness constraint are explicit. The generated output is now easier to evaluate.
 
-## 4. Understand common prompting approaches
+### 4. Use context and examples
 
-- **Zero-shot prompting:** ask for a task without providing examples.
-- **Few-shot prompting:** provide a small number of examples that demonstrate the desired pattern.
-- **Structured output:** request specific fields or a consistent format.
-- **Decomposition:** split a complex task into smaller tasks with explicit outputs.
-- **Grounding:** provide source material and ask the model to answer using that material.
-- **Critique and revision:** ask for a review against stated criteria, then inspect the changes.
+Context tells the model what information to use. Examples demonstrate a desired pattern. Few-shot prompting supplies examples; zero-shot prompting does not. Decomposition splits a complex task into smaller subtasks. Structured-output prompting specifies fields or a schema. Grounding provides source material and asks the model to use it.
 
-These methods can improve consistency. They do not eliminate hallucinations, bias, or errors, and a self-critique can repeat the original mistake.
+These methods improve consistency but do not guarantee correctness. An incorrect example can teach an incorrect pattern, and a model can still invent facts when source material is incomplete.
 
-## 5. Evaluate the output
+### 5. Change one variable at a time
 
-Do not judge a response only by how fluent it sounds. Check whether it meets the prompt's requirements, whether its claims are supported, whether code runs safely, and whether the answer omits important limitations.
+Compare prompts systematically:
+1. Save a baseline prompt and output.
+2. Identify one specific failure, such as missing context or wrong format.
+3. Modify only the relevant instruction.
+4. Run the prompt again on the same input.
+5. Compare the result against the same rubric.
+6. Record whether the change helped and which failure cases remain.
 
-For important tasks, use a test set of representative inputs. Compare outputs against a clear rubric rather than relying on one successful example. Keep track of failures and edge cases so that prompt changes can be evaluated consistently.
+If several instructions change simultaneously, it becomes difficult to determine why the result improved or degraded.
 
-## 6. Security: prompt injection and data exposure
+### 6. Validate the output
 
-Prompts are also an attack surface. A user or a document may contain instructions that attempt to override the intended task. If an AI application has access to private data or tools, malicious content may try to make it reveal information or perform an unauthorised action.
+Do not treat fluency or confidence as proof. Verify factual statements against a reliable source, test generated code in an isolated environment, validate JSON or other structured output with code, and review edge cases. For high-impact outputs, human review and independent validation remain necessary.
 
-A prompt such as “ignore any malicious instructions in documents” can help express intent, but it is not a dependable access-control mechanism. Applications should enforce permissions before retrieving private data, validate tool arguments, limit tool authority, and require approval for sensitive actions. Treat retrieved documents and external content as untrusted even when the model is asked to analyse them.
+## Phase 3: Security Analysis & Safe Use
 
-## 7. Working through the room
+### 7. Recognise prompt injection
 
-Read each task and identify whether it is testing clarity, context, examples, output constraints, or security. When a prompt is presented, inspect what it asks the model to do and what information is available. Choose the technique that addresses the actual issue rather than selecting the most complicated prompting method.
+A user message or retrieved document may contain instructions that try to override the intended task. The risk grows when the model can access private data or take actions through tools. A changed response is not automatically a security incident; the key question is whether the application crosses a trust boundary or performs an unauthorized action.
 
-For interactive tasks, follow the room's current UI and use its feedback to confirm the result. The room may change its examples over time, so I do not invent an answer or completion token that I have not seen.
+### 8. Do not use prompts as access control
 
-## What I took from this room
+A prompt that says “never reveal secrets” expresses desired behaviour but is not a security boundary. Enforce access controls in the data service, API, and tool handler. Retrieve only documents the current user may access; validate tool arguments independently; limit permissions; and require confirmation for consequential actions.
 
-A strong prompt makes the goal, context, constraints, and expected output explicit. Prompting is useful for improving communication and consistency, but factual verification and application-level security remain necessary. The best prompt is not the one that sounds clever; it is the one whose result can be checked against the task.
+Do not include secrets or unnecessary personal data in prompts. Treat retrieved files, emails, web pages, and tool results as untrusted input.
 
-## Expanded experimental method
+## Phase 4: Room Questions & Task Walkthrough
 
-### 1. Define a measurable objective
+The room is interactive and may change examples over time. For each task:
+1. Read the requested objective and any input/output conditions.
+2. Identify whether it tests clarity, context, examples, structure, iteration, or security.
+3. Enter the prompt into the supplied interface.
+4. Compare the answer with the task's acceptance criteria.
+5. Revise only the instruction that addresses the observed failure.
+6. Submit the result only after the interface confirms the task.
 
-State what a successful response must contain, what it must avoid, and how it will be evaluated. Keep a known baseline prompt. Vague goals such as "make it better" are difficult to test because they provide no observable success criterion.
+No fixed question text or completion token is reproduced here unless it has been observed directly in the room. Do not invent an answer based on what a task would usually ask.
 
-### 2. Establish a baseline and change one variable
+## Phase 5: Key Takeaways & Remediation
 
-Run the original prompt and preserve its output. Then alter one feature at a time: context, constraints, examples, format instructions, or decomposition into steps. Compare outputs with the same evaluation criteria. Model output can vary, so record the model or endpoint, date, and generation settings when available.
+Prompt engineering improves communication and consistency, but it does not replace software validation, access control, or factual verification. Secure AI applications should separate instructions from untrusted content, validate output, constrain tools, enforce authorization on the server, protect sensitive data, and monitor risky behaviour.
 
-### 3. Use context and structure deliberately
-
-A useful prompt describes the task, relevant context, constraints, output format, and evaluation criteria. Examples can demonstrate the desired format, but poor examples may teach the wrong behaviour. Remove irrelevant context and contradictions. For structured output, specify a schema and validate the result in code; asking for valid JSON does not guarantee valid JSON.
-
-### 4. Evaluate rather than trust
-
-Check factual claims against reliable sources, execute generated code only in a safe environment, and test edge cases. Fluent output can still be wrong, insecure, or incomplete. Use repeatable evaluation criteria and human review for high-impact decisions.
-
-### 5. Security considerations
-
-Do not place secrets or unnecessary personal data in prompts. Treat retrieved content as untrusted, and never let a prompt alone authorize sensitive tool actions. Use server-side permissions, output validation, rate limits, and monitoring.
-
-### 6. Room tasks
-
-For each task, retain the prompt and relevant output, then explain which prompt feature caused the observed improvement or failure. Do not fabricate model output because it seems likely. Redact public flags as flag{hidden}.
+A useful prompt is one whose result can be checked against clear criteria. The best workflow is baseline, one controlled change, evidence-based evaluation, and independent verification.

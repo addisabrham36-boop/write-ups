@@ -109,6 +109,7 @@ These pages cover fundamentals, defensive security, web testing, AI security, fo
 - [Securing AI Systems](./TryHackMe/Securing%20AI%20Systems.md)
 - [LLM Security](./TryHackMe/LLM%20Security.md)
 - [AI Forensics](./TryHackMe/AI%20Forensics.md)
+- [AI System Reconnaissance](./TryHackMe/AI%20System%20Reconnaissance.md)
 - [Cypheron](./TryHackMe/Cypheron.md)
 - [Phantom Fob](./TryHackMe/Phantom%20Fob.md)
 - [The Brochure](./TryHackMe/The%20Brochure.md)

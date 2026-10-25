@@ -1,143 +1,113 @@
-# The Brochure: Hacker Holidays 2026 — TryHackMe Walkthrough
+# The Brochure: Complete TryHackMe Walkthrough
 
 Official room: https://tryhackme.com/room/hh-thebrochure-081f3e36
 
 ## Room Overview & Information
 
-**Event:** Hacker Holidays 2026  
-**Day:** 0, The Brochure  
-**Category:** OSINT and image analysis  
+**Event:** Hacker Holidays  
+**Category:** Open-source intelligence (OSINT)  
 **Difficulty:** Easy  
-**Objective:** Inspect a hotel brochure, use its visible clues to find the correct social-media account, combine several fragments of an encoded message, and submit the flag.
+**Objective:** Analyse the supplied brochure, find the related public social-media account, inspect its unusual follower, and recover the room flag.
 
-This is a browser-based OSINT challenge, not a conventional port-scanning or boot-to-root machine. The intended clue is printed in the image and leads to a public social-media trail. The challenge does not require exploiting Instagram or accessing private accounts.
+This is an OSINT puzzle, not a server-exploitation challenge. The intended path is to correlate a clue in the brochure with a public Instagram account, then decode information revealed by the suspicious follower. No network scanning, shell access, or privilege escalation is required.
 
-## Phase 1: Acquire and inspect the evidence
+## Phase 1: Acquire and Inspect the Brochure
 
-### 1. Download the room artifact
+### 1. Download and preserve the image
 
-Open the Day 0 task and download the provided archive. Keep the original unchanged. On a Linux analysis system, inspect the archive before extracting it:
-
-```bash
-file task-files.zip
-sha256sum task-files.zip
-unzip -l task-files.zip
-```
-
-- `file` identifies the archive format.
-- `sha256sum` records a hash so the source artifact can be identified later.
-- `unzip -l` lists contents without writing extracted files to disk.
-
-Use the actual filename if it differs from `task-files.zip`. When the archive contents look reasonable, extract it into a separate directory:
+Open the active room and download the provided brochure image. Keep the original file unchanged. Confirm the filename and format:
 
 ```bash
-mkdir -p brochure-analysis
-unzip task-files.zip -d brochure-analysis
-find brochure-analysis -maxdepth 2 -type f -print
+file brochure-image.jpg
+sha256sum brochure-image.jpg
+exiftool brochure-image.jpg
 ```
 
-The expected artifact is a brochure image in PNG format. If the supplied archive differs, follow the actual filenames shown by `find`.
+- `file` identifies the likely format from file contents.
+- `sha256sum` records a fingerprint of the exact artifact.
+- `exiftool` displays available image metadata.
 
-### 2. Inspect the image itself
+Replace the example filename with the one supplied by the room. Metadata may contain useful clues, but the original write-up reports that Aperi'Solve does not reveal an obvious hidden payload. Do not assume every image puzzle requires steganography.
 
-Open the brochure in an image viewer and read the text carefully. The visible clues refer to finding the hotel on Instagram and to VERA, the hotel's AI concierge. The image is designed to look like an artifact-analysis puzzle, but the important clue is its visible content rather than a hidden executable or a network service.
+### 2. Read the visible clue
 
-You may inspect metadata as a sanity check:
+Inspect the brochure's text, branding, and visual details. The key name in the artifact is **Byte Lotus Resorts**.
 
-```bash
-file brochure.png
-exiftool brochure.png
-sha256sum brochure.png
-```
+The goal at this stage is not to guess the flag. Identify a distinct phrase from the brochure and use it to search public information. Preserve the exact spelling because a small variation can make the correct profile harder to find.
 
-These commands identify the file, show available image metadata, and record its hash. The lack of unusual metadata does not mean the image contains no clue; in this room, the intended pivot is printed on the brochure.
+## Phase 2: Follow the Public Instagram Trail
 
-Do not spend time running exploit scanners or assuming that steganography is required. The task is explicitly categorized as OSINT.
+### 3. Find the resort account
 
-## Phase 2: Follow the public social-media trail
-
-### 3. Find the hotel account
-
-Search the visible hotel name and Instagram reference. A useful query is:
+Search Instagram for **Byte Lotus Resorts**. The matching public profile identified by the room is:
 
 ```text
-site:instagram.com "Byte Lotus Resort"
+@thebytelotusresort
 ```
 
-The query uses the search engine's `site:` operator to restrict results to Instagram and quoted words to narrow the hotel name. Open the matching public account and confirm that its displayed name and posts match the brochure. The account identified in the documented challenge is `thebytelotusresort`.
+Open the profile and inspect the visible posts, profile details, and follower list. The challenge's next clue is that this account has only one follower.
 
-The profile has little useful information in its visible posts. Inspect the accounts it follows, because OSINT often relies on relationships between public accounts rather than one isolated page.
+Do not broaden the search into unrelated personal information or attempt to access private accounts. The intended chain needs only the public account and its suspicious follower.
 
-### 4. Pivot to VERA
+### 4. Inspect the single follower
 
-The hotel account follows a single account that matches the brochure's VERA clue: `veratheconcierge`. Open that public profile and inspect its posts. Three posts contain separate fragments of a Base64-encoded message. Copy each fragment exactly and preserve the original order.
+Open the follower's public profile and carefully read the visible username or encoded text. The room indicates that the relevant value is Base64-encoded.
 
-The three documented fragments are:
+Base64 changes how bytes are represented as text. It is not encryption and requires no secret key to reverse. The presence of Base64 does not by itself make a string malicious; the room's clue and the profile context tell you what to inspect next.
 
-```text
-VEhNe1YzckBzX2FD
-QzB1bnRfaDRzX2Iz
-M25fZjB1bmQhfQ==
-```
+## Phase 3: Decode and Validate the Clue
 
-Do not decode the pieces separately unless necessary. Base64 fragments may not end on a complete three-byte boundary; joining them first avoids corrupting the combined data.
+### 5. Copy the encoded value exactly
 
-## Phase 3: Decode and verify the message
+Copy the complete Base64 string from the follower profile. Preserve the original string before decoding it. Missing a character, including spaces incorrectly, or accidentally truncating the text can produce a decoding error or a different result.
 
-### 5. Concatenate the fragments
+### 6. Decode using the AttackBox
 
-Join the fragments with no spaces or line breaks:
-
-```text
-VEhNe1YzckBzX2FDQzB1bnRfaDRzX2IzM25fZjB1bmQhfQ==
-```
-
-Base64 is an encoding, not encryption. It changes the representation of bytes and does not provide confidentiality.
-
-### 6. Decode using the command line
-
-On Linux, copy the concatenated value into the following command:
+Use the following command, replacing BASE64_VALUE with the exact string from the active profile:
 
 ```bash
-printf '%s' 'VEhNe1YzckBzX2FDQzB1bnRfaDRzX2IzM25fZjB1bmQhfQ==' | base64 --decode
+printf '%s' 'BASE64_VALUE' | base64 --decode
 printf '\n'
 ```
 
-- `printf '%s'` writes the exact input without appending a newline to the encoded data.
-- `base64 --decode` converts the Base64 string back to its original text.
-- The second `printf` adds a newline to make the terminal output easier to read.
+- `printf '%s'` writes the string without appending a newline to the encoded input.
+- `base64 --decode` decodes the text.
+- The final `printf` prints a newline so the terminal output is easier to read.
 
-Alternatively, paste the concatenated string into CyberChef and use the **From Base64** operation. Both methods should produce the same text.
+Alternatively, paste the value into CyberChef and use the **From Base64** operation.
 
-### 7. Validate the flag
+If decoding fails, verify that the full string was copied and that the task's value is actually Base64. Do not switch to a different cipher simply because the first attempt did not work.
 
-The decoded message is:
+### 7. Follow the decoded clue
 
-```text
-THM{V3r@s_aCC0unt_h4s_b33n_f0und!}
-```
+Read the decoded output and follow the exact clue it provides. The decoded value leads to the flag in the active challenge; use the current room's output as the authority.
 
-Submit the value exactly, preserving capitalization, punctuation, and the exclamation mark.
+This note deliberately does not supply a guessed encoded string or flag value. The exact follower content is the evidence that connects the social-media clue to the answer, and it must be read from the live room.
 
-## Phase 4: Question and answer
+## Phase 4: Task Question and Evidence Chain
 
-### Question: “What is the flag?”
+### Question: “Uncover the flag!”
 
-**Answer:**
+Use the sequence below to complete the task:
 
-```text
-THM{V3r@s_aCC0unt_h4s_b33n_f0und!}
-```
+1. Inspect the supplied brochure and identify the Byte Lotus Resorts clue.
+2. Search Instagram for the exact name.
+3. Open the matching account, `@thebytelotusresort`.
+4. Inspect the single follower identified by the room.
+5. Copy the encoded value shown by that profile.
+6. Decode the value with Base64.
+7. Follow the resulting clue and submit the flag shown by the active room.
 
-**Evidence chain:** brochure text → public hotel Instagram account → account followed by the hotel → VERA's three encoded fragments → concatenated Base64 → decoded flag.
+The flag should be redacted in this public repository as `THM{hidden}`, but the live task requires the exact value shown by TryHackMe.
 
 ## Phase 5: Key Takeaways & Remediation
 
-- OSINT findings often come from links between public profiles, not just from one page.
-- Read the image before assuming the solution requires metadata, steganography, or exploit tooling.
-- Keep public-source findings reproducible by recording the account name, post fragments, and decoding steps.
-- Base64 is reversible representation, not encryption. Never treat an encoded secret as protected.
-- Public accounts can expose unintended connections through their following lists and post history. Review what an organization and its service accounts reveal.
-- Do not attempt to access private accounts, bypass platform controls, or collect unrelated personal data during OSINT.
+- OSINT often relies on correlating several small public clues rather than exploiting a service.
+- Inspect the supplied artifact before assuming metadata or steganography is the solution.
+- Preserve the original file and record the tool used to inspect it.
+- Search the exact brand name and verify the profile matches the brochure.
+- Base64 is encoding, not encryption. Do not use it to protect credentials or secrets.
+- Public social-media relationships can expose unintended links between accounts.
+- Collect only the information required by the authorised exercise.
 
-This room is a reminder that the best first tool may be careful reading. The clue is visible, the trail is public, and the technical step is simply joining and decoding the three fragments.
+The correct method is to follow the evidence chain from the brochure to the matching public account, inspect the unusual follower, decode the provided value, and verify the resulting flag against the live task. No unrelated server enumeration or exploitation is part of this room.

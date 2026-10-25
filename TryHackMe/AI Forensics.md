@@ -74,7 +74,3 @@ For AI pipelines, maintain model provenance, sign or hash release artefacts, val
 ## What I took from this room
 
 AI forensics still depends on disciplined evidence handling. The AI-specific part changes which artefacts need inspection, but the core method remains the same: preserve, identify, correlate, verify, and document.
-
-## Phase 5: Key Takeaways & Remediation
-
-The main goal is to connect every conclusion to observable evidence and enforce security controls at the correct trust boundary. Keep the original artefacts, record the exact commands and outputs from your own run, and redact any flag in public notes as `flag{hidden}`.

@@ -1,6 +1,6 @@
 # Phishing with HiddenEye: TryHackMe Walkthrough
 
-Official room: https://tryhackme.com/room/hideye
+Official room: https://tryhackme.com/room/phishinghiddeneye
 
 ## Room Overview & Information
 

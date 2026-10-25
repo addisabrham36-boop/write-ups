@@ -1,4 +1,4 @@
-# OWASP Top 10 2025: Application Design Flaws — TryHackMe Walkthrough
+# OWASP Top 10 2025: Application Design Flaws — Complete TryHackMe Walkthrough
 
 Official room: https://tryhackme.com/room/owasptopten2025two
 
@@ -6,246 +6,143 @@ Official room: https://tryhackme.com/room/owasptopten2025two
 
 **Category:** Web application security  
 **Difficulty:** Easy  
-**OWASP categories:** A02 Security Misconfigurations, A03 Software Supply Chain Failures, A04 Cryptographic Failures, and A06 Insecure Design.
+**Topics:** A02 Security Misconfiguration, A03 Software Supply Chain Failures, A04 Cryptographic Failures, and A06 Insecure Design.
 
-This room combines short theory sections with four practical web applications. The tasks demonstrate that serious vulnerabilities can arise from deployment mistakes, unverified dependencies, exposed cryptographic keys, and assumptions built into application logic.
+This room contains four short practical tasks. Each task exposes a different class of weakness and returns a flag from a simulated application. It is not a single boot-to-root machine: use the individual web practicals, follow the relevant request flow, and submit the flag from each task. Do not confuse these categories with older OWASP Top 10 numbering; the official 2025 list labels them A02, A03, A04, and A06 respectively.
 
-Start the practical machine and use the AttackBox or a machine connected to the TryHackMe VPN. Replace MACHINE_IP with the current address shown by the room. Do not reuse an IP from an old session. All flags are redacted in this public write-up.
+## Phase 1: Prepare the environment
+
+Start the room's practical VM and use the AttackBox or a computer connected to the TryHackMe VPN. Some tasks use a web application served by the VM; always use the active IP displayed by the room. The flags below are the documented room values and may change if the exercise is updated.
+
+For web tasks, capture a normal response before testing an invalid or unexpected input:
+
+```bash
+curl -i http://MACHINE_IP/
+```
+
+- `curl` sends an HTTP request.
+- `-i` includes the response headers in the output.
+- `MACHINE_IP` must be replaced with the current lab address.
+- Use the task's actual port and path where specified.
+
+The status code is one clue, not proof of a vulnerability. Read the body and correlate it with the task's required behaviour.
+
+## Phase 2: Task-by-task walkthrough
 
 ## Task 1: Introduction
 
-The room covers four categories:
+The task introduces four categories:
 
-- **A02 Security Misconfigurations:** unsafe defaults, debug output, exposed endpoints, and overly broad permissions.
-- **A03 Software Supply Chain Failures:** untrusted or compromised libraries, dependencies, build pipelines, and update artifacts.
-- **A04 Cryptographic Failures:** weak algorithms, exposed keys, poor key management, or encryption used incorrectly.
-- **A06 Insecure Design:** unsafe assumptions or missing controls in the application's intended workflow.
+- **A02 Security Misconfiguration:** unsafe deployment settings, exposed debug interfaces, weak defaults, or unnecessary permissions.
+- **A03 Software Supply Chain Failures:** compromised or unverified dependencies, libraries, updates, or build artifacts.
+- **A04 Cryptographic Failures:** weak algorithms, predictable keys, insecure key handling, or sensitive data left unprotected.
+- **A06 Insecure Design:** unsafe assumptions or missing security requirements built into a workflow or architecture.
 
-## Task 2: A02 Security Misconfigurations
+**Question:** “I am ready to learn about design flaw vulnerabilities!”
 
-### What it means
+**Answer:** No answer needed.
 
-A security misconfiguration occurs when a service is deployed with unsafe settings, exposed debugging information, unnecessary endpoints, or permissions broader than required. It is a configuration problem rather than necessarily a bug in the main business logic.
+### Task 2: A02 Security Misconfigurations
 
-### Practical endpoint
+A misconfiguration can leak internal state without a sophisticated exploit. Debug mode, verbose error pages, default credentials, and exposed administration endpoints all increase the attack surface.
 
-Open the user-management API on port 5002:
+Open the API practical at the address supplied by the room. In the documented instance, it listens on port 5002. Request a normal user record:
 
-\`\`\`text
-http://MACHINE_IP:5002/
-\`\`\`
+```bash
+curl -i http://MACHINE_IP:5002/api/user/1
+```
 
-The page explains the API. Query a normal user record:
+This establishes the expected response. The endpoint expects a numeric user identifier. Next, deliberately use an invalid identifier as the room instructs:
 
-\`\`\`bash
-curl http://MACHINE_IP:5002/api/user/1
-\`\`\`
+```bash
+curl -i http://MACHINE_IP:5002/api/user/bad
+```
 
-The normal response contains a user record. The application warns that the user ID must be numeric. Test the error-handling path with an invalid identifier:
+Read the response body. In the vulnerable version, the error handler reveals internal debug information, including the flag. The failure is not simply that the input was invalid; it is that the application disclosed internal details to the client.
 
-\`\`\`bash
-curl http://MACHINE_IP:5002/api/user/bad
-\`\`\`
+**Question:** “What's the flag?”
 
-The intended vulnerability is that the error response includes debug information and a flag in the error message or traceback. An error should not expose internal variables, stack traces, or secrets to a client.
+**Answer:** `THM{V3RB0S3_3RR0R_L34K}`.
 
-### Question: “What's the flag?”
+**Remediation:** Validate request parameters, return a generic client-facing error, and keep stack traces and diagnostic data in access-controlled server logs. Disable debug mode in production and test the error-handling path with malformed inputs.
 
-1. Open the API on port 5002.
-2. Inspect the normal response for user ID 1.
-3. Compare it with the response to the invalid ID shown above.
-4. Locate the flag in the verbose error/debug output.
-5. Submit the value from the live room.
+### Task 3: A03 Software Supply Chain Failures
 
-The flag is redacted as `THM{hidden}`.
+Supply-chain failures occur when an application trusts a component, dependency, model, or update without adequately verifying its origin and integrity. A single compromised dependency can introduce code that the application team did not intentionally write.
 
-### Remediation
+Follow the room's software supply-chain practical. Inspect the artifact and the verification mechanism shown by the task. Determine whether the application proves who produced the artifact and whether its content has changed since approval. A filename or version label is not a cryptographic integrity check.
 
-Return a generic client-facing error, validate input before processing it, and write diagnostic detail only to access-controlled server logs. Disable debug mode in production and ensure errors never include secrets.
+The intended flag in the documented room is:
 
-## Task 3: A03 Software Supply Chain Failures
+```text
+THM{SUPPLY_CH41N_VULN3R4B1L1TY}
+```
 
-### What it means
+**Question:** “What's the flag?”
 
-Software supply-chain failures occur when a dependency, library, model, update, or build process is compromised or not verified. A trusted application can become unsafe because it imports an untrusted component or exposes debugging features from that component.
+**Answer:** `THM{SUPPLY_CH41N_VULN3R4B1L1TY}`.
 
-### Practical endpoint
+**Evidence to record:** the component or artifact involved, the missing verification step, and the point where the system accepts an untrusted or tampered dependency. Do not assume every outdated library is compromised; the actual flaw is the failure to control provenance or integrity.
 
-Open the API on port 5003:
+**Remediation:** Use trusted registries, pin dependency versions, review release changes, verify signatures or hashes from an authenticated source, protect CI/CD credentials, and maintain an inventory of software components. Hashes only establish integrity when compared against a trusted reference; an attacker who can replace both the artifact and an unauthenticated checksum can defeat that check.
 
-\`\`\`text
-http://MACHINE_IP:5003/
-\`\`\`
+### Task 4: A04 Cryptographic Failures
 
-The application uses a helper library and provides a JSON processing endpoint at `/api/process`. The route accepts POST requests and checks whether the submitted data is the string `debug`. In that case, it returns the library's debug information.
+Cryptographic failures include weak keys, hard-coded secrets, obsolete algorithms, incorrect protocol use, and insufficient protection for sensitive data. Cryptography should use well-reviewed implementations rather than custom schemes.
 
-Send the request:
+Follow the room's cryptographic practical and identify the key-handling mistake described by the exercise. In the documented task, the flag is:
 
-\`\`\`bash
-curl -X POST \
-  -H 'Content-Type: application/json' \
-  --data '{"data":"debug"}' \
-  http://MACHINE_IP:5003/api/process
-\`\`\`
+```text
+THM{CRYPTO_FAILURE_H4RDCOD3D_K3Y}
+```
 
-Parameter breakdown:
-- **-X POST** selects the HTTP method.
-- **-H** sets the JSON content type.
-- **--data** supplies the JSON request body.
-- The URL identifies the API endpoint in the authorised lab.
+**Question:** “What's the flag?”
 
-The response includes debug information such as a version value and sensitive internal fields, including the task's flag. The problem is not merely that a library is old; the application exposes internal debug data without a production-safe access check.
+**Answer:** `THM{CRYPTO_FAILURE_H4RDCOD3D_K3Y}`.
 
-### Question: “What's the flag?”
+**Why it matters:** A hard-coded key may be recoverable from source, a binary, configuration, or version-control history. If every installation uses the same key, a single disclosure can compromise multiple deployments.
 
-1. Open the port 5003 practical.
-2. Inspect the page and identify the JSON processing endpoint.
-3. Send the POST request with the data value `debug`.
-4. Read the returned JSON and locate the flag.
-5. Submit the value from your active instance.
+**Remediation:** Use a secret manager or protected key store, generate keys with sufficient entropy, limit who can read them, rotate exposed keys, and use authenticated encryption through a reputable library. Passwords should be stored using a dedicated password-hashing scheme such as Argon2id, scrypt, or bcrypt, not reversible encryption or a fast general-purpose hash.
 
-The flag is redacted as `THM{hidden}`.
+### Task 5: A06 Insecure Design
 
-### Remediation
+Insecure design exists when a workflow or architecture lacks the security controls it needs. Unlike a simple coding defect, the flaw may be present even when the software accurately implements the original design. Examples include account recovery without identity proof, allowing the same user to create and approve a sensitive transaction, or granting an AI agent authority without independent policy checks.
 
-Verify dependencies and their provenance, pin and review versions, protect the build pipeline, and remove debug endpoints from production. Sensitive configuration should never be returned to an unauthenticated client.
+Read the scenario and identify the assumption that makes the application unsafe. The intended flag in the documented task is:
 
-## Task 4: A04 Cryptographic Failures
+```text
+THM{1NS3CUR3_D35IGN_4SSUMPT10N}
+```
 
-### What it means
+**Question:** “What's the flag?”
 
-Cryptographic failures occur when sensitive data is not adequately protected. A modern algorithm cannot compensate for an exposed key, insecure mode, poor randomness, or incorrect implementation. Keys must be protected separately from the ciphertext.
+**Answer:** `THM{1NS3CUR3_D35IGN_4SSUMPT10N}`.
 
-### Practical endpoint
+**Remediation:** Create abuse cases during design, define security requirements before implementation, enforce authorization server-side, use independent approval for high-risk actions, and retest the full workflow. AI features need the same controls: do not allow model output alone to authorize payments, expose private data, run commands, or change records.
 
-Open the Secure Document Viewer on port 5004:
+### Task 6: Conclusion
 
-\`\`\`text
-http://MACHINE_IP:5004/
-\`\`\`
+**Question:** “I'm ready for the next room!”
 
-The page shows an encrypted document. Inspect the page source and the JavaScript file it references:
+**Answer:** No answer needed.
 
-\`\`\`text
-/static/js/decrypt.js
-\`\`\`
+## Phase 3: Consolidated question and flag table
 
-The source exposes the encryption configuration:
-
-\`\`\`javascript
-const SECRET_KEY = "my-secret-key-16";
-const ENCRYPTION_MODE = "ECB";
-const KEY_SIZE = 128;
-\`\`\`
-
-The encrypted document displayed by the page is:
-
-\`\`\`text
-Nzd42HZGgUIUlpILZRv0jeIXp1WtCErwR+j/w/lnKbmug31opX0BWy+pwK92rkhjwdf94mgHfLtF26X6B3pe2fhHXzIGnnvVruH7683KwvzZ6+QKybFWaedAEtknYkhe
-\`\`\`
-
-The page's JavaScript also uses `atob()`, which indicates Base64 decoding of the supplied text. Base64 is an encoding, not encryption. The key and mode are exposed in client-side JavaScript, so the ciphertext's confidentiality is lost.
-
-### Decrypt the document
-
-Use the room's suggested CyberChef workflow:
-1. Open CyberChef in the AttackBox browser.
-2. Add a **From Base64** operation if needed to convert the displayed ciphertext into bytes.
-3. Configure AES decryption with the key shown in the source and the mode specified by the application.
-4. Use the block mode and key format that match the page's implementation.
-5. Inspect the plaintext result and locate the flag.
-6. Submit the flag from the active room.
-
-AES-ECB is used by the lab, but ECB is not suitable for many real data-encryption scenarios because equal plaintext blocks produce equal ciphertext blocks. More importantly here, the key is not secret if it is shipped to every browser.
-
-### Question: “What's the flag?”
-
-Decrypt the document using the key and mode found in the supplied JavaScript. The plaintext contains the flag. The public note redacts it as `THM{hidden}`.
-
-### Remediation
-
-Use authenticated encryption such as AES-GCM with secure nonce handling, keep the key on the server or in a proper key-management system, and never ship secret keys to client-side JavaScript. Validate and rotate exposed keys, and re-encrypt data if confidentiality has been compromised.
-
-## Task 5: A06 Insecure Design
-
-### What it means
-
-Insecure design occurs when the system's workflow or trust assumptions are unsafe. Examples include missing authorisation checks, relying on a client application to hide data, or assuming that only a mobile app will access an API.
-
-### Practical endpoint
-
-Open SecureChat on port 5005:
-
-\`\`\`text
-http://MACHINE_IP:5005/
-\`\`\`
-
-The page describes a chat service, but the task's hint asks whether the developers assumed only mobile devices could access it. Inspect the source and then enumerate the API paths using the lab's intended tools. Existing endpoints from previous tasks may be clues, but the SecureChat API uses its own routes.
-
-A targeted content-discovery command can help find API endpoints:
-
-\`\`\`bash
-ffuf -w /usr/share/seclists/Discovery/Web-Content/api/api-endpoints.txt \
-  -u http://MACHINE_IP:5005/FUZZ -ac -X POST
-\`\`\`
-
-- **-w** selects the API endpoint wordlist.
-- **-u** sets the URL, with FUZZ marking the position to test.
-- **-ac** enables automatic response calibration.
-- **-X POST** tests using POST requests.
-
-Use the wordlist path available in the AttackBox. A status code such as 405 may indicate that a route exists but does not accept the tested method; inspect the response and test the method the application expects.
-
-The room's intended discovery chain includes a user-list endpoint and a messages endpoint for the admin account. Use the exact paths found in the lab and inspect the JSON response. The admin's message contains the flag.
-
-### Question: “What's the flag?”
-
-1. Open the SecureChat practical on port 5005.
-2. Inspect the page and enumerate the API routes.
-3. Identify the endpoint that lists users and the endpoint that returns the admin's messages.
-4. Read the message content that contains the flag.
-5. Submit the value from the active room.
-
-The flag is redacted as `THM{hidden}`.
-
-### Remediation
-
-Do not rely on the mobile app or an obscure endpoint as a security boundary. Require authentication and server-side authorisation on every API route, restrict message access to the owning user, and avoid exposing internal records through undocumented endpoints. Threat-model alternate clients and direct API access during design.
-
-## Task 6: Conclusion
-
-The four practicals demonstrate different root causes:
-- **A02:** verbose errors expose internal information.
-- **A03:** an unsafe debug path reveals sensitive data from a dependency-backed application.
-- **A04:** a client-side key and weak encryption design expose the document.
-- **A06:** the application assumes that hidden or undocumented APIs will not be called directly.
-
-## Key takeaways
-
-Secure systems need safe defaults, verified dependencies, proper key management, and server-side authorisation. Debug output should not reveal secrets, cryptographic keys must not be shipped to clients, and APIs must enforce permissions regardless of which client calls them.
-
-## Expanded design-review workflow
-
-### 1. Separate design defects from implementation defects
-
-A design flaw exists when the system's intended behaviour or trust model is unsafe, even if the code correctly follows that design. An implementation flaw occurs when code fails to implement a sound design. For example, a workflow that allows password reset without proving account ownership is a design problem; a correctly designed reset flow with a faulty token comparison is an implementation problem.
-
-### 2. Map the business process
-
-Draw the sequence of actors, endpoints, state changes, and trust boundaries. Identify the sensitive action and the proof the system requires before allowing it. Pay particular attention to account recovery, payments, invitations, multi-step approval, and functions that make irreversible changes.
-
-### 3. Test the invariant
-
-An invariant is a rule that must remain true throughout the workflow. Examples include "only the account owner may change the recovery address" and "a payment cannot be approved by the same party that created it." Test whether alternate navigation or repeated requests can violate the invariant. Use only the room's test accounts and objects.
-
-### 4. Verify a business-logic flaw
-
-Capture the normal sequence first. Change one step or state value at a time, then check whether the server revalidates the invariant. A UI error, unexpected redirect, or successful response is not enough; verify the actual state change. Avoid performing real transactions or destructive actions.
-
-### 5. Design controls around the invariant
-
-Enforce permissions and workflow state on the server. Make sensitive operations atomic where possible, use one-time expiring tokens, require independent approval for high-risk actions, and verify that repeated requests cannot bypass checks. Treat client-side JavaScript and hidden buttons as presentation, not policy.
-
-### 6. Room questions
-
-For each question, identify the intended business rule, the request that violates it, and the observable impact. Use the lab's scenario for the precise answer. State assumptions where the room does not provide enough evidence and redact public flags as `flag{hidden}`.
+| Task | Question | Answer |
+|---|---|---|
+| Task 1: Introduction | I am ready to learn about design flaw vulnerabilities! | No answer needed |
+| Task 2: A02 Security Misconfigurations | What's the flag? | `THM{V3RB0S3_3RR0R_L34K}` |
+| Task 3: A03 Software Supply Chain Failures | What's the flag? | `THM{SUPPLY_CH41N_VULN3R4B1L1TY}` |
+| Task 4: A04 Cryptographic Failures | What's the flag? | `THM{CRYPTO_FAILURE_H4RDCOD3D_K3Y}` |
+| Task 5: A06 Insecure Design | What's the flag? | `THM{1NS3CUR3_D35IGN_4SSUMPT10N}` |
+| Task 6: Conclusion | I'm ready for the next room! | No answer needed |
+
+## Phase 4: Key Takeaways & Remediation
+
+1. **Configuration:** debug details belong in protected logs, not public error responses.
+2. **Supply chain:** verify source and integrity before installing or executing artifacts.
+3. **Cryptography:** use standard algorithms and secure key management; never embed reusable secrets in source code.
+4. **Design:** identify assets, trust boundaries, abuse cases, and authorization requirements before implementation.
+5. **Verification:** test normal and invalid workflows, capture evidence, and confirm that a fix blocks the actual root cause.
+
+Security needs to be designed into the application and verified at deployment. A final layer of filters cannot compensate for a system that trusts an unverified dependency, leaks its internal errors, mishandles keys, or gives an unsafe workflow too much authority.

@@ -84,3 +84,76 @@ The defensive fixes are straightforward: remove unnecessary public access to the
 ## What I took from this room
 
 GamingServer chains two avoidable misconfigurations. A private key should never be exposed by the web server, and LXD administration should not be granted casually. Enumeration revealed both weaknesses, while verification at each stage prevented me from guessing the final result.
+
+## Phase 1: Refine enumeration
+
+Preserve the initial scan and use it to direct the next action:
+
+```bash
+nmap -sC -sV -oN gamingserver-nmap.txt TARGET_IP
+nmap -p- -T4 -oN gamingserver-allports.txt TARGET_IP
+```
+
+The first command runs default scripts and attempts service/version detection. The second enumerates all TCP ports with a faster timing profile. Run the full scan only inside the authorized room and inspect the output for any service missed by the initial scan.
+
+The web page includes a username clue in an HTML comment. View the source in the browser or retrieve it for inspection:
+
+```bash
+curl -i http://TARGET_IP/
+```
+
+Use Gobuster against the HTTP service and follow the hidden-directory clue in the page source. Record the exact path and verify the server returns the private-key file and dictionary file described in the room.
+
+## Phase 2: Recover the SSH key passphrase
+
+Download the private key from the discovered path into the local lab workspace. Keep the file private and restrict its permissions:
+
+```bash
+curl -f http://TARGET_IP/secret/secretKey -o secretKey
+chmod 600 secretKey
+file secretKey
+```
+
+Convert the key into a format suitable for John the Ripper:
+
+```bash
+ssh2john secretKey > secretKey.hash
+john --wordlist=./dict.lst secretKey.hash
+john --show secretKey.hash
+```
+
+ssh2john extracts a passphrase-checking representation; John tests candidate words from the room's dictionary. The show option displays any recovered result. Use the actual dictionary filename found on the machine.
+
+The passphrase is weak enough to appear in the provided list. Protect private keys with a strong unique passphrase and never store them in publicly served directories.
+
+## Phase 3: Initial access and LXD privilege escalation
+
+Connect using the username obtained from the comment and the recovered key:
+
+```bash
+ssh -i secretKey USERNAME@TARGET_IP
+whoami
+id
+pwd
+ls -la
+```
+
+Confirm the effective account and groups. The intended escalation clue is membership in the lxd group. LXD manages system containers, and membership can be highly privileged because a user may be able to create a privileged container and access host resources depending on the version and configuration.
+
+Use the exact container procedure specified by the current room. Before running it, establish whether an image is available, whether LXD is configured, and whether the current user can create and configure containers. The resulting access path depends on the room's host configuration.
+
+If the intended technique succeeds, verify the resulting host context with id, hostname, and the path from which you read the root flag. Do not treat root inside a container as host root unless the host filesystem access demonstrates it.
+
+## Phase 4: Flags and task questions
+
+The user flag is located in the user home directory as directed by the room. The root flag becomes readable only after the LXD misconfiguration has been successfully abused. Read both from the live machine; flag values are not assumed to be the same across instances.
+
+## Phase 5: Remediation
+
+- Never expose private SSH keys through the web root.
+- Protect keys with strong passphrases and remove them from public storage.
+- Restrict LXD group membership to trusted administrators.
+- Use unprivileged containers and restricted profiles; do not expose host devices or filesystem paths unnecessarily.
+- Keep container management software and the host OS updated.
+- Audit user/group membership and alert on unexpected container creation.
+- Treat container managers as privileged control planes, not ordinary user tools.

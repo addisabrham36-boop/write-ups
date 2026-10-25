@@ -14,9 +14,9 @@ Security misconfiguration happens when a system is deployed with unsafe settings
 
 Start the room's machine and use the current IP address assigned by TryHackMe. The user-management API runs on port 5002:
 
-\`\`\`text
+```text
 http://MACHINE_IP:5002/
-\`\`\`
+```
 
 Replace MACHINE_IP with your active target address.
 
@@ -24,9 +24,9 @@ Replace MACHINE_IP with your active target address.
 
 The page describes the API. Request a normal user record:
 
-\`\`\`bash
+```bash
 curl http://MACHINE_IP:5002/api/user/1
-\`\`\`
+```
 
 The endpoint returns a user record. This establishes the normal response format before testing error handling.
 
@@ -34,9 +34,9 @@ The endpoint returns a user record. This establishes the normal response format 
 
 The application indicates that the user ID must be numeric. Send an invalid value:
 
-\`\`\`bash
+```bash
 curl http://MACHINE_IP:5002/api/user/bad
-\`\`\`
+```
 
 Inspect the response. The vulnerable handler exposes debug information, including a flag in the error output. This is a misconfiguration because detailed internals are returned to the client rather than being kept in protected server logs.
 

@@ -86,3 +86,67 @@ Fix each weakness independently. Enforce MFA and rate limits, disable production
 ## What I took from this room
 
 Internal is a chain rather than a single exploit: web enumeration leads to WordPress, WordPress leads to a web shell, host enumeration reveals an internal Jenkins service, and Jenkins access leads to the final privilege boundary. Each step should be supported by evidence from the live machine, and both flags should be redacted as flag{hidden} in a public write-up.
+
+## Phase 1 continued: Hostname and web enumeration
+
+The lab application expects the hostname internal.thm. After adding the current IP to the local hosts file, verify it:
+
+```bash
+getent hosts internal.thm
+curl -i http://internal.thm/
+```
+
+Then enumerate the discovered web server:
+
+```bash
+gobuster dir -u http://internal.thm/ -w /path/to/wordlist.txt -o internal-web.txt
+```
+
+Use a wordlist available in the AttackBox. Confirm the actual WordPress path before running WPScan.
+
+## Phase 2 continued: WordPress credential discovery
+
+WPScan can enumerate usernames and site metadata in the permitted lab:
+
+```bash
+wpscan --url http://internal.thm/wordpress/ --enumerate u
+```
+
+Adjust the URL to match the discovered installation. A username is a lead, not a password. If the room directs password testing, use the supplied list and a conservative rate; stop when the intended lab credential is verified.
+
+Once logged in as an administrator, the theme editor may permit editing a PHP file that the web server executes. This demonstrates how excessive CMS permissions can become server-side code execution. Use the room's authorized proof file, configure only the lab-reachable callback, and restore the changed theme file when finished.
+
+## Phase 3 continued: Enumerate local privileges
+
+When a shell is established, verify the account and context:
+
+```bash
+whoami
+id
+hostname
+pwd
+sudo -l
+```
+
+Check for the internal Jenkins service or application endpoint indicated by the room. A local-only listener is not reachable externally by default; an SSH tunnel can forward a local port through the authenticated lab SSH connection:
+
+```bash
+ssh -L LOCAL_PORT:127.0.0.1:REMOTE_PORT USERNAME@MACHINE_IP
+```
+
+Replace the port and username with the service and credentials identified by the room. Open the forwarded local port in the browser and confirm the expected Jenkins interface. Do not expose the forwarded port to public interfaces.
+
+Use the Jenkins task's observed configuration and credentials to follow the intended subsequent privilege path. Do not assume an arbitrary Jenkins job automatically provides root; verify the job permissions, execution context, and resulting identity.
+
+## Phase 4: Flags and evidence
+
+Read the user and root flags from the current lab, and redact them in public notes. For each transition, record the exact service/endpoint, credentials source, account identity, and the evidence that the privilege level changed.
+
+## Phase 5: Remediation
+
+- Remove default or weak WordPress credentials and apply MFA.
+- Disable theme/plugin code editing in production where possible.
+- Patch WordPress and extensions, and restrict administrator accounts.
+- Bind Jenkins to loopback or a protected management network and require strong authentication.
+- Restrict job execution, protect secrets, and prevent jobs from running with excessive host privileges.
+- Audit SSH tunnel and firewall access rather than exposing internal services directly.

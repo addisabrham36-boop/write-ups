@@ -1,96 +1,112 @@
-# What Is Networking? TryHackMe Walkthrough
+# What Is Networking?: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/whatisnetworking
+Official room: https://tryhackme.com/room/whatisnetworking
 
-Networking is how devices exchange data. A laptop may connect to a website through a home router, several provider networks, and a remote server. Understanding the layers and addressing involved makes it easier to troubleshoot connectivity and investigate security events.
+## Room Overview & Information
 
-## 1. Identify the main network components
+**Category:** Networking fundamentals  
+**Difficulty:** Beginner  
+**Focus:** Networks and the Internet, IP and MAC addresses, MAC spoofing, and ICMP ping.
 
-- **Host:** a device that sends or receives network traffic.
-- **Switch:** forwards frames between devices on a local network, primarily using MAC addresses.
-- **Router:** forwards packets between different IP networks.
-- **Access point:** connects wireless clients to a network.
-- **Firewall:** permits or blocks traffic according to configured rules.
-- **Server:** provides a service such as web hosting, DNS, file sharing, or authentication.
-- **Client:** requests a service from a server.
+This room introduces how devices identify one another and communicate. The practicals use simulated networks, so any flag must be obtained from the current room. Do not replace it with a value from an older write-up.
 
-A device can be both a client and a server depending on what it is doing. The terms describe roles, not necessarily separate types of hardware.
+## Task 1: What is Networking?
 
-## 2. Understand addresses
+A computer network is a set of connected devices that can exchange data. Networks range from a few devices on a home LAN to large interconnected networks across the Internet. Devices need agreed rules and addressing to send data to the right destination.
 
-A MAC address identifies a network interface at the link layer. An IP address identifies an interface logically so packets can be routed between networks. A port number identifies a service or endpoint on a host, such as HTTPS on TCP port 443.
+A network is not necessarily the Internet. A private network may connect devices inside a home or organisation, while the Internet connects many networks together through routers and service-provider infrastructure.
 
-These values answer different questions. A MAC address does not normally travel unchanged across routers, and an IP address alone does not identify which application on the host should receive the data.
+## Task 2: What is the Internet?
 
-Useful local commands on Linux:
+The Internet is a network of networks. Private networks connect to other networks through routing infrastructure, and protocols allow devices from different manufacturers and operating systems to communicate.
 
-```bash
-ip addr
-ip route
-ip neigh
-```
+### Question: “Who invented the World Wide Web?”
 
-- `ip addr` shows interfaces and assigned addresses.
-- `ip route` shows routing decisions and the default gateway.
-- `ip neigh` shows cached neighbour mappings, commonly IP-to-MAC information on the local link.
+Answer: **Tim Berners-Lee**.
 
-The output depends on the machine and network. Do not copy an example address as if it were your own.
+The World Wide Web is a service built on top of the Internet, using technologies such as HTTP and HTML. The Internet and the Web are related but not identical: email, DNS, and many other services also use the Internet.
 
-## 3. Follow the path to a website
+## Task 3: Identifying Devices on a Network
 
-When a user opens a website, the browser typically needs to resolve a domain name through DNS, establish a transport connection, negotiate TLS for HTTPS, and exchange HTTP requests and responses. The network layer routes packets toward the destination, while switches and access points move traffic across local segments.
+Devices commonly use IP addresses and MAC addresses for different purposes.
 
-A simplified sequence is:
+- **IP address:** a logical address used by IP to identify an interface and route packets.
+- **MAC address:** a link-layer address used to deliver frames on a local network.
 
-1. The device obtains or already has an IP configuration.
-2. DNS resolves the hostname to an address.
-3. The device routes traffic toward the destination or default gateway.
-4. TCP establishes a connection when the application uses TCP.
-5. TLS protects the connection for HTTPS.
-6. HTTP carries the request and response.
+IPv4 uses four decimal octets separated by dots. Each octet ranges from 0 to 255. IPv6 uses a 128-bit address written in hexadecimal groups.
 
-Real deployments may use caching, proxies, VPNs, load balancers, or other mechanisms, so the path is not always a straight line.
+A private IPv4 address is used inside private networks and is not routed directly across the public Internet. A public address is globally routable, subject to routing and provider policy. Network Address Translation (NAT) commonly lets multiple private devices share one public IPv4 address.
 
-## 4. Common protocols and ports
+### Question 1: “What does the term ‘IP’ stand for?”
 
-| Protocol | Typical use | Common port |
-|---|---|---:|
-| DNS | Name resolution | 53 UDP/TCP |
-| HTTP | Web traffic | 80 TCP |
-| HTTPS | Encrypted web traffic | 443 TCP |
-| SSH | Secure remote shell | 22 TCP |
-| DHCP | Automatic IP configuration | 67/68 UDP |
-| SMTP submission | Sending email | 587 TCP |
-| RDP | Remote desktop | 3389 TCP |
+Answer: **Internet Protocol**.
 
-A port is a convention, not proof. Services can be configured to use nonstandard ports, and a port scan must be interpreted alongside service detection.
+### Question 2: “What is each section of an IP address called?”
 
-## 5. Test connectivity methodically
+For the IPv4 format taught in this room, each dot-separated section is an **octet**.
 
-Use commands that answer one question at a time:
+### Question 3: “How many sections (in digits) does an IPv4 address have?”
 
-```bash
-ping -c 4 TARGET_IP
-```
+Answer: **Four** octets.
 
-This tests whether ICMP echo replies are returned. A failed ping does not prove the host is offline because a firewall may block ICMP.
+### Question 4: “What does the term ‘MAC’ stand for?”
 
-```bash
-ip route
-```
+Answer: **Media Access Control**.
 
-Check whether a route exists toward the target. For a web service, test the application directly:
+## Task 3 practical: MAC spoofing in the simulated hotel network
+
+The room provides an interactive scenario where the router allows Alice's traffic because her device has been authorised, while Bob's traffic is blocked. The exercise asks you to change Bob's simulated MAC address to match Alice's.
+
+1. Open the interactive lab using **View Site**.
+2. Inspect the packet flow for Alice and Bob.
+3. Note which device's packets are allowed and which are dropped.
+4. Use the simulator's control to change Bob's MAC address to the value used by Alice.
+5. Send the test traffic again and observe whether the router now allows it.
+6. Submit the flag shown by the simulator.
+
+This demonstrates why MAC-address-based access control alone is weak. A MAC address can be spoofed, and it does not provide strong user authentication. The exercise is a simulation; do not spoof addresses on a real network unless you have explicit authorisation.
+
+### Question 5: “Deploy the interactive lab using the ‘View Site’ button and spoof your MAC address to access the site. What is the flag?”
+
+Obtain the flag from the successful simulated action and submit it to the active room. The public write-up deliberately uses `flag{hidden}` rather than publishing a flag value that has not been independently confirmed in the live instance.
+
+## Task 4: Ping (ICMP)
+
+Ping uses ICMP Echo Request and Echo Reply messages to test basic reachability and measure round-trip time. It is useful for troubleshooting, but a failed ping does not prove a host is offline because firewalls can block ICMP.
+
+A Linux example is:
 
 ```bash
-curl -I https://example.com
+ping -c 4 8.8.8.8
 ```
 
-This requests response headers from the named site. If DNS fails, check name resolution; if the route is missing, check network configuration; if the TCP connection works but HTTP returns an error, investigate the application or proxy.
+- `ping` sends ICMP echo probes.
+- `-c 4` sends four requests and stops.
+- `8.8.8.8` is the destination IP in the room's example.
 
-## 6. Security implications
+The room's interactive website has its own simulated ping function and reveals a flag when the correct address is pinged. Use that simulator for the question rather than assuming a local terminal result will unlock the task.
 
-Network segmentation limits how far an attacker can move after compromising one device. Firewalls reduce unnecessary exposure, secure protocols protect data in transit, and monitoring helps identify unusual traffic. Exposed services should be inventoried and restricted to the users and systems that need them.
+### Question 1: “What protocol does ping use?”
 
-## What I took from this room
+Answer: **ICMP** (Internet Control Message Protocol).
 
-Networking becomes easier when I separate link-layer delivery, IP routing, transport ports, and application protocols. When something fails, I can test each layer rather than repeatedly trying random commands.
+### Question 2: “What is the syntax to ping 10.10.10.10?”
+
+Answer: `ping 10.10.10.10`.
+
+This is the basic syntax shown by the room. On Linux, you can limit the number of requests with `-c`, but the question asks for the simple form.
+
+### Question 3: “What flag do you get when you ping 8.8.8.8?”
+
+Open the practical, enter or ping `8.8.8.8` as instructed, and copy the flag shown by the active simulator. Do not substitute a guessed flag from another write-up.
+
+## Troubleshooting
+
+- If the lab does not respond, confirm the simulator has loaded and use the controls it provides.
+- If a ping receives no reply on a real network, consider ICMP filtering before concluding the host is offline.
+- If a MAC change does not alter the simulation, verify that you copied the authorised device's full address correctly.
+- A MAC address is relevant to the local link; routers do not forward the same Ethernet frame unchanged across the Internet.
+
+## Key takeaways
+
+IP addresses support logical addressing and routing; MAC addresses support local-link delivery; and ICMP ping checks a limited form of reachability. The practical demonstrates why trusting a spoofable MAC address is not a strong authentication mechanism.

@@ -100,37 +100,3 @@ Do not claim a control works merely because it is described in a policy. Test th
 ## Key takeaways
 
 Securing AI requires layered controls across data, models, APIs, retrieval, tools, and operations. The most important principles are least privilege, verified provenance, server-side authorisation, safe output handling, strong monitoring, and explicit human oversight for high-impact actions.
-
-## Expanded secure-design workflow
-
-### 1. Inventory the AI system
-
-List the model, datasets, retrieval sources, prompts, plugins, tools, user identities, service accounts, APIs, and deployment dependencies. Mark which inputs are untrusted and which assets are sensitive. The model endpoint alone is not the entire system.
-
-### 2. Enforce controls at the right layer
-
-Access control should be enforced by the API, database, retrieval service, or tool that owns the resource. Prompt instructions can influence behaviour but cannot guarantee authorization. Require each tool call to validate identity, arguments, target resource, and allowed action independently.
-
-### 3. Protect model and data integrity
-
-Maintain provenance for training data, model weights, configuration, and plugins. Use trusted registries, signed or hashed release artifacts, access-controlled build pipelines, and review of dependency changes. Test new model versions before production and maintain rollback capability.
-
-### 4. Validate inputs and outputs
-
-Validate file formats, schemas, lengths, and allowed values. Treat model output as untrusted before sending it to a shell, SQL engine, HTML renderer, or external tool. Prefer structured function calls to arbitrary generated commands and escape output for its destination context.
-
-### 5. Protect confidentiality and availability
-
-Minimize sensitive content sent to models and external providers. Apply tenant separation before retrieval, control retention, redact secrets from logs, and restrict access to conversation history. Set request and token budgets, timeouts, concurrency limits, and abuse monitoring.
-
-### 6. Monitor and respond
-
-Log model version, user context, tool invocation, authorization outcome, and relevant error metadata while avoiding unnecessary secrets. Alert on unusual tool usage, abnormal data access, suspicious policy-bypass attempts, and resource spikes. Define how to disable a tool, revoke credentials, or roll back a model release.
-
-### 7. Verify remediation
-
-Test the complete application path, not only the model response. Include prompt injection, cross-tenant access attempts, invalid tool arguments, oversized inputs, and safe failure modes. Record whether the backend enforced the intended policy.
-
-### 8. Room questions
-
-Use components and evidence described by the live exercise. Map each issue to the asset at risk, the trust boundary crossed, and the control that blocks it. Do not invent configuration details or flags; redact flags as flag{hidden}.

@@ -10,7 +10,9 @@ Official room: https://tryhackme.com/room/enumerationbruteforce
 
 This room contains multiple small web labs under the `enum.thm` hostname. The important pattern is to understand how the application responds before automating requests. Run the exercises only against the machine assigned by TryHackMe. Do not use these techniques against a public login page without explicit written permission.
 
-## Task 1: Introduction and setup
+## Phase 1: Reconnaissance & Enumeration
+
+### Task 1: Introduction and setup
 
 Start both the attacker machine and lab machine as instructed. Record the generated target IP. Add the host mapping to `/etc/hosts`:
 
@@ -63,7 +65,7 @@ The result is only as reliable as the error-string comparison. If the applicatio
 
 Run the supplied script against the room's list. Find the entry marked `[VALID]` and submit that exact email address. The actual address is deliberately not hard-coded here because the room's provided list and active instance are the source of truth.
 
-## Task 3: Enumerating Users via Verbose Errors
+### Task 3: Enumerating Users via Verbose Errors
 
 Verbose errors can disclose internal paths, database details, usernames, or application logic. For this lab, the login response tells the tester whether an email exists.
 
@@ -85,7 +87,7 @@ The room also shows a Python script. The important components are:
 
 If the script fails, check the hostname mapping, the endpoint path, the request field names, and whether the response is JSON. Do not assume the script's result is correct if the server returns an error or the lab is still starting.
 
-## Task 4: Exploiting Vulnerable Password Reset Logic
+### Task 4: Exploiting Vulnerable Password Reset Logic
 
 Password-reset systems often send a single-use token or code to the user's registered channel. A secure token should be unpredictable, time-limited, bound to the correct account, and invalidated after use. A short numeric token with a small range is vulnerable to guessing.
 
@@ -135,7 +137,7 @@ A response with a different content length can be a useful clue, but it is not p
 
 After the successful reset, log in using the new password and open the account dashboard. Copy the flag displayed by the lab and submit it. This public write-up intentionally uses `flag{hidden}` rather than publishing the live flag.
 
-## Task 5: Exploiting HTTP Basic Authentication
+### Task 5: Exploiting HTTP Basic Authentication
 
 HTTP Basic Authentication sends a Base64 representation of `username:password` in the `Authorization` header. Base64 is encoding, not encryption. Basic authentication must be protected by HTTPS to prevent credentials being exposed in transit.
 
@@ -184,7 +186,11 @@ hydra -l USERNAME -P /path/to/wordlist.txt enum.thm http-get /labs/basic_auth/
 
 Use the exact username and failure condition from the active lab. Tool syntax can vary by service and Hydra version; if the command does not work, verify the module options with `hydra -U http-get` or the installed documentation. Keep request rates reasonable and test only the TryHackMe target.
 
-## Task 6: OSINT
+## Phase 3: Post-Exploitation and Additional Reconnaissance
+
+The authentication labs do not provide an operating-system shell or a privilege-escalation path. This phase therefore focuses on validating the results, limiting credential exposure, and keeping the later OSINT activity passive and in scope.
+
+### Task 6: OSINT
 
 The room introduces the Internet Archive's Wayback Machine and Google dorking. Older snapshots may expose paths or files that are no longer linked from the current site. Historical data can be stale, so validate whether the resource still exists before treating it as a current exposure.
 
@@ -222,7 +228,11 @@ Use these operators only for assets in scope. Do not download, disclose, or expl
 
 This is a completion prompt rather than a technical answer. Select the continuation option after reviewing the task content.
 
-## Task 7: Conclusion
+## Phase 4: Room Questions & Answers
+
+The email and flag answers that depend on the live lab remain instance-bound. Use the exact candidate marked by the supplied script and retrieve flags after completing the reset or login flow. The question text and validation method are preserved in the task sections above.
+
+### Task 7: Conclusion
 
 The room teaches how verbose errors and weak reset logic can reveal valid accounts or allow password recovery, and how Basic Authentication can be attacked when credentials are weak. It also demonstrates using public archives and search operators for OSINT.
 
@@ -230,7 +240,7 @@ The room teaches how verbose errors and weak reset logic can reveal valid accoun
 
 This is the room's final acknowledgement. Submit it as the task requests after completing the exercises.
 
-## Remediation summary
+## Phase 5: Key Takeaways & Remediation
 
 - Use generic responses for login and reset flows so account existence is not revealed.
 - Rate-limit authentication and reset requests and monitor for repeated failures.

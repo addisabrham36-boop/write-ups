@@ -1,84 +1,102 @@
 # Securing AI Systems: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/securingaisystems
+Official room: https://tryhackme.com/room/securingaisystems
 
-This room focuses on securing AI architecture before deployment. The main lesson is that traditional application controls remain necessary, but they are not enough when a system adds a model, prompt construction, retrieval, vector storage, and tools that can perform actions.
+## Room Overview & Information
 
-## 1. Map the architecture
+**Category:** AI security architecture  
+**Focus:** Secure data handling, model provenance, inference endpoints, retrieval, agent tools, and operational monitoring.
 
-Start by identifying the user interface, API, model, data stores, retrieval layer, tool layer, identity provider, and external services. Draw the direction of data flow and mark trust boundaries. For a retrieval-based assistant, for example, the request may travel from the user to the API, from the API to a vector store, from retrieved passages into the model context, and from the model to a tool service.
+An AI system includes more than a model. Its security depends on the data it receives, the way it is trained, the software around it, the APIs it exposes, the tools it can call, and the people who administer it. A secure design treats the model as one component inside a larger system of controls.
 
-At each boundary, record which identity is used and what permissions apply. Do not assume that the model itself is an enforcement point.
+## Phase 1: Define the security objectives
 
-## 2. Identify high-value assets
+Identify the assets and goals the system must protect:
+- Confidentiality of user and business data.
+- Integrity of training data, model artifacts, and outputs.
+- Availability of inference services.
+- Correct identity and permissions for every user.
+- Accountability for model requests and tool actions.
+- Provenance of models, datasets, and dependencies.
 
-Consider:
+A system that drafts summaries has a different risk profile from an agent that can modify production records or execute commands. Define permitted actions before choosing controls.
 
-- Training data and model weights.
-- System prompts and application configuration.
-- Private documents and vector embeddings.
-- API keys, tokens, and service identities.
-- Tool arguments and tool results.
-- User data, audit logs, and evaluation records.
-- Model registry and software dependencies.
+## Phase 2: Secure the data lifecycle
 
-For each asset, define the confidentiality, integrity, and availability requirements. A recommendation engine may need protection against manipulated inputs, while a support assistant may have a high confidentiality risk if it can retrieve customer records.
+Data security begins at collection and continues through training, evaluation, deployment, and deletion.
 
-## 3. Review trust boundaries and risks
+1. Collect only data that is necessary and authorised.
+2. Review provenance and licensing.
+3. Remove secrets and minimise personal data.
+4. Restrict access to datasets.
+5. Separate training, validation, and test data.
+6. Version datasets and record transformations.
+7. Scan for poisoning and anomalous records.
+8. Define retention and deletion procedures.
 
-The common architecture weaknesses to look for include:
+Data poisoning can alter model behaviour, while leakage between training and test sets can make evaluation appear stronger than real-world performance.
 
-- A user can retrieve documents belonging to another user.
-- Untrusted webpage or document text can influence privileged tool calls.
-- The model has access to broad internal APIs it does not need.
-- Generated output is passed directly into SQL, shell, HTML, or another interpreter.
-- Secrets are placed in prompts or logs.
-- Model artifacts or dependencies can be downloaded from untrusted sources.
-- Agent loops can run without sensible limits.
-- Security events are not logged, or logs store excessive sensitive data.
+## Phase 3: Protect model artifacts and dependencies
 
-When documenting a finding, explain the path from the weakness to the impact. “Prompt injection is possible” is incomplete unless the report explains what data or action the attacker can influence.
+Maintain an inventory of models, libraries, datasets, plugins, and deployment images. Record version, source, hash, license, and approval status. Verify signatures or checksums using a trusted reference before deploying an artifact.
 
-## 4. Apply least privilege
+Do not load an unknown serialized model on an everyday workstation. Some formats rely on unsafe deserialization and may execute code. Use trusted formats and safe loading methods, and isolate analysis of untrusted artifacts.
 
-Use a dedicated identity for each service and grant only the permissions required for its task. Separate read-only tools from tools that change state. Enforce access checks in the API or tool service, not only in the model's instructions.
+Protect build pipelines and model registries with strong authentication, least privilege, code review, and audit logging. A compromised dependency can undermine a model even if the model's own logic is correct.
 
-For example, if the assistant can search a knowledge base, it should only retrieve documents the current user is allowed to see. If it can create a ticket, the ticket API should validate the caller and the allowed fields before writing anything.
+## Phase 4: Secure inference endpoints
 
-Require explicit approval for high-impact actions such as payments, account changes, deletion, or privileged administration. Add rate limits and execution budgets to reduce runaway loops and cost-based denial of service.
+For every inference API:
+- Require authentication where appropriate.
+- Enforce per-user and per-tenant authorisation.
+- Apply rate and request-size limits.
+- Validate the input schema.
+- Restrict output size and execution time.
+- Avoid exposing detailed stack traces.
+- Monitor unusual request volume and access patterns.
+- Keep administrative endpoints private.
 
-## 5. Protect data and model supply chains
+A public endpoint is not automatically vulnerable, but it must be designed for its intended audience and abuse model.
 
-Use trusted model sources and versioned artifacts. Record hashes, dependency versions, owners, and approval status. Review datasets for provenance and sensitive data, and prevent unauthorised modification of model files or training pipelines.
+## Phase 5: Secure retrieval-augmented generation
 
-Secrets should live in a managed secret store and should be scoped and rotated. Avoid embedding credentials in prompts, notebooks, sample data, or source control. Restrict access to vector databases and object stores as carefully as ordinary databases.
+RAG applications retrieve documents and place them into model context. The retrieval layer must enforce the user's access permissions before content is supplied to the model. Otherwise, a user may ask questions that cause the model to reveal information from documents they could not access directly.
 
-## 6. Validate inputs and outputs
+Treat retrieved documents as untrusted content because they may contain indirect prompt-injection instructions. Separate trusted instructions from retrieved data, limit the model's authority, and verify sensitive actions in application code.
 
-Treat user prompts, uploaded documents, webpages, and retrieved content as untrusted. Input filters can help, but they cannot reliably detect every malicious instruction. The more important safeguard is to prevent untrusted content from directly controlling privileged operations.
+## Phase 6: Restrict tools and agent authority
 
-Validate outputs according to their destination. Use parameterised database operations, context-aware HTML encoding, strict tool schemas, and allowlisted actions. A generated URL, query, or command should not be executed without independent validation.
+If the model can invoke tools, use least privilege:
+- Define a small set of explicit tools.
+- Validate arguments against strict schemas.
+- Authenticate each tool call.
+- Check authorisation independently of the model.
+- Require human approval for destructive or high-impact actions.
+- Apply network and filesystem restrictions.
+- Log tool requests and results.
+- Use timeouts, quotas, and emergency shutdown controls.
 
-## 7. Monitoring and testing
+A prompt telling the model not to delete files is not equivalent to removing its ability to delete files.
 
-Log security-relevant events such as authentication, retrieval access decisions, tool calls, denied actions, model/version changes, and unusual request volume. Minimise the sensitive content captured in logs and restrict access to them.
+## Phase 7: Monitoring and incident response
 
-Test at least:
-- Cross-user access to retrieved documents.
-- Prompt injection through direct prompts and retrieved content.
-- Tool calls with missing, invalid, or unauthorised arguments.
-- Data leakage through answers and logs.
-- Excessive loops, oversized requests, and resource exhaustion.
-- Tampered or unapproved model and dependency artifacts.
+Log relevant requests, model and prompt versions, retrieval identifiers, tool calls, permission decisions, and errors. Avoid logging secrets unnecessarily. Centralise logs and restrict access so an attacker who compromises an application cannot easily erase the evidence.
 
-Every finding should have a retest. If a mitigation claims to block cross-user document access, test with two identities and verify that one cannot retrieve the other's records.
+During an incident:
+1. Preserve relevant logs and artifacts.
+2. Identify affected users, models, datasets, and tools.
+3. Determine whether the model only generated unsafe text or whether an action was executed.
+4. Contain the affected endpoint or tool integration.
+5. Rotate exposed credentials and revoke sessions where needed.
+6. Rebuild from trusted artifacts if integrity is uncertain.
+7. Add regression tests and monitor for recurrence.
 
-## 8. Room task workflow
+## Phase 8: Work through the room
 
-For each architecture or scenario task, identify the component, trust boundary, and failure mode. Select the risk category that matches the evidence, then choose a control that actually enforces the required policy. In the final review, connect each finding to an affected component and a recommended mitigation rather than listing unrelated security advice.
+Follow the task instructions and use the supplied examples. For each security control, identify the threat it addresses and how to verify the control. If a task asks for a concrete value or flag, retrieve it from the live environment and redact it in public notes.
 
-I do not claim the lab's final review passed unless the live room confirms it. Use the task feedback to verify the current exercise's expected answers.
+Do not claim a control works merely because it is described in a policy. Test that unauthorised requests are rejected and that the system logs relevant failures.
 
-## What I took from this room
+## Key takeaways
 
-Securing an AI system means securing its architecture and permissions, not merely adding safety instructions to a model. Least privilege, access checks before retrieval, validated tool actions, protected artifacts, monitoring, and adversarial testing form the practical baseline.
+Securing AI requires layered controls across data, models, APIs, retrieval, tools, and operations. The most important principles are least privilege, verified provenance, server-side authorisation, safe output handling, strong monitoring, and explicit human oversight for high-impact actions.

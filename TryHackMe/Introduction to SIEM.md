@@ -127,46 +127,20 @@ For each alert, record:
 
 A SIEM does not magically know which activity is malicious. It depends on telemetry, normalised fields, well-designed rules, and analyst validation. Improve detection by ensuring relevant logs are enabled, clocks are synchronised, fields are parsed consistently, and rules are tested against both malicious and benign cases. Keep a record of tuning changes and avoid discarding alerts simply because they are noisy.
 
-## Expanded SIEM workflow
+## Phase 9: Complete the alert investigation
 
-### 1. What a SIEM does
+For the final interactive alert task, identify the relevant event and the rule that matched it before deciding what action the interface expects.
 
-A Security Information and Event Management platform collects security-relevant events from multiple sources, parses and normalizes them, correlates related activity, and supports searching, alerting, dashboards, and investigation. It does not automatically understand every event; data quality and rule quality determine what analysts can see.
+1. Open the room's supplied dashboard and select the task-specific alert.
+2. Inspect event time, source, destination, user, process, and result fields.
+3. Open the rule details and read the actual condition that matched.
+4. Compare the observed activity with the rule's intent and the scenario.
+5. Select True Positive only when the event matches the suspicious behaviour the rule is designed to detect. Use False Positive when the match is benign.
+6. Choose the action requested by the active room and verify the dashboard's response.
+7. Copy the displayed flag only after the action succeeds.
 
-Common sources include Windows event logs, Linux authentication logs, DNS, firewalls, proxies, cloud audit logs, identity providers, and endpoint detection platforms. Record the source and field semantics before writing a query.
+The event record and rule definition determine the answer. A suspicious process name alone is not enough to choose a match term, and a completed UI click is not proof that a control was applied successfully.
 
-### 2. Confirm the data source and time window
+## Analyst checklist
 
-Start with the task's stated index, table, dataset, or log source. Confirm the relevant time range and timezone. A query returning no events may mean the event did not occur, the data was not ingested, the index is wrong, or the time filter excludes it.
-
-A good investigation starts broad enough to find the event, then narrows based on evidence. Avoid guessing field names without checking the schema or the room's interface.
-
-### 3. Search and filter events
-
-Use the search language supported by the lab's SIEM. In any query, understand the difference between exact matches, wildcard matches, Boolean operators, and time filters. Preserve the query used to obtain an answer so the result can be reproduced.
-
-For each result, inspect timestamp, host, user, source/destination address, event type, process or application, and outcome where available. Do not assume that a field has the same meaning across all data sources.
-
-### 4. Correlate related events
-
-A single failed login can be ordinary user error. Many failures followed by a success, especially from a new source or against multiple accounts, may indicate password spraying or brute force. A new process followed by an unusual outbound connection can suggest malicious execution, but corroborate it with endpoint or network evidence.
-
-Build a timeline and look for sequence, frequency, rarity, and context. Check whether the host is expected to perform the activity and whether the account normally uses that source.
-
-### 5. Detection rules and false positives
-
-A detection rule should identify a meaningful behaviour and include enough context for triage. Too broad a rule creates noise; too narrow a rule misses variants. Test the rule against known benign and suspicious data, and document its assumptions.
-
-Severity should reflect the potential impact and confidence, not simply the number of events. A high-severity alert still needs investigation, and a low-severity event can become important when correlated with other evidence.
-
-### 6. Triage and incident response
-
-Validate the alert, identify affected assets and accounts, determine the likely attack stage, preserve evidence, and escalate according to procedure. Containment actions such as disabling an account or isolating a host can disrupt business, so use the organization's authority and process. In a training room, follow the task instructions and do not alter unrelated systems.
-
-### 7. Answer the room questions
-
-Find the relevant event in the stated source and time range. Verify the requested field directly in the event record rather than inferring it from a dashboard summary. Preserve exact formatting for IP addresses, usernames, event IDs, and timestamps. Retrieve flags from the active room and redact them as `flag{hidden}` in public notes.
-
-### 8. Operational recommendations
-
-Normalize timestamps, maintain reliable ingestion, protect log integrity, restrict access to sensitive records, monitor pipeline health, and review detections regularly. A SIEM is only as useful as the data it receives and the quality of the investigations built around it.
+Preserve the query, event identifier, timestamp and timezone, matched rule, evidence supporting the classification, chosen action, and validation result. In production, use a documented playbook, escalate when impact or uncertainty is high, and confirm containment through subsequent logs. Retune the detection if it misses the intended pattern or alerts on normal activity.

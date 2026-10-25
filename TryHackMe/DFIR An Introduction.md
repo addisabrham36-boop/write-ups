@@ -69,3 +69,45 @@ For each task, identify whether it concerns evidence preservation, analysis, con
 ## Key takeaways
 
 DFIR requires both speed and discipline. Incident response limits harm, while forensic methods preserve the evidence needed to understand the incident and prevent recurrence. A good investigation records what is known, what remains uncertain, and why each action was taken.
+
+## Expanded investigation workflow
+
+### 1. Establish scope and preserve evidence
+
+Digital forensics and incident response (DFIR) combines evidence collection and analysis with containment and recovery. Before collecting anything, identify the incident, affected assets, time window, authority to investigate, and evidence-handling requirements. Keep a record of who collected each item, when it was collected, how it was stored, and every person who handled it.
+
+Preserve original evidence and work from verified copies when possible. Calculate hashes before and after transfer:
+
+```bash
+sha256sum evidence-file
+file evidence-file
+stat evidence-file
+```
+
+A matching hash supports byte-for-byte integrity between copies; it does not prove that the original file was trustworthy. Do not alter a live system casually: even opening files can change metadata, and volatile evidence may disappear when a machine is powered off.
+
+### 2. Volatile and persistent evidence
+
+Volatile evidence includes active processes, logged-in sessions, network connections, memory contents, and some temporary state. Persistent evidence includes disk files, system logs, registry/configuration data, browser artefacts, and backups. The order of collection depends on the incident and the risk of losing evidence.
+
+A live response may collect process and network state first, while a powered-off device may require forensic imaging. Follow the room's instructions rather than improvising collection commands on a production system.
+
+### 3. Build a timeline
+
+Normalize timestamps to a known time zone and record the original time format. Correlate authentication logs, process events, network records, file metadata, and endpoint alerts. Account for clock skew, log rotation, missing events, and the possibility that an attacker altered local logs.
+
+A timeline should distinguish observed facts from interpretations. For example, a process starting shortly before an outbound connection is a correlation; proving that it caused the connection may require process telemetry or other evidence.
+
+### 4. Analyse and contain
+
+Use the provided logs or forensic image to identify the initial access, execution, persistence, privilege changes, lateral movement, and impact. Search for indicators, but do not rely on a single hash or IP address: attackers can change infrastructure and legitimate software can share indicators.
+
+Containment should stop ongoing harm while preserving enough evidence for investigation. Depending on the incident, that may mean isolating a host, disabling a compromised account, blocking a malicious destination, or suspending a service. Coordinate changes and document them.
+
+### 5. Report findings
+
+For each finding, record the source, timestamp, command or tool, relevant output, interpretation, confidence, and recommended action. Avoid copying secrets or personal data into the report unless necessary and authorized. Keep original artefacts in controlled storage and redact flags in public training notes as `flag{hidden}`.
+
+### 6. Recovery and lessons learned
+
+Remove persistence, patch the exploited weakness, rotate credentials that may have been exposed, restore from trusted backups, and monitor for recurrence. Recovery is not complete merely because the suspicious process stopped. Validate the root cause and test the controls that should prevent the same path.

@@ -134,35 +134,24 @@ A URL filter alone is not enough if the renderer can follow redirects or resolve
 
 MD2PDF demonstrates how a document-conversion feature can become a route into internal services. Enumerate the exposed endpoints, inspect the 403 response, test how the server renders HTML, and verify the internal response in the generated PDF. The fix is to restrict both the content that is rendered and the network access available to the renderer.
 
-## Expanded exploitation analysis and validation
+## Room Question Checklist
 
-### 1. Trace the document-conversion pipeline
+The published guide does not contain the exact current task wording for every interactive question, and the flag is shown inside the generated PDF. Use this checklist to link each task to its proof rather than guessing values.
 
-A Markdown-to-PDF service commonly accepts user text or a file, converts Markdown to HTML, then renders HTML into a PDF using a browser engine or conversion library. Each transition is a trust boundary. The risk depends on whether user-controlled content can invoke raw HTML, access local files, load remote URLs, or trigger dangerous renderer features.
+| Task focus | Exact evidence to collect |
+|---|---|
+| Service discovery | Saved Nmap output for the active target |
+| Web-path discovery | Gobuster output and manual confirmation of the admin route |
+| Internal restriction | The actual response from the external request to the admin endpoint |
+| SSRF proof | A generated PDF showing the response fetched from the lab's internal service |
+| Final flag | The exact flag displayed in the current PDF output |
 
-Record the exact input field, request format, response, and conversion behaviour in the room. Start with a benign Markdown sample and compare it with a sample containing HTML that the application claims to sanitize. Do not infer a vulnerability merely because the output contains HTML-looking characters.
+## Final verification checklist
 
-### 2. Inspect the HTTP interaction
+- Confirm that the request is processed by the server-side renderer, not only by the browser.
+- Compare a normal Markdown conversion with a conversion containing a controlled resource reference.
+- Verify that the PDF contains content from the intended internal endpoint.
+- Keep the target IP, target port, and generated PDF from the same active instance.
+- Do not claim local-file disclosure or arbitrary code execution unless the evidence demonstrates it.
 
-Use browser Developer Tools or Burp Suite to capture the request. Note the method, path, Content-Type, parameters, cookies, and response. If the UI sends a JSON request, preserve the exact JSON structure. A mismatch in field name or encoding can produce a false negative.
-
-### 3. Test trust boundaries with harmless content
-
-First determine whether raw HTML is accepted, escaped, or removed. If the room explicitly includes a server-side request forgery or local-file access task, follow the room's stated test target and restrictions. Use a controlled lab URL rather than probing public or internal systems that are not in scope.
-
-For each test, record:
-- The baseline input and output.
-- The changed input and exact response.
-- Whether the converter performed an observable action.
-- Which component likely interpreted the input.
-- Alternative explanations for the result.
-
-A generated PDF containing reflected text is not proof of server-side request forgery or local-file disclosure. The evidence must show that the renderer accessed the resource or executed the relevant operation.
-
-### 4. Root cause and remediation
-
-Escape or sanitize Markdown-to-HTML output using a well-maintained allowlist sanitizer; disable raw HTML when not required; run the renderer in a sandbox with restricted filesystem permissions; block unnecessary network egress; use temporary directories; apply timeouts and file-size limits; and avoid passing user-controlled values into shell commands. Do not rely only on a blacklist of strings.
-
-### 5. Room questions and flags
-
-Map each question to the exact request, PDF behaviour, or server-side result observed in the active room. Record the actual value, not a copied example. Keep sensitive output out of public notes and redact any flag as `flag{hidden}`.
+The durable fix is to remove unnecessary raw-HTML support, deny the renderer access to internal networks and local files, and require authentication for internal administration. Validation should occur where the actual fetch happens, including after redirects and DNS resolution.

@@ -1,25 +1,59 @@
-# Introduction to Operating Systems — TryHackMe
+# Introduction to Operating Systems: TryHackMe Walkthrough
 
-An operating system manages hardware resources and provides services to programs. It handles processes, memory, storage, devices, users, and permissions, making it possible for applications to run without each one needing to control hardware directly.
+Room: https://tryhackme.com/room/introtooperatingsystems
 
-## Processes and files
+An operating system sits between applications and the hardware. It manages processes, memory, files, devices, users, and permissions so applications can run without each program needing to manage the hardware itself.
 
-A process is a running instance of a program. The operating system schedules CPU time and manages memory so processes can share the machine. Files and directories organise persistent data, while access controls determine which users can read or change it.
+## 1. Main operating-system responsibilities
 
-On Linux, I can inspect the current identity and processes with:
+- **Process management:** creates, schedules, and stops running programs.
+- **Memory management:** allocates memory and isolates processes.
+- **File-system management:** organises files and directories and controls access.
+- **Device management:** provides drivers and interfaces for hardware.
+- **User and permission management:** controls identities and resource access.
+- **Networking:** provides APIs and services that allow programs to communicate.
+- **Logging and auditing:** records selected events for troubleshooting and security.
 
-```bash
-whoami
-ps aux
-ls -l
-```
+The kernel is the privileged core of the OS. User applications normally run with fewer privileges. This separation helps contain failures and restricts what a compromised program can do.
 
-These commands show the current user, running processes, and file permissions. They are starting points for investigation, not proof that a process or file is safe.
+## 2. Processes and services
 
-## Why it matters for security
+A program is a set of instructions stored on disk; a process is a running instance of that program. A service or daemon commonly runs in the background to provide a continuing function, such as networking, logging, or web hosting.
 
-Misconfigured permissions, outdated software, and overly privileged services can create weaknesses. Logs and process information also help defenders investigate suspicious behaviour. I should understand the normal role of a process before deciding it is malicious.
+On Linux, inspect processes and services with the commands ps aux and systemctl --type=service --state=running. The first lists processes, and the second lists running systemd services. Use these commands to understand the system, not to terminate unfamiliar processes blindly.
 
-## What I took from this topic
+On Windows, Task Manager and Services provide graphical views. PowerShell commands such as Get-Process and Get-Service can also inspect processes and services.
 
-The operating system is the layer that coordinates applications and hardware. Learning how it manages processes, files, users, and permissions makes later security tasks much easier to understand.
+## 3. Filesystems and permissions
+
+Filesystems organise persistent data. Linux commonly uses a single directory tree rooted at /, while Windows commonly uses drive letters such as C:\. The visible layout differs, but both systems have files, directories, ownership or ACLs, and access rules.
+
+Linux permissions commonly distinguish owner, group, and other users, with read, write, and execute bits. Windows commonly uses access-control lists to grant or deny specific rights. The principle is the same: users and processes should receive only the access they require.
+
+Useful Linux checks are pwd, ls -la, id, and whoami. These show the current directory, directory contents and permissions, group memberships and identity details, and current username.
+
+## 4. Users, privilege, and isolation
+
+An ordinary user should not have unrestricted control over the operating system. Administrative roles are needed for system changes, but using them for every task increases the impact of mistakes or compromise.
+
+Privilege escalation occurs when a user or process gains permissions beyond those intended. Defenders reduce the risk through timely patching, minimal administrative access, secure service configuration, and monitoring for unexpected permission changes.
+
+## 5. Boot and updates
+
+The OS loads after firmware and boot components initialise the system. Once running, services start according to the system's configuration. Security updates fix known vulnerabilities, so update management is a key part of keeping the OS secure.
+
+A production update process should test critical updates where practical, maintain backups, and verify that systems restart and services remain healthy after patching.
+
+## 6. Troubleshooting by layer
+
+If an application fails, check the error message, process state, permissions, available disk space, memory pressure, and relevant logs. For a service, verify that it is running and listening on the expected address and port. For a file-access error, inspect ownership and permissions before changing them.
+
+Do not fix every problem by running the application as administrator or root. That can hide the underlying issue while increasing the consequences of a future vulnerability.
+
+## 7. Working through the room
+
+For each task, identify the operating-system function described. Process scheduling belongs to process management, persistent file organisation belongs to filesystem management, and access restrictions belong to permissions and security. Use the task's terminology and inspect the provided environment when it asks for a command or value.
+
+## What I took from this room
+
+The operating system is both a resource manager and a security boundary. Processes, permissions, filesystems, services, and updates all affect how safely a computer operates.

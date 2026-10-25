@@ -1,79 +1,119 @@
-# OWASP Top 10 2025: Insecure Data Handling
+# OWASP Top 10 2025: Insecure Data Handling — TryHackMe Walkthrough
 
 Official room: https://tryhackme.com/room/owasptopten2025three
 
 ## Room Overview & Information
 
 **Category:** Web application security  
-**Difficulty:** Beginner  
-**Topics:** A04 Cryptographic Failures, A05 Injection, and A08 Software or Data Integrity Failures.
+**Difficulty:** Easy  
+**OWASP categories:** A04 Cryptographic Failures, A05 Injection, and A08 Software or Data Integrity Failures.
 
-The room combines three common ways an application mishandles input or data: sensitive information is not adequately protected, user input is interpreted as instructions, or the application trusts data or software without verifying its integrity.
+The room contains three practicals: decrypting a note protected by a weak shared key, abusing server-side template rendering to read a lab file, and demonstrating unsafe deserialization. These tasks show three different root causes and should not be treated as one generic “input validation” problem.
 
-Start the lab machine and use the AttackBox or a machine connected to the TryHackMe VPN. Replace `MACHINE_IP` with the address shown by the active room.
+Start the machine and use the AttackBox or a machine connected to the TryHackMe VPN. Use the active room's IP address and keep all testing inside the lab. Flags are redacted in this public write-up.
 
 ## Task 1: Introduction
 
-Read the task description and deploy the machine before attempting the practicals. The room has separate web applications on different ports, so make sure you use the port for the current task.
+The room covers three categories:
+- **A04 Cryptographic Failures:** sensitive data is not adequately protected.
+- **A05 Injection:** untrusted input is interpreted as instructions or expressions.
+- **A08 Software or Data Integrity Failures:** an application trusts data or artifacts without adequately verifying their integrity.
 
 ## Task 2: A04 Cryptographic Failures
 
-Cryptographic failures occur when sensitive data is exposed because encryption is absent, weak, misused, or implemented with poor key management. Examples include plaintext passwords, outdated algorithms, weak derivation keys, exposed encryption keys, and missing transport encryption.
+### What the practical demonstrates
 
-The practical is available at:
+The note-sharing service encrypts notes using a weak, shared derivative key. A key with a tiny search space is not safe merely because the ciphertext looks random. The application also exposes enough information for the learner to infer the key.
 
-```text
+Open the practical at:
+
+\`\`\`text
 http://MACHINE_IP:8001
-```
+\`\`\`
 
-It is a note-sharing service that uses a weak shared derivative key to protect notes.
+Replace MACHINE_IP with the address assigned by the active room.
 
 ### Question: “Decrypt the encrypted notes. One of them will contain a flag value. What is it?”
 
-1. Open the note-sharing application on port 8001.
-2. Follow the application's instructions to inspect and unlock the available notes.
-3. Identify how the shared derivative key is used and what information the workflow exposes.
-4. Decrypt the notes using the method demonstrated by the practical.
-5. Locate the note containing the flag and submit the value shown by the lab.
+The room hints that the key is four bytes and begins with the letters KEY. The intended key is:
 
-Keep the original ciphertext and work on a copy if you export any artefact. The lesson is not to invent an encryption algorithm or treat a hidden key as secure merely because it is not shown on the page. Keys must be generated with appropriate entropy, protected separately from ciphertext, and rotated if exposed.
+\`\`\`text
+KEY1
+\`\`\`
+
+Enter this key in the note-sharing interface and select **Decrypt All Notes**. Inspect the decrypted notes and copy the flag from the one containing it. The flag is redacted as `THM{hidden}`.
+
+### Why this is a cryptographic failure
+
+A short predictable key can be guessed or searched quickly. A shared key also creates a broad impact if it is exposed. Use established authenticated-encryption schemes, generate keys with sufficient entropy, and store them in a server-side secret manager rather than exposing them to every client.
 
 ## Task 3: A05 Injection
 
-Injection occurs when untrusted input is interpreted as a command, query, or template expression. Common examples include SQL injection, command injection, and Server-Side Template Injection (SSTI).
+### What the practical demonstrates
 
-The practical is available at:
+The application renders dynamic content using a server-side template engine. Server-Side Template Injection (SSTI) occurs when user-controlled input is interpreted as template syntax rather than treated as plain text. Depending on the engine and its permissions, SSTI may expose configuration, read files, or execute commands.
 
-```text
+Open the practical at:
+
+\`\`\`text
 http://MACHINE_IP:8000
-```
+\`\`\`
 
-The task demonstrates SSTI and asks you to read a file from the web application's directory.
+Replace MACHINE_IP with the active lab address.
 
-### Question: “Perform an SSTI attack on the practical. You need to read the contents of flag.txt that is located within the same directory as the web application.”
+First, use the task's harmless test to establish that the server evaluates template expressions. A reflected string alone is not proof of SSTI; the output must show that the server interpreted the expression.
 
-1. Inspect the input field and learn how ordinary text is returned.
-2. Use the task's guidance to determine whether the server evaluates template expressions.
-3. Test the smallest harmless expression that confirms server-side evaluation.
-4. Follow the room's intended workflow to read `flag.txt`.
-5. Verify the response contains the file's content and submit the flag.
+### Question: “What's the flag?”
 
-A string reflected back to the page is not enough to prove SSTI. Evidence of template evaluation is needed. The exact syntax depends on the engine used by the practical.
+The task's intended path is to use the vulnerable template context to read the contents of `flag.txt` in the application's directory. Follow the room's supplied hints and verify that the response contains the file's contents rather than merely echoing your input. Submit the flag shown by the active lab; it is redacted here as `THM{hidden}`.
 
-The fix is to use fixed templates and pass user input as data, restrict the web process's filesystem permissions, and avoid putting secrets in files accessible to the application.
+### Why this is an injection vulnerability
+
+The application has allowed untrusted input to cross into the template interpreter. The safe design is to use fixed templates and pass user input as data. Do not evaluate user-supplied template syntax. Also run the application with limited filesystem permissions so a template bug cannot access unrelated secrets.
 
 ## Task 4: A08 Software or Data Integrity Failures
 
-Integrity failures occur when an application accepts software, updates, or data without adequate verification. A package may be altered, a deployment artifact may be replaced, or a workflow may trust input that should be authenticated.
+### What the practical demonstrates
 
-When reviewing a software supply chain, verify the source, version, checksum or signature, build provenance, and approval status. A checksum only helps when the expected checksum comes from a trusted source. If both the artifact and checksum come from the same compromised location, the check provides little assurance.
+Unsafe deserialization occurs when an application loads attacker-controlled serialized data without validating its source and structure. In Python, pickle is especially sensitive because deserializing a crafted object can invoke callable behaviour. Pickle should not be used to load untrusted data.
 
-Use signed updates, protected build pipelines, least-privilege CI/CD identities, dependency inventories, and monitoring for unexpected changes. Keep a record of which approved artifact was deployed to each environment.
+The practical asks you to create a serialized object that causes the application to read `flag.txt`. Follow the room's instructions and use only its test endpoint and local flag file. The critical concept is that the deserializer trusts the incoming object enough to invoke behaviour while loading it.
 
-## Phase 5: Reporting and verification
+### Question: “What are the contents of flag.txt?”
 
-For each practical, record the vulnerable data flow, the observed evidence, and the actual impact. Submit values from the live lab rather than copying a flag from a different instance. In a public repository, redact the flag as `flag{hidden}`.
+1. Inspect the application's request format and identify where the serialized object is accepted.
+2. Follow the task's guidance to construct the expected serialized test object in the lab.
+3. Encode the serialized bytes in the format the endpoint expects.
+4. Submit the request to the room's endpoint.
+5. Verify the response contains the contents of the lab's `flag.txt`.
+6. Submit the flag shown by the active instance.
+
+The flag is redacted here as `THM{hidden}`. This write-up intentionally does not include a copy-paste malicious pickle payload; the security lesson is that untrusted serialized data must never be deserialized with a mechanism that can invoke arbitrary callables.
+
+### Why this is an integrity failure
+
+The application treats a user-supplied artifact as trusted executable object data. Safer designs use non-executable data formats such as JSON with strict schema validation, authenticate artifacts where appropriate, and verify their provenance before processing them.
+
+## Phase 5: Reporting and Remediation
+
+### Cryptographic failures
+- Replace short or predictable keys with securely generated keys.
+- Use authenticated encryption with correct nonce handling.
+- Keep keys on the server and protect them with proper key management.
+- Rotate any key that has been exposed.
+
+### SSTI
+- Do not evaluate user-controlled template strings.
+- Render untrusted values as data.
+- Keep the web process least-privileged.
+- Restrict file and network access available to the renderer.
+
+### Unsafe deserialization
+- Do not deserialize untrusted pickle data.
+- Prefer a non-executable data format with strict schema validation.
+- Authenticate and verify the integrity of trusted artifacts.
+- Isolate processing of untrusted inputs and log unexpected failures.
 
 ## Key takeaways
 
-Cryptography protects data only when the algorithms, keys, and implementation are sound. Injection happens when data becomes executable syntax. Integrity failures occur when an application trusts artifacts or records without adequate verification. These problems need different controls, so identify the root cause before recommending a fix.
+The three practicals have different root causes. A predictable encryption key weakens confidentiality; SSTI lets input influence a template interpreter; unsafe deserialization lets untrusted object data trigger behaviour. Identify the specific trust boundary, verify the impact in the lab, and apply a fix that removes the root cause rather than relying on a generic filter.

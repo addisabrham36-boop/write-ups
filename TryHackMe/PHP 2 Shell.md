@@ -128,3 +128,22 @@ Do not publish a weaponised exploit or expose an organisation's affected host de
 ## Key takeaways
 
 PHP2Shell demonstrates how a flaw in a language runtime can affect many applications that rely on it. The important concepts are memory safety, upload-progress handling, worker reuse, ASLR, and the difference between memory disclosure and code execution. Patch the runtime, restart workers, reduce process privileges, and correlate telemetry for signs of exploitation.
+
+## Phase 8: Task Evidence and Validation Checklist
+
+Keep the memory-disclosure and remote-code-execution stages separate. For each stage, record the request, target runtime version, response, worker context, and what the output proves.
+
+| Task focus | Required evidence |
+|---|---|
+| Confirm target runtime | Exact PHP version and deployment configuration shown by the lab |
+| Verify memory disclosure | Response content demonstrating the unintended memory exposure |
+| Understand ASLR effect | Address-related evidence shown by the room, with explanation of its limits |
+| Verify code execution | The harmless proof result requested by the official task |
+| Confirm privilege boundary | Effective user and process context, not just a success message |
+| Submit flag | Exact flag displayed by the active room; redact publicly as THM{hidden} |
+
+Do not treat a memory leak as proof of remote code execution. A result from a different worker, runtime version, or configuration may not establish that the intended chain worked. Keep the test within the provided machine and use the task's current proof method.
+
+## Final remediation checklist
+
+Confirm the official vendor advisory and fixed releases for the CVEs listed by the room. Upgrade PHP and restart affected worker processes, disable upload-progress handling if it is not required, review memory-limit and error-handling behaviour, and avoid exposing detailed process memory through HTTP responses. Reduce process privileges, isolate the web runtime, and monitor unusual worker failures, repeated requests, and anomalous child processes. Regression-test both the disclosure and execution paths after patching.

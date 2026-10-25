@@ -1,53 +1,101 @@
-# Passive Reconnaissance — TryHackMe
+# Passive Reconnaissance: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/passiverecon
+Official room: https://tryhackme.com/room/passiverecon
 
-Before testing a system, I need to understand what is publicly visible about it. That first information-gathering stage is reconnaissance. Passive reconnaissance means collecting information from public sources without directly probing the target's systems. It can still reveal a surprising amount, which is why organisations should pay attention to what they publish.
+## Room Overview & Information
 
-## What counts as passive reconnaissance?
+**Category:** Network security and OSINT  
+**Difficulty:** Beginner  
+**Focus:** WHOIS, DNS records, DNSDumpster, Certificate Transparency, and Shodan.
 
-Examples include reading a company's website, checking public DNS records, looking at certificate information, reviewing search-engine results, and searching public documents for details that were accidentally exposed. The key distinction is how the information is collected. I am observing information that is already available rather than actively sending scans or test traffic to the target.
+Passive reconnaissance collects information from public sources without directly probing the target's services. It can reveal domain registration information, DNS configuration, subdomains, certificates, and internet-exposed services. Public does not mean harmless: only investigate domains and assets within the exercise's scope, and handle discovered personal or sensitive information responsibly.
 
-Passive does not mean harmless in every context. Information can be sensitive, and I still need to respect privacy, laws, and the scope of any assessment.
+The official room notes that some public lookups require internet access. If the AttackBox cannot reach an external site, use the supported TryHackMe VPN environment or the room's instructions rather than inventing results.
 
-## Checking DNS information
+## Phase 1: WHOIS
 
-DNS helps translate names such as `example.com` into information that computers can use. On a Linux system, I can query public DNS records with tools such as `dig`:
+WHOIS can return domain-registration data such as registrar, creation or expiry dates, nameservers, and registrant details where those details are not privacy-protected.
 
-```bash
-dig example.com A
-dig example.com MX
-dig example.com NS
-dig example.com TXT
-```
-
-These queries ask for different record types:
-
-- `A` can return an IPv4 address.
-- `MX` lists mail servers for the domain.
-- `NS` lists authoritative name servers.
-- `TXT` can contain verification data and other published text records.
-
-The output depends on the domain's configuration and the resolver being used. A missing record does not automatically mean something is broken, and a result can change over time.
-
-## WHOIS and public sources
-
-A WHOIS lookup may show registration details for a domain or IP allocation, depending on the registry and privacy settings. For example:
+Run a lookup on a domain that the room authorises:
 
 ```bash
 whois example.com
 ```
 
-Some registrant details may be hidden or replaced by a privacy service. I should not assume that every field is current or that the listed contact is the person who manages the technical system.
+The command queries a WHOIS service and prints the available registration record. The exact fields depend on the registry, registrar, and privacy settings. Do not assume that a missing registrant name means the domain has no owner; privacy services and registry policies often hide personal information.
 
-Other useful sources include search engines, public code repositories, certificate-transparency logs, job listings, and the organisation's own documentation. Each source gives only part of the picture, so I should cross-check important findings rather than treating one search result as unquestionable truth.
+Look for the registrar, important dates, and nameservers. Treat WHOIS as one source of context, not proof that a site is trustworthy.
 
-## Keeping the work organised
+## Phase 2: DNS records
 
-When I collect information, I should record the source and when I found it. That makes it easier to tell the difference between a verified fact and an assumption. I should also separate information about the organisation from information about third-party providers, because a domain or IP address can belong to a hosting company or service rather than directly to the target.
+DNS records expose how names map to services. Query the record types relevant to the domain:
 
-## What I took from this room
+```bash
+dig example.com A
+dig example.com AAAA
+dig example.com MX
+dig example.com TXT
+dig example.com NS
+```
 
-Passive reconnaissance is about building an initial picture from public information before moving to direct testing. DNS lookups, registration data, search engines, and public documents can reveal useful clues, but they need context. For an authorised assessment, this stage helps me decide what is worth investigating next while keeping the work within the agreed scope.
+- `A` returns IPv4 addresses.
+- `AAAA` returns IPv6 addresses.
+- `MX` identifies mail exchangers and their preference values.
+- `TXT` returns text records, which may include email policy or verification data.
+- `NS` lists authoritative nameservers.
 
-I have kept the commands here as general examples. I should only record specific discoveries or room answers after verifying them during the room itself.
+For a name you already know, these commands answer a specific question. They do not enumerate every possible subdomain.
+
+## Phase 3: Discover subdomains with DNSDumpster
+
+DNSDumpster aggregates publicly available DNS and related information. In the room's exercise, search for the domain specified by the task and review the results. Record the discovered subdomain, resolved IP, and record type as shown.
+
+The purpose is to discover names that are not obvious from the homepage. A forgotten development host or old admin portal may enlarge an organisation's attack surface. Do not assume a discovered subdomain is vulnerable; passive discovery only identifies a possible asset.
+
+If the service does not load, check the room's connectivity guidance. Do not substitute a guessed hostname or a result from another domain.
+
+## Phase 4: Certificate Transparency
+
+Certificate Transparency (CT) logs are public append-only records of issued TLS certificates. Certificates often contain domain names and subdomains in their Subject Alternative Name list. Search the domain through a CT search service such as crt.sh and review matching certificate names.
+
+Example command-line query for a public CT site, where network access is available:
+
+```bash
+curl -s 'https://crt.sh/?q=%25.example.com&output=json'
+```
+
+This is an illustrative query pattern. It asks crt.sh for certificate entries matching subdomains of example.com and requests JSON output. The returned data can include duplicates, expired certificates, and historical names, so validate any candidate before treating it as a current asset.
+
+A certificate entry shows that a name appeared in a certificate record; it does not prove that the hostname currently resolves or serves a live application.
+
+## Phase 5: Shodan
+
+Shodan indexes information about internet-facing services observed by its crawlers. Search the domain or a resolved address using the room's authorised example. Review the service, port, banner, and timestamp when available.
+
+A Shodan result is a historical observation, not a guarantee that the service is still online. Service banners can be inaccurate or intentionally altered. Use the results to form questions for an authorised assessment, not to claim a confirmed vulnerability.
+
+## Phase 6: Answering the room's practical questions
+
+The room uses public lookups and example domains. For every question asking for a specific domain, subdomain, IP, or service:
+
+1. Copy the exact domain from the question.
+2. Use the specified public source (WHOIS, DNS, DNSDumpster, CT logs, or Shodan).
+3. Identify the field the question asks for.
+4. Record the exact result and its source.
+5. If the result is historical or duplicated, verify it before drawing conclusions.
+
+The task values are dependent on the queried domain and the data available when the lookup is performed. This guide describes the procedure rather than fabricating a supposedly universal answer.
+
+## Phase 7: Passive versus active reconnaissance
+
+A DNS query to a public resolver, WHOIS lookup, CT search, or Shodan query generally relies on third-party/public data and is considered passive relative to the target. A direct port scan, HTTP request to the target, or login attempt is active and can be logged by the target.
+
+The distinction is about how information is gathered, not whether the activity is automatically authorised. Keep both passive and active work inside the approved scope.
+
+## Phase 8: Reporting and mitigation
+
+Maintain an asset inventory, remove obsolete DNS records, protect registrar accounts with MFA, and review public service exposure. Avoid publishing discovered personal information or sensitive host details unnecessarily. Passive data can be incomplete or stale, so label the source and observation time in a report.
+
+## Key takeaways
+
+WHOIS gives registration context, DNS reveals configured records, DNSDumpster helps surface subdomains, CT logs reveal names in certificates, and Shodan shows observed internet-facing services. Cross-check sources and treat every result as a lead that requires validation.

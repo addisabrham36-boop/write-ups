@@ -76,3 +76,29 @@ Escaping must be context-aware. HTML output encoding does not automatically prot
 ## Key takeaways
 
 SSTI is an injection vulnerability in which input crosses into a server-side template interpreter. The lab's objective is to prove evaluation and retrieve the specified file. The durable fix is to keep user input separate from executable template syntax and minimise the application's permissions.
+
+## Expanded injection testing methodology
+
+### 1. Identify the interpreter
+
+Injection occurs when untrusted data is interpreted as part of a command or query. Identify the sink: SQL engine, operating-system shell, template renderer, LDAP query, or another interpreter. The correct test and remediation depend on the sink.
+
+### 2. Establish a baseline
+
+Capture a normal request and response from the room. Identify exactly which input is under test and how it reaches the backend. Change one input at a time and compare response content, errors, timing, and state changes. Do not infer injection from an error string alone.
+
+### 3. Use controlled validation
+
+Follow the room's prescribed benign payloads. Confirm that the result is caused by the input and is repeatable. For database queries, a difference in returned rows or a controlled boolean condition may be relevant; for shell or template injection, use only the harmless proof specified by the lab. Do not use destructive commands or test unrelated systems.
+
+### 4. Find the root cause
+
+The central failure is usually mixing data with executable syntax or relying on incomplete filtering. Encodings and alternate syntax may expose a filter that checks the wrong representation, but the durable fix is not to add more blacklist entries.
+
+### 5. Remediation
+
+Use parameterized SQL statements, safe APIs, structured arguments, context-aware output encoding, and least-privilege service accounts. Avoid shell interpretation for user-controlled values. Where templates support raw expressions, restrict the features and run rendering in an isolated environment.
+
+### 6. Record room answers accurately
+
+For every task, preserve the input, output, affected sink, and demonstrated effect. Use the live room to obtain exact values; do not fabricate payload output. Redact public flags as `flag{hidden}`.

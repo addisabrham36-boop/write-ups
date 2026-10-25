@@ -1,25 +1,25 @@
 # Security Lab Write-Ups
 
-A collection of practical notes and walkthroughs from cybersecurity training rooms, capture-the-flag challenges, and web security labs. The goal is to document the reasoning behind each step, explain the commands and tools used, and preserve useful lessons for future practice.
+A personal technical archive of cybersecurity training rooms, capture-the-flag challenges, and web security labs. These notes document the reasoning behind each step, explain the tools used, and preserve practical lessons for future study.
 
 ## Repository structure
 
-- **TryHackMe:** room notes covering networking, Linux, Windows, reconnaissance, web security, penetration testing, blue-team operations, forensics, malware analysis, AI security, and event-based challenges.
+- **TryHackMe:** walkthroughs and study notes covering networking, operating systems, reconnaissance, web security, penetration testing, blue-team operations, digital forensics, malware analysis, and AI security.
 - **PortSwigger Web Security:** web application security lab notes, including API testing.
 
 ## How to use these notes
 
-1. Start with the room's official instructions and deploy the required lab environment.
-2. Replace placeholders such as `TARGET_IP`, `USERNAME`, and `WORDLIST` with values from your own active lab.
-3. Run commands only against systems you own or are explicitly authorized to test.
-4. Read the explanation alongside each command. The aim is to understand why a step works, not just copy a sequence.
-5. Treat machine output as environment-specific. IP addresses, service versions, paths, and answers can differ between lab instances.
+1. Read the room's official instructions and start the required lab environment.
+2. Replace placeholders such as `TARGET_IP`, `USERNAME`, and `WORDLIST` with values from your own active instance.
+3. Run commands only against systems you own or are explicitly authorised to test.
+4. Read the explanation alongside each command. The objective is to understand why a step works, not just copy a sequence.
+5. Treat target output as environment-specific. IP addresses, service versions, paths, and answers can change between lab instances.
 
-These notes are a learning reference, not a substitute for the room instructions. Where a result depends on a live lab, the walkthrough should explain how to obtain and verify it rather than inventing output. Flags and other direct completion tokens are redacted in public notes where appropriate.
+Where a result depends on a live environment, the notes should explain how to obtain and verify it rather than inventing output. Flags are redacted in public notes where appropriate. The official room and its active lab remain the source of truth for machine-specific values.
 
 ## Contents
 
-## Core security and networking
+## Fundamentals and networking
 
 - [Careers in Cyber](./TryHackMe/Careers%20in%20Cyber.md)
 - [Cryptography for Dummies](./TryHackMe/Cryptography%20for%20Dummies.md)
@@ -44,10 +44,12 @@ These notes are a learning reference, not a substitute for the room instructions
 - [WiFi Hacking](./TryHackMe/WiFi%20Hacking.md)
 - [Windows Basics](./TryHackMe/Windows%20Basics.md)
 
-## Reconnaissance and offensive security
+## Offensive security and web testing
 
+- [API Test](./PortSwigger-Web-Security/API%20Test.md)
 - [AI System Reconnaissance](./TryHackMe/AI%20System%20Reconnaissance.md)
 - [Active Reconnaissance](./TryHackMe/Active%20Reconnaissance.md)
+- [Advanced SQL Injection](./TryHackMe/Advanced%20SQL%20Injection.md)
 - [Basic Pentesting](./TryHackMe/Basic%20Pentesting.md)
 - [Blue TryHackMe ](./TryHackMe/Blue%20TryHackMe%20.md)
 - [Bypass Functions](./TryHackMe/Bypass%20Functions.md)
@@ -64,6 +66,9 @@ These notes are a learning reference, not a substitute for the room instructions
 - [Metasploit Introduction](./TryHackMe/Metasploit%20Introduction.md)
 - [Ninja Skills](./TryHackMe/Ninja%20Skills.md)
 - [No Scope Finding RCE](./TryHackMe/No%20Scope%20Finding%20RCE.md)
+- [OWASP Top 10 2025 A01 Broken Access Control](./TryHackMe/OWASP%20Top%2010%202025%20A01%20Broken%20Access%20Control.md)
+- [OWASP Top 10 2025 Injection](./TryHackMe/OWASP%20Top%2010%202025%20Injection.md)
+- [OWASP Top 10 2025 Security Misconfiguration](./TryHackMe/OWASP%20Top%2010%202025%20Security%20Misconfiguration.md)
 - [OverlayFS CVE-2021-3493](./TryHackMe/OverlayFS%20CVE-2021-3493.md)
 - [PHP 2 Shell](./TryHackMe/PHP%202%20Shell.md)
 - [Passive Reconnaissance Notes](./TryHackMe/Passive%20Reconnaissance%20Notes.md)
@@ -78,10 +83,11 @@ These notes are a learning reference, not a substitute for the room instructions
 - [The Hacker Methodology](./TryHackMe/The%20Hacker%20Methodology.md)
 - [TryHack3M Bricks Heist](./TryHackMe/TryHack3M%20Bricks%20Heist.md)
 - [TryHackMe MR.Robot  ](./TryHackMe/TryHackMe%20MR.Robot%20%20.md)
+- [TryhackMe OWASP Top 10 2025. Room: IAAA Failures](./TryHackMe/TryhackMe%20OWASP%20Top%2010%202025.%20Room%3A%20IAAA%20Failures.md)
 - [Tryhackme  : python playground walkthrough](./TryHackMe/Tryhackme%20%20%3A%20python%20playground%20walkthrough.md)
 - [Vulnversity  TryHackMe](./TryHackMe/Vulnversity%20%20TryHackMe.md)
 
-## Defensive security, incident response, and phishing
+## Defensive security, forensics, and phishing
 
 - [AI Forensics](./TryHackMe/AI%20Forensics.md)
 - [Android Hacking 101](./TryHackMe/Android%20Hacking%20101.md)
@@ -98,7 +104,7 @@ These notes are a learning reference, not a substitute for the room instructions
 - [SOC Role in Blue Team](./TryHackMe/SOC%20Role%20in%20Blue%20Team.md)
 - [Snort](./TryHackMe/Snort.md)
 
-## AI security
+## AI and AI security
 
 - [AI Models and Data](./TryHackMe/AI%20Models%20and%20Data.md)
 - [AI Security Threats](./TryHackMe/AI%20Security%20Threats.md)
@@ -108,30 +114,21 @@ These notes are a learning reference, not a substitute for the room instructions
 - [Securing AI Systems](./TryHackMe/Securing%20AI%20Systems.md)
 - [The Building Blocks of AI](./TryHackMe/The%20Building%20Blocks%20of%20AI.md)
 
-## Web application security
-
-- [API Test](./PortSwigger-Web-Security/API%20Test.md)
-- [OWASP Top 10 2025 A01 Broken Access Control](./TryHackMe/OWASP%20Top%2010%202025%20A01%20Broken%20Access%20Control.md)
-- [OWASP Top 10 2025 Injection](./TryHackMe/OWASP%20Top%2010%202025%20Injection.md)
-- [OWASP Top 10 2025 Security Misconfiguration](./TryHackMe/OWASP%20Top%2010%202025%20Security%20Misconfiguration.md)
-- [TryhackMe OWASP Top 10 2025. Room: IAAA Failures](./TryHackMe/TryhackMe%20OWASP%20Top%2010%202025.%20Room%3A%20IAAA%20Failures.md)
-
 ## Advent of Cyber
 
-- [Advanced SQL Injection Advent of Cyber 2024](./TryHackMe/Advanced%20SQL%20Injection%20Advent%20of%20Cyber%202024.md)
 - [Advent of Cyber 2022](./TryHackMe/Advent%20of%20Cyber%202022.md)
 - [Advent of Cyber 2023](./TryHackMe/Advent%20of%20Cyber%202023.md)
 - [Advent of Cyber Prep Track](./TryHackMe/Advent%20of%20Cyber%20Prep%20Track.md)
 
-## Other room walkthroughs
+## Other challenge walkthroughs
 
 - [Cyber Heroes](./TryHackMe/Cyber%20Heroes.md)
 - [Offensive Security Intro](./TryHackMe/Offensive%20Security%20Intro.md)
 - [OhSINT Try Hack Me ROOM:](./TryHackMe/OhSINT%20Try%20Hack%20Me%20ROOM%3A.md)
 
-## Scope and responsible use
+## Responsible use
 
-All practical security testing should remain within the authorized training environment or another system for which explicit permission has been granted. Techniques demonstrated in these notes are intended for education, defensive understanding, and controlled lab practice.
+All practical security testing should remain within an authorised training environment or another system for which explicit permission has been granted. Techniques described here are intended for education, defensive understanding, and controlled lab practice.
 
 ---
 

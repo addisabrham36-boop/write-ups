@@ -54,3 +54,37 @@ For each question, identify which lifecycle phase is being described and what se
 ## What I took from this room
 
 Security is not a final checklist at the end of development. It is a set of activities that begin with requirements and continue through deployment, monitoring, patching, and retirement.
+
+## Expanded secure SDLC workflow
+
+### 1. Requirements and design
+
+Define functional requirements alongside security, privacy, availability, and audit requirements. Identify assets, users, trust boundaries, misuse cases, and operational constraints before implementation. Security requirements should be testable, not limited to "the system must be secure."
+
+### 2. Implementation
+
+Follow secure coding standards, use parameterized database access, validate inputs, encode outputs for their context, and keep secrets out of source control. Review dependencies and choose maintained libraries. Code review should examine authorization and error handling, not only style.
+
+### 3. Testing
+
+Use unit and integration tests for business rules, static analysis for risky code patterns, dependency scanning for known vulnerable packages, and dynamic testing for runtime behaviour. Integrate security testing throughout development rather than postponing it until release day.
+
+### 4. Build and deployment
+
+Protect CI/CD credentials, restrict who can modify build pipelines, pin dependencies where appropriate, produce traceable artifacts, and prevent unreviewed changes from reaching production. Separate development, test, and production environments and credentials.
+
+### 5. Operations and maintenance
+
+Monitor logs and alerts, patch vulnerabilities, rotate exposed credentials, review access, and test backups and recovery. Retirement should include revoking secrets, deleting unneeded data safely, and removing obsolete DNS entries or services.
+
+### 6. Threat modelling and risk
+
+For each feature, ask who can abuse it, which asset is at risk, how the abuse path works, and which control prevents it. Prioritize by likelihood and impact; document exceptions and reassess when the design changes.
+
+### 7. Room tasks
+
+Map questions to the lifecycle phase or security activity they describe. Use the room's exact terminology and distinguish testing from deployment, monitoring, and maintenance.
+
+### 8. Key takeaway
+
+A secure SDLC makes security a continuous responsibility from requirements through retirement. Automation helps, but ownership, review, evidence, and the ability to fix findings are what make the process effective.

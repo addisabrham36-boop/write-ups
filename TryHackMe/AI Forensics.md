@@ -74,3 +74,17 @@ For AI pipelines, maintain model provenance, sign or hash release artefacts, val
 ## What I took from this room
 
 AI forensics still depends on disciplined evidence handling. The AI-specific part changes which artefacts need inspection, but the core method remains the same: preserve, identify, correlate, verify, and document.
+## Phase 5: Task Evidence and Reporting Checklist
+
+For each room question, identify the artifact that can answer it and preserve the smallest evidence excerpt that supports the conclusion.
+
+| Question type | Evidence to inspect | Common mistake |
+|---|---|---|
+| File type or format | File signature and parser output | Trusting the extension only |
+| File identity | SHA-256 hash and source | Treating a hash as proof of safety |
+| Model configuration | Config, weights manifest, version | Confusing a model error with compromise |
+| Suspicious behaviour | Input, output, process/network telemetry | Treating one anomaly as conclusive |
+| Data provenance | Source, timestamp, version, approval record | Assuming public availability means trustworthy |
+| Flag or secret | Exact task artifact or agent output | Guessing values or copying another instance |
+
+A good report distinguishes observation, interpretation, and confidence. Include tool versions and exact commands; sanitize secrets and session tokens. For AI pipelines, verify artifact provenance, avoid unrestricted deserialization, log model versions and tool calls, and keep untrusted model execution isolated.

@@ -13,7 +13,9 @@ This room uses an Alf.io event-management application with an extension system. 
 
 Only run these steps against the machine deployed for this room. The payloads below use placeholders for the AttackBox address and must not be pointed at a real service.
 
-## Task 1: Introduction and vulnerability model
+## Phase 1: Reconnaissance & Enumeration
+
+### Task 1: Introduction and vulnerability model
 
 Alf.io is a Java/Spring Boot event-management platform. Its extension mechanism allows scripts to run when application events occur. The intended sandbox restricts access to the underlying JVM. In the vulnerable design, however, the application exposes `returnClass`, a raw Java class object.
 
@@ -21,7 +23,7 @@ The critical trust error is that the blocklist assumes dangerous functionality c
 
 This is a sandbox escape leading to OS command execution. A sandbox must constrain capabilities, not merely block a few strings.
 
-## Task 2: Vulnerability Hunting with NoScope
+### Task 2: Vulnerability Hunting with NoScope
 
 Start the lab machine. When it has finished booting, open the NoScope interface provided by the room and test the assigned `MACHINE_IP`. Fill in the application's basic details and start the automated assessment.
 
@@ -35,7 +37,9 @@ Review the validated finding or report produced by the room's NoScope assessment
 
 Open the report and locate the flag value that NoScope retrieved from the lab's `flag.txt`. Submit the exact value shown by the current room. This public write-up does not publish the flag; use `flag{hidden}` as a redaction placeholder.
 
-## Task 3: Weaponizing the CVE
+## Phase 2: Vulnerability Analysis & Initial Access
+
+### Task 3: Weaponizing the CVE
 
 The room states that the target runs Alf.io `2.0-M5-2509-1`, is vulnerable to CVE-2026-35482, and provides administrator credentials for the lab. An event has already been configured. The objective is to register an extension that executes a reverse-shell script when the specified event is triggered.
 
@@ -119,7 +123,19 @@ The room notes that the extension can be triggered again by hiding the event: ed
 
 Answer: `EVENT_STATUS_CHANGE`.
 
-## Phase 4: Evidence, impact, and remediation
+## Phase 3: Privilege Escalation & Post-Exploitation
+
+This exercise's documented chain targets extension-triggered command execution. It does not describe a separate local privilege-escalation stage, so do not claim root or SYSTEM unless the live session explicitly verifies that identity. After a callback, check the current user and host, preserve only the evidence needed for the exercise, and stop once the stated objective is demonstrated.
+
+## Phase 4: Room Questions & Flags Walkthrough
+
+| Question | Answer or validation method |
+|---|---|
+| What sandboxing engine did NoScope identify as the one in use? | Mozilla Rhino |
+| What was the flag value NoScope retrieved out of the flag.txt file during its engagement? | Read the report from the active lab; redacted here as flag{hidden} |
+| On what event is the exploit payload triggered? | EVENT_STATUS_CHANGE |
+
+## Phase 5: Key Takeaways & Mitigation / Remediation
 
 The exploit demonstrates that a blocklist-based sandbox can fail when it exposes powerful objects and allows dynamic reflection. The root cause is excessive capability exposure and an incomplete security boundary, not merely a missing blocked string.
 
@@ -132,6 +148,6 @@ Recommended controls:
 - Monitor unexpected child processes and outbound connections.
 - Patch to a version that fixes the vulnerable binding and sandbox escape.
 
-## Key takeaways
+## Summary
 
 NoScope's finding demonstrates a JavaScript-to-JVM sandbox escape through an exposed class object. The workflow moves from automated identification to a manual reproduction in the lab, registers an event-driven extension, and verifies the callback. The security lesson is to constrain capabilities instead of relying on string-based blocklists.

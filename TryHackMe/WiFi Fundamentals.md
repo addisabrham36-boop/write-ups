@@ -1,45 +1,76 @@
 # Wi-Fi Fundamentals: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/wififundamentals
+Official room: https://tryhackme.com/room/wififundamentals
 
-Wi-Fi lets devices connect to a local network using radio waves. The same network concepts still apply: devices need addressing, a gateway, DNS, and access controls. The wireless link adds its own concerns, including radio coverage, authentication, encryption, and the possibility of nearby devices observing wireless traffic.
+## Room Overview & Information
 
-## 1. Understand the wireless network
+**Category:** Wireless networking and security  
+**Difficulty:** Beginner  
+**Focus:** Wi-Fi architecture, SSIDs/BSSIDs, radio channels, authentication, encryption, and common wireless risks.
 
-An access point advertises a wireless network identified by an SSID. A client scans for networks, authenticates, associates with an access point, and then typically receives network configuration through DHCP. The SSID is a network name, not a secret, and hiding it does not provide meaningful security.
+Wi-Fi provides a wireless link between clients and an access point. The access point connects the wireless network to a wired LAN or other network. Because radio signals travel beyond physical walls, wireless security depends on configuration and monitoring as well as physical access controls.
 
-A BSSID identifies a particular access point radio interface, commonly represented by a MAC address. A single SSID can be provided by multiple access points, each with its own BSSID. Channels and bands affect how nearby networks share the radio spectrum.
+## Phase 1: Identify the wireless network
 
-## 2. Frequency bands and channels
+The **SSID** is the human-readable network name. The **BSSID** identifies a particular access point radio, commonly using its MAC address. A single organisation may use the same SSID across multiple access points, each with its own BSSID.
 
-Wi-Fi commonly operates in the 2.4 GHz and 5 GHz bands, with newer equipment also supporting 6 GHz where regulations and hardware permit. The 2.4 GHz band generally travels farther through obstacles but has fewer non-overlapping channels and often more interference. Higher-frequency bands can offer more capacity but may have shorter practical range.
+A channel identifies the radio-frequency channel used by the access point. Channel availability and overlap depend on the band and regulatory region. A client and access point need compatible radio settings to communicate.
 
-Channel selection should consider local interference, device support, and regulatory requirements. A channel number by itself does not guarantee better performance.
+## Phase 2: Authentication and encryption
 
-## 3. Authentication and encryption
+- **Open Wi-Fi:** no Wi-Fi password-based authentication and generally no link-layer encryption.
+- **WEP:** legacy encryption that is considered broken and should not be used.
+- **WPA2-Personal:** commonly authenticates with a shared pre-shared key.
+- **WPA3-Personal:** uses a stronger modern authentication design.
+- **WPA/WPA2-Enterprise:** commonly uses 802.1X and EAP with an authentication server.
 
-Older protocols such as WEP are insecure and should not be used. WPA2 with AES-CCMP remains common, while WPA3 provides newer protections when supported and correctly configured. Enterprise Wi-Fi commonly uses 802.1X and an authentication server rather than one shared household password.
+Encryption protects the wireless link, but it does not guarantee that every destination or application is safe. HTTPS and application-level protections remain important.
 
-A strong passphrase matters for personal Wi-Fi security. Use a unique password, update router firmware, disable obsolete protocols, and avoid leaving the administration interface exposed to untrusted networks.
+## Phase 3: Understand the handshake at a high level
 
-## 4. Inspect the local connection
+In a WPA2-Personal network, the client and access point perform a four-way handshake that helps confirm possession of the shared secret and derives session keys. A captured handshake does not immediately reveal the passphrase. Offline guessing is possible if an attacker captures the required exchange and the passphrase is weak.
 
-On Linux, commands such as nmcli device status, nmcli connection show, and ip addr can help inspect network interfaces and assigned addresses. The exact output depends on the distribution and network manager.
+This is why a long, unique passphrase matters. A passphrase reused elsewhere can also be compromised through an unrelated breach.
 
-If Wi-Fi is connected but internet access fails, check the interface, IP address, default route, DNS resolution, and service reachability in that order. A wireless association does not prove that DHCP or DNS is working.
+## Phase 4: Recognise common wireless risks
 
-## 5. Wireless security risks
+- Weak or default Wi-Fi passwords.
+- Obsolete encryption modes.
+- Rogue access points that impersonate a trusted network.
+- Misconfigured enterprise certificate validation.
+- Poor guest-network isolation.
+- Exposed management interfaces.
+- Unpatched access-point firmware.
+- Clients automatically reconnecting to untrusted networks.
 
-Common risks include weak passphrases, obsolete encryption, rogue access points, evil-twin networks, insecure router administration, and poor separation between guest and internal devices. A rogue access point may imitate a legitimate network name to trick users into connecting, but the SSID alone is not proof of legitimacy.
+A hidden SSID does not provide meaningful access control. Likewise, MAC allowlists can be bypassed because MAC addresses are not strong proof of identity.
 
-Defences include WPA2-AES or WPA3, certificate validation for enterprise authentication, strong router credentials, firmware updates, guest-network isolation, and monitoring for unexpected access points. Users should be cautious with unfamiliar networks and avoid bypassing certificate warnings.
+## Phase 5: Inspect a wireless configuration
 
-## 6. Work through the room
+On a Linux system you administer, use:
 
-Read each task to identify whether it refers to an SSID, BSSID, frequency band, channel, authentication method, or encryption protocol. If the room presents a network scan, use the values shown in that environment. Do not substitute the details of a nearby real network.
+```bash
+iw dev
+ip link
+nmcli device wifi list
+```
 
-Any active wireless testing should remain inside the authorised lab. Do not capture traffic, disconnect clients, or test passwords against networks you do not own or have explicit permission to assess.
+- `iw dev` lists wireless interfaces.
+- `ip link` shows interface state.
+- `nmcli device wifi list` displays networks visible to NetworkManager.
 
-## What I took from this room
+The output depends on the adapter, driver, permissions, location, and whether wireless is enabled. Use the interface and target values provided by the TryHackMe lab rather than copying an example from another computer.
 
-Wi-Fi is not just a password and a signal bar. Security depends on the authentication method, encryption, router configuration, radio environment, and the way wireless clients are isolated from other systems.
+## Phase 6: Work through the room
+
+Read each task and identify whether it asks about a network name, access-point identifier, security mode, authentication method, or defensive control. Use the interactive content provided by the room. If the question requests a live value, copy it from the lab output.
+
+For a practical question, verify the selected network by BSSID or other lab-specific evidence. Similar SSIDs may exist nearby, so do not assume the first matching name is the intended target.
+
+## Phase 7: Secure a wireless deployment
+
+Use WPA3 or properly configured WPA2, disable obsolete protocols, set unique credentials, update firmware, and separate guest devices from sensitive systems. For enterprise Wi-Fi, validate server certificates and enforce identity-based access. Monitor for rogue access points and remove unused accounts or saved network profiles.
+
+## Key takeaways
+
+Wi-Fi is a radio-based network link with its own discovery, authentication, and encryption mechanisms. Security depends on modern protocols, strong credentials, careful client configuration, and network segmentation. SSID hiding and MAC filtering should never be treated as the primary security boundary.

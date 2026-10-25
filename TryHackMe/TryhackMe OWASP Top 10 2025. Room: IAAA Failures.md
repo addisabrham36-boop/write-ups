@@ -121,3 +121,40 @@ This endpoint is the path recorded in the successful account activity. The lesso
 ## Key takeaways
 
 The room shows three failures of IAAA: an IDOR allows horizontal access to another user's data, inconsistent identity handling allows account takeover, and incomplete logging makes an attack harder to investigate. Verify each result in the active static site and redact flags in public notes.
+
+## Expanded technical workflow for the IAAA categories
+
+### A01: Broken access control
+
+Build a request/role matrix before testing. Record the user role, requested object, action, expected permission, and observed result. In the room's static banking application, compare the account identifier displayed for the current user with the value requested by the page. Change only the identifier in the authorized lab, then confirm whether the server returns another user's data.
+
+The essential proof is unauthorized data access, not the fact that the URL changed. The user's role did not increase, so the demonstrated issue is horizontal privilege escalation. Server-side authorization must check both the authenticated identity and ownership or explicit access rights for every object request.
+
+### A07: Authentication failures
+
+Authentication verifies identity; authorization decides which actions that identity may perform. A secure implementation should use high-entropy credentials or passkeys, protect reset flows, rate-limit attempts, support MFA where appropriate, and invalidate sessions after sensitive account changes. Do not confuse a valid login with permission to access every account.
+
+When testing a login or account-recovery workflow, capture the normal request first and verify each step in the room. Do not infer successful takeover from a redirect alone; confirm which identity the session represents.
+
+### A09: Logging and alerting failures
+
+Security events should record who acted, what action was attempted, which resource was involved, when it happened, and whether it succeeded. The room may simulate a firewall block or alerting action. Verify the observable state after the action instead of assuming that clicking a control has enforced the policy.
+
+Logs should be centrally collected, time-synchronized, protected against unauthorized modification, and monitored for meaningful events. Avoid logging plaintext passwords, session tokens, or unnecessary personal data.
+
+### Evidence to capture
+
+For each category, preserve the sanitized request or screen, the control that failed, the observed outcome, and the expected secure behaviour. If a task asks for a specific value, copy it from the live application. Keep the exact task wording in the notes and do not fabricate a response or flag.
+
+### Remediation checklist
+
+- Enforce object-level and function-level authorization on the server.
+- Use secure session handling and modern authentication.
+- Protect account recovery and prevent enumeration where practical.
+- Record important authentication and authorization events.
+- Alert on repeated failures, suspicious account changes, and access patterns.
+- Test both allowed and denied cases for every role.
+
+### Phase 4: Task mapping
+
+The existing task sections above provide the IAAA definition and the room's A01 scenario. For any remaining question in the current room, identify whether it tests identity, authentication, authorization, or accountability, then link the answer to the observed control or event. Redact the live flag as flag{hidden} in public copies.

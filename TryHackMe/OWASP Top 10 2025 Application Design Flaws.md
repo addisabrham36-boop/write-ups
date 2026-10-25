@@ -223,3 +223,29 @@ The four practicals demonstrate different root causes:
 ## Key takeaways
 
 Secure systems need safe defaults, verified dependencies, proper key management, and server-side authorisation. Debug output should not reveal secrets, cryptographic keys must not be shipped to clients, and APIs must enforce permissions regardless of which client calls them.
+
+## Expanded design-review workflow
+
+### 1. Separate design defects from implementation defects
+
+A design flaw exists when the system's intended behaviour or trust model is unsafe, even if the code correctly follows that design. An implementation flaw occurs when code fails to implement a sound design. For example, a workflow that allows password reset without proving account ownership is a design problem; a correctly designed reset flow with a faulty token comparison is an implementation problem.
+
+### 2. Map the business process
+
+Draw the sequence of actors, endpoints, state changes, and trust boundaries. Identify the sensitive action and the proof the system requires before allowing it. Pay particular attention to account recovery, payments, invitations, multi-step approval, and functions that make irreversible changes.
+
+### 3. Test the invariant
+
+An invariant is a rule that must remain true throughout the workflow. Examples include "only the account owner may change the recovery address" and "a payment cannot be approved by the same party that created it." Test whether alternate navigation or repeated requests can violate the invariant. Use only the room's test accounts and objects.
+
+### 4. Verify a business-logic flaw
+
+Capture the normal sequence first. Change one step or state value at a time, then check whether the server revalidates the invariant. A UI error, unexpected redirect, or successful response is not enough; verify the actual state change. Avoid performing real transactions or destructive actions.
+
+### 5. Design controls around the invariant
+
+Enforce permissions and workflow state on the server. Make sensitive operations atomic where possible, use one-time expiring tokens, require independent approval for high-risk actions, and verify that repeated requests cannot bypass checks. Treat client-side JavaScript and hidden buttons as presentation, not policy.
+
+### 6. Room questions
+
+For each question, identify the intended business rule, the request that violates it, and the observable impact. Use the lab's scenario for the precise answer. State assumptions where the room does not provide enough evidence and redact public flags as `flag{hidden}`.

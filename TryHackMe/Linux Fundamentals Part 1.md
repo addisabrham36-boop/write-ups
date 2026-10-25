@@ -26,9 +26,9 @@ Linus Torvalds announced the Linux kernel in 1991. Modern Linux distributions co
 
 **Answer:**
 
-\`\`\`bash
+```bash
 echo "TryHackMe"
-\`\`\`
+```
 
 The `echo` command prints its arguments to standard output. Quotes keep the text together as one argument and are useful when the text contains spaces.
 
@@ -42,9 +42,9 @@ Start the room's deployed Linux machine and open its terminal. The exercise uses
 
 Check the active user with:
 
-\`\`\`bash
+```bash
 whoami
-\`\`\`
+```
 
 The command prints the effective username. Always verify the current environment instead of assuming the account name.
 
@@ -60,10 +60,10 @@ Use `ls` to inspect the provided directory. If the task refers to the exercise f
 
 Inspect the folders and identify which one contains the supplied file. Use:
 
-\`\`\`bash
+```bash
 ls -la
 find . -maxdepth 2 -type f
-\`\`\`
+```
 
 The first command includes hidden entries; the second lists files within the current directory and one level below it.
 
@@ -79,10 +79,10 @@ Read the file with `cat` or `less`. The task expects the exact text shown by the
 
 Navigate to the directory and check the current path:
 
-\`\`\`bash
+```bash
 cd /home/tryhackme/folder4
 pwd
-\`\`\`
+```
 
 - `cd` changes the current directory.
 - `pwd` prints the absolute path of the current working directory.
@@ -93,9 +93,9 @@ pwd
 
 Search the log for the flag prefix:
 
-\`\`\`bash
+```bash
 grep 'THM' access.log
-\`\`\`
+```
 
 The room's log contains a flag. It is intentionally redacted in this public write-up as `THM{hidden}`. The important technique is using grep to search a file for a string rather than reading the entire log manually.
 
@@ -112,10 +112,10 @@ Useful options include:
 
 Appending an ampersand to a command asks the shell to start it as a background job:
 
-\`\`\`bash
+```bash
 sleep 60 &
 jobs
-\`\`\`
+```
 
 The example starts a harmless sleep process in the background and then lists shell jobs. The exact behaviour depends on the shell.
 
@@ -123,9 +123,9 @@ The example starts a harmless sleep process in the background and then lists she
 
 **Answer:**
 
-\`\`\`bash
+```bash
 echo password123 > passwords
-\`\`\`
+```
 
 The single greater-than operator redirects standard output to the file and overwrites its existing contents. Be careful: it destroys the previous file contents immediately.
 
@@ -133,9 +133,9 @@ The single greater-than operator redirects standard output to the file and overw
 
 **Answer:**
 
-\`\`\`bash
+```bash
 echo tryhackme >> passwords
-\`\`\`
+```
 
 The double greater-than operator appends output to the end of the file without replacing existing content. In the room's question, the point is to keep the previous line while adding a new one.
 

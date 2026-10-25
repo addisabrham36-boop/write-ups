@@ -1,84 +1,114 @@
 # Phishing: Merry Clickmas — TryHackMe Walkthrough
 
-Official room: https://tryhackme.com/room/phishingmerryclickmas
+Official room: https://tryhackme.com/room/phishing-aoc2025-h2tkye9fzU
 
 ## Room Overview & Information
 
-**Category:** Email security / phishing analysis  
-**Difficulty:** Beginner  
-**Focus:** Identifying suspicious senders, analysing message content, inspecting URLs and attachments, and deciding how to respond.
+**Event:** Advent of Cyber 2025, Day 2  
+**Category:** Social engineering / email security  
+**Focus:** Creating a controlled phishing simulation, analysing a harvested test credential, and checking for password reuse in a simulated mailbox.
 
-The room uses a seasonal phishing scenario to practise recognising suspicious messages. The festive theme is decoration; the analysis process is the same as for any email. Establish who sent it, where links lead, what attachments contain, and what action the sender wants from the recipient.
+The exercise uses the fictional TBFC environment. It demonstrates how a convincing operational email can persuade a recipient to visit a lookalike page, and how password reuse can turn one compromised account into access to another service. Perform these steps only inside the room's lab. Do not send phishing email to real recipients or collect real credentials.
 
-## Phase 1: Read the message as evidence
+## Phase 1: Understand the scenario
 
-Start with the sender address, display name, subject, greeting, requested action, and any deadline or threat. Look for a mismatch between the claimed organisation and the actual sending domain. Urgency is a warning sign, but it is not proof by itself.
+The scenario asks you to send a phishing message to the fictional factory mailbox. The email claims that the shipping schedule has changed and asks the recipient to confirm the new schedule using a lab-hosted page. The purpose is to demonstrate how a plausible work-related request can bypass a person's caution.
 
-Ask what the sender wants the recipient to do: enter credentials, open an attachment, approve a payment, change account settings, or share private information. The requested action often reveals the likely goal of the campaign.
+The key learning objectives are:
+- Understand how social engineering creates urgency or operational pressure.
+- Recognise how a lookalike page can collect a test credential.
+- Confirm whether a password has been reused on another service.
+- Identify practical controls that prevent this chain from succeeding.
 
-Do not decide solely from grammar or visual design. A well-written message can be malicious, and a legitimate message can contain spelling mistakes. Use multiple indicators.
+## Phase 2: Start the lab and launch the supplied page
 
-## Phase 2: Inspect the link destination
+Start the room's AttackBox and target environment. Use the script supplied by the task to start the simulated page. Run it from the directory where the room's file is stored:
 
-A displayed link can hide a different destination. In a safe training environment, hover over it or inspect the address without blindly following it. Check the registered domain, spelling, subdomains, path, and whether the link uses an unexpected redirect or URL shortener.
+\`\`\`bash
+./server.py
+\`\`\`
 
-For example, `accounts.example.com.attacker.test` belongs to `attacker.test`, not `example.com`. Read domains from right to left and identify the actual registered domain.
+If execution is denied, check the file permissions and follow the room's instructions for running the provided script. Do not replace it with a public phishing kit or host it outside the lab.
 
-A lock icon or HTTPS connection only indicates that the connection is encrypted to the host presented. It does not prove that the host belongs to the organisation named in the message.
+Open the URL and port specified by the active room to confirm that the training page is reachable. Use the actual lab address rather than copying a temporary IP from another walkthrough.
 
-## Phase 3: Examine sender and authentication details
+## Phase 3: Prepare the simulated email with SET
 
-Where the room provides email headers, inspect the actual From address, Reply-To, Return-Path, Received chain, Message-ID, and SPF/DKIM/DMARC results.
+The room uses the Social-Engineer Toolkit (SET) to send a single training email. Start SET in the AttackBox using the command supplied by the environment. In the menu, select the options indicated by the task:
 
-- **SPF** checks whether a sending server is authorised for a domain.
-- **DKIM** verifies a cryptographic signature over selected message data.
-- **DMARC** defines policy and alignment expectations for a domain's authentication results.
+1. **Social-Engineering Attacks**
+2. **Mass Mailer Attack**
+3. **E-Mail Attack Single Email Address**
+4. **One-Time Use Email Template**
 
-These checks need context. A message can pass authentication for a malicious domain, and an attacker may abuse a compromised legitimate account. Do not treat a single passing check as a guarantee of safety.
+The names and menu numbers can vary by SET version. Read the menu on your screen and select the matching options rather than assuming the numbers are unchanged.
 
-## Phase 4: Review attachments cautiously
+The room's fictional email uses the subject **Shipping Schedule Changes**, a plain-text body, and the fictional recipient `factory@wareville.thm`. The message claims the schedule has changed and directs the recipient to the lab page. Use the sender and SMTP settings displayed by the active room. They are part of the isolated training environment and must not be replaced with a real mail server or real recipient.
 
-Do not execute unknown attachments on your main system. In the lab, use the provided safe analysis workflow and inspect metadata before opening a file. Record the file type and hash where the task asks for them. If a sandbox is used, keep it isolated and never enter real credentials.
+Before sending, verify:
+- The recipient is the fictional address specified by the room.
+- The message links only to the lab-hosted page.
+- No real password or personal data is included.
+- The SMTP server and sender are the lab's provided values.
+- The exercise is being run within the authorised environment.
 
-A filename extension is not proof of the true file type. A document may contain links, macros, embedded objects, or instructions that try to persuade the user to enable risky features. Archives may contain nested files that need to be inspected separately.
+Send the single test email and wait for the lab's notification that the recipient interacted with the page.
 
-## Phase 5: Evaluate the requested action
+## Phase 4: Retrieve the test credential
 
-Phishing messages often create pressure by claiming that an account will be locked, a parcel will be returned, a payment is overdue, or a reward will expire. The user is encouraged to act before verifying the request.
+The room's simulated recipient follows the link, and the training environment records the credential submitted to the page. Use the notification or result displayed by the room to obtain the password. Do not treat a successful notification as proof that a real user was compromised; this is a controlled simulation.
 
-For a message that asks for credentials, go to the service through a known bookmark or manually entered address instead of using the link. For a payment or bank-detail change, verify through a separate known contact method. Do not use the phone number or reply address supplied by the suspicious message as the only verification channel.
+### Question 1: “What is the password used to access the TBFC portal?”
 
-## Phase 6: Decide whether to report
+The lab's simulated phishing interaction reveals the test password:
 
-Use a combination of evidence: sender mismatch, unexpected link, suspicious attachment, unusual request, failed authentication alignment, or a known malicious indicator. If the message is suspicious, report it through the organisation's process and preserve the original email and headers.
+**Answer:** `unranked-wisdom-anthem`
 
-A useful report states:
-- Why the message appears suspicious.
-- The sender and destination domain.
-- The attachment name and hash, if available.
-- Whether anyone clicked the link or opened the file.
-- Whether credentials or payment details were entered.
-- The time the message arrived and any related activity.
+This is a credential for the fictional TryHackMe exercise only. Never reuse it outside the lab.
 
-If credentials were entered, notify the security team immediately, change the password through the legitimate site, revoke sessions where possible, and review MFA and account activity. If an attachment was opened, report that fact promptly; hiding it delays containment.
+## Phase 5: Test for password reuse
 
-## Phase 7: Working through the room
+The next task asks you to open the factory mailbox and determine whether the harvested password was reused. In a real incident, password reuse is a serious risk because a credential exposed on one service may work on email, VPN, or another business application.
 
-Read each sample carefully and follow the task's question. If asked to identify a phishing clue, point to the exact header, URL, attachment, or request in the sample. If asked whether a message is malicious, base the decision on multiple signals and the room's evidence.
+Browse to the mailbox service at the target address shown by the room:
 
-The live exercise may use specific sample details that are not included here, so do not copy guessed domains or answers from another walkthrough. Verify the current sample and use the room's feedback.
+\`\`\`text
+http://MACHINE_IP
+\`\`\`
 
-## Phase 8: Prevention
+Replace MACHINE_IP with the active target address. Sign in with the fictional factory account details supplied by the room and the password retrieved in the previous task. Do not test these credentials against any other system.
 
-- Use phishing-resistant MFA where possible.
-- Deploy email authentication and filtering.
-- Block known malicious domains and attachments.
-- Train users to report suspicious messages without fear of blame.
-- Verify payment or account changes through a second channel.
-- Use least privilege to limit the impact of compromised accounts.
-- Maintain a rapid process for revoking sessions and resetting credentials.
-- Monitor suspicious sign-ins and impossible-travel patterns.
+Once logged in, inspect the received messages. Locate the email containing the shipment information and read the total number of toys expected for delivery. Make sure you are reading the total requested by the question, not an individual shipment or a message timestamp.
+
+### Question 2: “What is the total number of toys expected for delivery?”
+
+**Answer:** **1984000**
+
+The value is taken from the message in the simulated factory mailbox. The lesson is that a phishing compromise may become more serious when a user reuses the same password across services.
+
+## Phase 6: Evidence and interpretation
+
+The chain is:
+1. A believable email is sent to the fictional recipient.
+2. The recipient visits the training page.
+3. The lab records the test credential.
+4. The same credential is accepted by the mailbox service.
+5. The mailbox contains operational information that was not available through the initial page.
+
+Each step proves a different point. A delivered email does not prove that it was opened. A page visit does not prove that a credential was submitted. A captured test credential does not prove access to another service until the second login succeeds.
+
+## Phase 7: Mitigation and prevention
+
+- Use unique passwords for every service and a password manager.
+- Enable MFA, preferably phishing-resistant authentication for important accounts.
+- Use email authentication controls and secure email gateways.
+- Provide a simple way to report suspicious messages.
+- Verify urgent operational changes through a known independent channel.
+- Restrict mailbox access and monitor unusual sign-ins.
+- Train staff to recognise unexpected links and credential requests.
+- Use lab-only accounts and controlled recipients for authorised phishing simulations.
+- Rotate credentials and revoke sessions quickly if a real credential is exposed.
 
 ## Key takeaways
 
-Phishing succeeds when a message causes a person to skip verification. Inspect the true sender and destination, avoid opening unexpected attachments, and confirm sensitive requests through a separate trusted channel. No single visual clue proves a message is safe or malicious; evaluate the evidence as a whole.
+Phishing works by making a request appear routine and urgent. This room shows how a simulated email can lead to a test credential and how password reuse can extend the impact to a mailbox. Unique passwords, MFA, independent verification, and quick reporting reduce the risk.

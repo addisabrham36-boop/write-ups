@@ -1,20 +1,59 @@
-# Bypass Functions — TryHackMe
+# Bypass Functions: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/
+Room: https://tryhackme.com/room/bypassfunctions
 
-I need to confirm the exact TryHackMe room named “Bypass Functions” before writing a precise walkthrough. The title could refer to different challenge contexts, and guessing would produce a page that looks technical while being unreliable.
+This note treats the room as a controlled exercise in understanding application restrictions and the difference between a filter and a security boundary. The exact language, function, and restrictions must be taken from the live task; names alone are not enough to infer the intended bypass.
 
-## General lesson
+## 1. Read the constraints first
 
-Security controls should not depend on a single fragile check. If an application blocks a dangerous function name but allows an equivalent path through another function or feature, the underlying design may still be unsafe. Defenders should focus on the capability being exposed and enforce controls at the correct boundary.
+Start the lab and identify which input field, function, or execution environment the task provides. Record what is allowed, what is blocked, and what output the application returns. Do not begin by trying random strings. The goal is to understand the rule being enforced and whether the rule actually prevents the unsafe behaviour.
 
-For a lab, I should inspect the task description, identify the intended restriction, and test the provided input paths one at a time. I should record the exact behaviour rather than claim that a particular bypass works without evidence.
+## 2. Separate filtering from security enforcement
 
-## What to record
+A blacklist rejects a known set of strings or characters. It can fail when equivalent syntax, alternate encodings, or another code path reaches the same operation. An allowlist defines the specific input forms that are acceptable and is usually easier to reason about when the expected format is narrow.
 
-- The room's official URL and objective.
-- The input or function being restricted.
-- The test that demonstrated the behaviour.
-- The observed result and recommended mitigation.
+Even an allowlist is not enough if the application later interprets the input in a dangerous context. A value safe as plain text may become unsafe when inserted into a shell command, SQL statement, HTML document, or template without context-aware handling.
 
-Until the exact room content is confirmed, this stays a topic note rather than a fabricated completed walkthrough.
+## 3. Reproduce the behaviour methodically
+
+For each test:
+1. Record the original input and expected result.
+2. Change one property at a time.
+3. Observe the exact error or output.
+4. Determine whether the server rejected the input, transformed it, or interpreted it.
+5. Repeat only with values permitted by the lab.
+6. Document the smallest input that demonstrates the issue.
+
+This approach helps distinguish a real bypass from an unrelated error or a display quirk. It also makes the finding reproducible.
+
+## 4. Understand execution context
+
+The meaning of a character depends on where it is interpreted. A quote may be harmless inside a string but special in a shell, SQL query, or programming-language expression. Encoding changes representation; it does not automatically make an input safe after decoding.
+
+Trace the data from the user-controlled field through validation and into the operation that consumes it. If the value is passed to a parser or interpreter, identify the exact grammar and the protections that apply at that boundary.
+
+## 5. Verify impact without causing damage
+
+Use a harmless proof in the authorised lab. Avoid destructive file operations, credential theft, persistence, or actions against systems outside the assigned environment. If the exercise demonstrates command execution, confirm it with a benign result and record the execution identity.
+
+A filter bypass does not automatically prove full compromise. State exactly what was demonstrated and what remains unverified.
+
+## 6. Defensive design
+
+- Prefer structured APIs over constructing executable strings.
+- Use parameterised queries for database operations.
+- Apply context-aware output encoding for HTML and other interpreters.
+- Validate against a strict allowlist.
+- Keep dangerous functionality isolated and minimally privileged.
+- Add tests for alternate encodings and equivalent syntax.
+- Log rejected inputs and anomalous behaviour without unnecessarily storing secrets.
+
+Disabling one function may reduce exposure, but it does not fix the underlying design if another function provides the same unsafe capability.
+
+## 7. Working through the room
+
+Use the restrictions and examples supplied by the current task. Identify the intended operation, determine how the filter works, and test one hypothesis at a time. The accepted answer may depend on the specific lab code, so verify the current output rather than copying a guessed payload from another guide.
+
+## What I took from this room
+
+A bypass is meaningful only when it crosses a defined security boundary. Understanding the input path and execution context leads to a stronger finding and a more durable fix than memorising a list of special characters.

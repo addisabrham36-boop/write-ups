@@ -1,19 +1,65 @@
-# The Building Blocks of AI — TryHackMe
+# The Building Blocks of AI: TryHackMe Walkthrough
 
 Room: https://tryhackme.com/room/thebuildingblocksofai
 
-Artificial intelligence is a broad field concerned with systems that perform tasks associated with human intelligence. Machine learning is one part of AI: instead of defining every rule manually, developers train a model to identify patterns from examples.
+This room introduces the terms used to describe artificial intelligence and machine learning. The most useful starting point is to distinguish the task a system performs from the process used to build it. AI is the broad field; machine learning is one approach within it, and deep learning is a family of machine-learning methods based on neural networks.
 
-## Main ideas
+## 1. Understand the lifecycle
 
-A dataset contains examples used to train or evaluate a model. A model is the learned system that maps inputs to outputs. Training adjusts the model using data and an optimisation process. Inference is when the trained model is used to produce a prediction or response.
+A basic machine-learning workflow looks like this:
 
-Different tasks use different approaches. Classification assigns an input to a category, regression predicts a numeric value, and generative models produce new content such as text or images. These categories overlap in practice, but they help describe what a system is intended to do.
+1. Collect and prepare data.
+2. Choose a model and training approach.
+3. Train the model using examples.
+4. Evaluate it on data that was not used to fit it.
+5. Deploy the model for inference.
+6. Monitor its behaviour and update it when needed.
 
-## Limitations
+Training adjusts model parameters. Inference uses the trained model to produce an output for new input. A model that performs well on its training examples may still fail on new data, so evaluation is essential.
 
-A model can perform well on one dataset and fail on different real-world inputs. Data quality, bias, overfitting, and changes in the environment can all affect performance. A high accuracy score does not tell the whole story, especially when some errors have much higher consequences than others.
+## 2. Match the task to the model output
+
+- **Classification:** assigns an input to a category, such as spam or not spam.
+- **Regression:** predicts a numeric value, such as a demand estimate.
+- **Clustering:** groups similar examples without relying on predefined labels in the same way as supervised classification.
+- **Generative modelling:** creates new content such as text, images, audio, or code.
+- **Reinforcement learning:** learns a policy through interaction and feedback such as rewards.
+
+These categories are not mutually exclusive in every modern system. They are useful descriptions of the main objective.
+
+## 3. Understand data and labels
+
+Supervised learning uses labelled examples. Unsupervised learning looks for patterns or structure without the same kind of target labels. Training data teaches the model; validation data helps tune choices; and test data estimates performance after development decisions have been made.
+
+Poor labels, missing groups, biased collection, or maliciously altered examples can damage a model. If test data leaks into training, reported performance may be overly optimistic. The quality and origin of data matter as much as the model architecture.
+
+## 4. Neural networks and deep learning
+
+A neural network consists of connected computational units arranged in layers. Each layer transforms its input, and training adjusts weights to reduce a loss function. Deep learning uses networks with multiple layers to learn complex patterns.
+
+This does not mean the model reasons exactly like a human brain. The biological analogy is limited. A model learns statistical patterns from data and can still produce incorrect or nonsensical outputs.
+
+## 5. Overfitting, underfitting, and generalisation
+
+- **Overfitting:** the model learns training-specific details and performs poorly on new examples.
+- **Underfitting:** the model is too limited or insufficiently trained to capture useful patterns.
+- **Generalisation:** the ability to perform on new examples from the intended environment.
+- **Distribution shift:** production inputs differ from the training or evaluation data.
+
+Accuracy is not always enough. A classifier used for fraud detection may need precision, recall, false-positive rates, and an assessment of the cost of different errors. The right metric depends on the problem.
+
+## 6. Limitations and security
+
+AI output is not automatically correct or unbiased. Models may reveal sensitive information, respond badly to unusual inputs, or behave differently after the deployment environment changes. Generative models can also produce plausible statements that have no factual basis.
+
+Security depends on the entire application: data provenance, access control, model supply chain, input handling, output validation, and monitoring. A model's fluent answer should be checked before it is used for important decisions.
+
+## 7. Working through the room
+
+When a task describes a model or workflow, identify its input, output, and training method. If it describes categories such as spam detection, numeric forecasting, or generating text, match the task to the corresponding model objective. If it asks about training, validation, or test data, focus on the role each dataset plays.
+
+Use the terminology and examples provided by the active room. Do not assume the same wording appears in every version of a learning platform.
 
 ## What I took from this room
 
-AI is not one single technique. Understanding the data, the task, the training process, and the evaluation method makes it easier to judge what a model can and cannot do. I should be cautious about treating an AI output as fact without checking it.
+AI is a collection of approaches, not one single technology. Understanding data, training, inference, evaluation, and model limitations makes it easier to recognise both the useful capabilities and the security risks of AI systems.

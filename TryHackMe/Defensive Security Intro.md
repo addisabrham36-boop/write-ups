@@ -76,3 +76,47 @@ Not every alert is a confirmed incident. Analysts should verify evidence, record
 ## Key takeaways
 
 The Blue Team provides defensive security. A SOC monitors systems for suspicious events, DFIR investigates and responds to incidents, and malware analysts help identify what malicious software does. Ransomware is a type of malware that can deny access to files and demand payment. The room's flag should be obtained from the live exercise and redacted in public notes.
+
+## Expanded defensive workflow
+
+### 1. Define the defensive objective
+
+Defensive security aims to prevent, detect, investigate, and recover from attacks. The work may involve security operations, incident response, threat intelligence, endpoint security, identity protection, vulnerability management, and governance. The exact responsibilities vary by organization.
+
+Begin by identifying the asset, the threat, and the control expected to reduce risk. A security product is not the goal by itself; the goal is to reduce the likelihood or impact of a real attack and prove that the control works.
+
+### 2. Understand prevention, detection, and response
+
+Prevention makes an attack harder or blocks it, for example by patching, least privilege, MFA, and network segmentation. Detection identifies suspicious activity through logs, endpoint telemetry, network sensors, and alerts. Response validates the alert, scopes the incident, contains the threat, removes persistence, and restores normal operation.
+
+No single control is perfect. A layered design assumes that some controls will fail and provides additional opportunities to detect and contain an attack.
+
+### 3. Security operations and logs
+
+A SOC analyst gathers context from authentication, endpoint, firewall, DNS, proxy, and application logs. Useful questions include: which account acted, from which host, at what time, against what resource, and whether the behaviour is normal for that user or system.
+
+A log entry is evidence of an event recorded by a particular source, not necessarily the complete truth. Check timestamps, host identity, event IDs, surrounding activity, and other sources. Preserve the original log and record the query or filter used.
+
+### 4. Threat intelligence
+
+Threat intelligence turns observations into context that helps defenders prioritize action. Indicators can include IP addresses, domains, URLs, file hashes, email senders, and behavioural patterns. Indicators have lifetimes and false positives; verify source, confidence, timestamp, and relevance before blocking or escalating.
+
+Tactical intelligence helps detect immediate activity, operational intelligence describes campaigns and techniques, and strategic intelligence supports risk decisions. Use the level appropriate to the question rather than treating every indicator as equally useful.
+
+### 5. Vulnerability and asset management
+
+Defenders need an accurate inventory of devices, applications, owners, exposed services, and software versions. Prioritize vulnerabilities using exploitability, exposure, asset importance, available mitigations, and operational constraints. A severity score alone does not explain business risk.
+
+After patching, verify the installed version or configuration and confirm the affected service is still healthy. Record exceptions and deadlines instead of assuming a change succeeded.
+
+### 6. Work through the room
+
+For each task, identify whether it asks about prevention, detection, response, intelligence, or a specific defensive role. Use the room's own definitions and examples for exact answers. If the question asks how an alert should be handled, explain triage, evidence gathering, escalation, and containment rather than jumping immediately to deletion or rebooting.
+
+### 7. Measure effectiveness
+
+Useful measures include time to detect, time to contain, coverage of critical assets, patch compliance, alert quality, and recovery-test results. Metrics should be interpreted carefully: a high alert count may indicate more attacks, noisy detection, or both.
+
+### 8. Key lessons
+
+Effective defence combines people, process, and technology. Maintain asset visibility, enforce strong identity controls, centralize useful logs, tune detections, rehearse incident response, and validate recovery. The goal is not to claim a system is impossible to compromise, but to make attacks harder to execute and easier to detect and contain.

@@ -6,73 +6,113 @@ Official room: https://tryhackme.com/room/cryptographyfordummies
 
 **Category:** Cryptography fundamentals  
 **Difficulty:** Beginner  
-**Focus:** Classical ciphers, modern cryptographic concepts, keys, hashes, and recognising common transformations.
+**Focus:** Symmetric and asymmetric cryptography, public/private keys, MD5 hashing, Base64 encoding, and decoding.
 
-Cryptography is the study and practice of protecting information. In a CTF, a string that looks strange may be encoded or encrypted, and the challenge is to identify the transformation. In real systems, cryptography protects data, but it depends on correct key management and implementation.
+Cryptography protects information through different mechanisms. Encryption uses a key to protect confidentiality, hashing creates a one-way digest, and encoding changes representation. These are related but distinct operations.
 
-## Phase 1: Identify the problem before decoding
+## Task 1: Introduction
 
-Start with the task's clues. Check the character set, string length, punctuation, and whether the task mentions a cipher, key, or encoding. Preserve the original value so you can compare every transformation.
+Read the room's introduction and open the practical where required. The tasks ask you to compare cryptography types and perform simple hash and Base64 operations.
 
-Do not blindly run a long list of decoders. Choose a plausible method, test it, and evaluate whether the result is meaningful in the context of the task.
+## Task 2: Types of Cryptography
 
-## Phase 2: Caesar and substitution ciphers
+### Question: “What type of cryptography is more secure?”
 
-A Caesar cipher shifts letters by a fixed number of positions. For example, shifting each letter by three maps A to D, B to E, and so on. Because there are only 26 possible letter shifts in the basic English alphabet, it is easy to brute-force as a puzzle.
+**Room answer:** `asymmetric`.
 
-Atbash maps the alphabet in reverse: A to Z, B to Y, C to X, and so on. It uses no secret key.
+The room contrasts symmetric and asymmetric cryptography. Asymmetric systems use a related public/private key pair and can support authenticated key exchange or signatures. Security depends on the algorithm, key size, implementation, and how trust is established; asymmetric cryptography is not universally “more secure” for every use case.
 
-Classical substitution ciphers are useful learning exercises but are not secure for modern communication. Frequency analysis and the small keyspace make them vulnerable.
+### Question: “What type of cryptography is faster?”
 
-## Phase 3: Base64 and hexadecimal
+**Answer:** `symmetric`.
 
-Base64 and hexadecimal are encodings, not encryption.
+Symmetric algorithms are generally faster for encrypting large amounts of data. Modern protocols often use asymmetric techniques to establish or authenticate keys, then use symmetric encryption for the bulk data.
 
-```bash
-printf '%s' 'hello' | base64
-printf '%s' 'aGVsbG8=' | base64 --decode
-printf '%s' 'hello' | xxd -p
-```
+### Question: “What type of cryptography will a Bank site use?”
 
-The first command encodes a string, the second decodes a Base64 value, and the third displays the bytes of a string in hexadecimal. Use `printf` to avoid adding an unwanted newline.
+**Room answer:** `asymmetric`.
 
-If the decoded bytes are not readable text, inspect the output as a file or hex dump. The data may be binary or may contain another layer of encoding.
+The expected answer refers to the public-key cryptography used by HTTPS/TLS to authenticate a server and establish secure communication. In practice, TLS combines asymmetric cryptographic mechanisms with symmetric session encryption.
 
-## Phase 4: Hashes
+### Question: “What will you use to encrypt your messages in asymmetric cryptography?”
 
-A hash maps data to a fixed-length digest. It is not designed to be decrypted. If a CTF provides a hash and asks for the original input, the intended approach may be to identify the hash type and compare candidate values against the digest.
+**Answer:** `public key`.
 
-A hash lookup or password-cracking tool can only find a candidate that matches; it does not reverse the hash mathematically. The result depends on the candidate set and the strength of the original input.
+In a basic public-key encryption model, a sender encrypts a message using the recipient's public key. Only the matching private key should be able to decrypt it.
 
-For files, compute a digest with:
+### Question: “What will you use to decrypt messages in asymmetric cryptography?”
 
-```bash
-sha256sum sample.bin
-```
+**Answer:** `private key`.
 
-Use the hash to compare exact file identity, not to determine whether the file is malicious by itself.
+The private key must remain secret. In a signature system, the roles differ: the sender signs with a private key and others verify with the public key.
 
-## Phase 5: Encryption and keys
+### Question: “Does symmetric cryptography use two different keys for encryption/decryption? (aye/nay)”
 
-Encryption uses a key to transform plaintext into ciphertext. Symmetric encryption uses a shared secret, while asymmetric cryptography uses a related public/private key pair. The correct key and parameters are needed for decryption.
+**Answer:** `nay`.
 
-If a challenge mentions a key, identify where it is provided and how it is expected to be used. Do not confuse a password, key, IV/nonce, salt, and hash; they have different purposes. A salt is not necessarily secret, while an encryption key must be protected.
+Symmetric encryption uses the same shared secret key, or an equivalent shared secret, for encryption and decryption.
 
-## Phase 6: A repeatable CTF method
+## Task 3: Hashing
 
-1. Copy the exact input into a note.
-2. Identify likely encodings from their character sets.
-3. Check the task description for a cipher or algorithm clue.
-4. Apply one transformation at a time.
-5. Save each intermediate result.
-6. Verify that the output makes sense and matches the task's expected format.
-7. If it fails, revisit the hypothesis instead of stacking random transformations.
-8. Submit the value returned by the active challenge and redact flags in public notes.
+A cryptographic hash maps input data to a fixed-length digest. It is not designed to be decrypted. The room uses MD5 for a simple example, although MD5 is no longer suitable for security-sensitive integrity guarantees because of known collision weaknesses.
 
-## Phase 7: Security lessons
+### Question: “What's the MD5 hash of "hashes are cool"?”
 
-Do not invent custom encryption. Use established cryptographic libraries, authenticated encryption, strong key derivation, and a secure process for storing and rotating keys. Never put credentials or secret keys in public source repositories.
+**Answer:** `f762d32e3c160900d94b683e927555b9`.
+
+Verify it locally:
+
+\`\`\`bash
+printf '%s' 'hashes are cool' | md5sum
+\`\`\`
+
+Use `printf` to avoid adding a newline to the input. An extra newline changes the resulting hash.
+
+### Question: “What does MD5 stand for?”
+
+**Answer:** **Message Digest 5**.
+
+### Question: “Who created MD5?”
+
+**Answer:** **Ronald Rivest**.
+
+MD5 remains useful as a legacy identifier in some datasets, but use SHA-256 or a suitable modern alternative for new integrity-checking systems. For password storage, use a password-hashing scheme such as Argon2id, scrypt, or bcrypt rather than a fast hash.
+
+## Task 4: Encoding
+
+Base64 converts bytes into a printable character representation. It is encoding, not encryption, and it does not protect the data from someone who can read it.
+
+### Question: “Encode the string "cryptographyisuseful" with Base64”
+
+**Answer:** `Y3J5cHRvZ3JhcGh5aXN1c2VmdWw=`.
+
+Verify it with:
+
+\`\`\`bash
+printf '%s' 'cryptographyisuseful' | base64
+\`\`\`
+
+### Question: “Decode the string "dGhlIHNlY3JldCB3b3JkIGlzIDogd2F0ZXJtZWxvbg==". What's the secret word?”
+
+Decode it with:
+
+\`\`\`bash
+printf '%s' 'dGhlIHNlY3JldCB3b3JkIGlzIDogd2F0ZXJtZWxvbg==' | base64 --decode
+\`\`\`
+
+**Answer:** `watermelon`.
+
+The decoded text says the secret word is watermelon. Base64 can be reversed without a key; do not use it to protect passwords or confidential data.
+
+## Task 5: Practical distinctions
+
+| Operation | Purpose | Requires a secret key? | Reversible? |
+|---|---|---|---|
+| Symmetric encryption | Confidentiality | Yes | With the correct key |
+| Asymmetric encryption | Confidentiality / key exchange | Public/private key pair | With the matching private key |
+| Hashing | Digest / integrity comparison | Usually no | Not designed to be reversed |
+| Base64 encoding | Data representation | No | Yes |
 
 ## Key takeaways
 
-The first skill is classification: encoding, encryption, hashing, and classical ciphers are different. Read the clue, choose a justified transformation, preserve intermediate values, and verify the result. Cryptography is easier to learn when each operation has a clear purpose.
+Symmetric cryptography is generally faster; asymmetric cryptography supports public/private key operations; hashes are not encryption; and Base64 is only encoding. Use modern algorithms, protect private keys, and avoid MD5 for security-sensitive applications.

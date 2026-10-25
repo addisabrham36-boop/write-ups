@@ -1,96 +1,184 @@
-# Nmap Live Host Discovery — TryHackMe
+# Nmap: Live Host Discovery — TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/nmap01
+Official room: https://tryhackme.com/room/nmap01
 
-This room focuses on discovering which hosts are online before scanning their services. A live-host scan is not the same as a port scan: host discovery tries to determine whether a target responds, while port scanning checks which services are listening.
+## Room Overview & Information
 
-I only run these commands against the lab network and targets the room assigns. I use `TARGET_IP` and `TARGET_SUBNET` as placeholders because TryHackMe addresses can change between sessions.
+**Category:** Network reconnaissance  
+**Difficulty:** Beginner  
+**Focus:** Host discovery, ARP, ICMP probes, TCP SYN/ACK ping, UDP probes, reverse DNS, and subnet calculations.
 
-## 1. Check the lab connection
+Nmap host discovery determines which addresses appear to be active before a full port scan. Different probes work in different environments. A host may ignore ICMP but respond to TCP, and a device on the same Ethernet network may respond to ARP even when IP-layer probes are filtered.
 
-1. Start the machine or network required by the task.
-2. Confirm that my AttackBox or VPN is connected.
-3. Copy the target address or subnet from the room.
-4. If I am unsure what local routes exist, check my own machine:
+## Task 1: Introduction
 
-   ```bash
-   ip address
-   ip route
-   ```
+Start the room's interactive lab and follow the packet visualisation. The exercise uses simulated computers and a router. Answer from the current simulation rather than assuming that every network behaves identically.
 
-These commands show my local interface addresses and routing table. They do not scan the target network.
+## Task 2: Enumerating Targets
 
-## 2. ICMP echo discovery
+### Question: “What is the first IP address Nmap would scan if you provided 10.10.12.13/29 as your target?”
 
-The simplest host-discovery attempt is an ICMP echo request:
+**Answer:** `10.10.12.8`.
 
-```bash
-ping -c 4 TARGET_IP
-```
+A /29 prefix contains eight IPv4 addresses. The subnet containing 10.10.12.13/29 begins at 10.10.12.8, so that is the first address in the range. The network address is 10.10.12.8 and the broadcast address is 10.10.12.15.
 
-The `-c 4` option sends four requests and then stops. Replies suggest that the host is reachable and responding to ICMP. No reply does not prove the host is down: firewalls may block echo requests, the route may be wrong, or the machine may not be ready.
+### Question: “How many IP addresses will Nmap scan if you provide the following range 10.10.0-255.101-125?”
 
-## 3. Nmap ping scan
+**Answer:** **6400**.
 
-Nmap's `-sn` option performs host discovery without a port scan:
+The third octet spans 256 values (0 through 255) and the fourth octet spans 25 values (101 through 125 inclusive). Therefore, 256 × 25 = 6400 addresses.
 
-```bash
-nmap -sn TARGET_SUBNET
-```
+## Task 3: Discovering Hosts
 
-Replace the subnet with the CIDR range assigned by the room. For example, the format `192.0.2.0/24` means a 256-address IPv4 range, but that example range is documentation-only and must not be substituted for the real lab network.
+ARP resolves an IPv4 address to a MAC address on the local network. If a host wants to send traffic to a device on the same subnet and does not have a cached mapping, it broadcasts an ARP Request. The device that owns the requested address can reply with an ARP Response.
 
-Read the output for hosts Nmap reports as up. On a local Ethernet network, Nmap may use ARP discovery. Across routed networks, it may use ICMP or TCP-based probes depending on privileges and options.
+On a local Ethernet network, ARP requests are broadcast to the local segment, so multiple devices may see the request. Only the device that owns the queried IP should normally answer it. Cached ARP entries can mean that a second ping does not need a new ARP exchange.
 
-## 4. Understand the discovery probes
+### Question: “How many devices can see the ARP Request?”
 
-Nmap can use different probes because networks filter traffic differently:
+**Answer:** **4**.
 
-- **ICMP echo:** asks the host to reply to an echo request.
-- **TCP SYN or ACK probes:** test whether a host responds to a TCP packet sent to a chosen port.
-- **UDP probes:** send UDP packets and look for responses such as ICMP port-unreachable messages.
-- **ARP discovery:** useful on the local Ethernet segment because hosts normally need to respond to ARP for local IP resolution.
+The simulation shows the broadcast request being visible to four devices on the local segment.
 
-The exact probe set depends on the command, network position, privileges, and Nmap version. I should choose the method described by the room rather than assume every network permits ICMP.
+### Question: “Did computer6 receive the ARP Request? (Y/N)”
 
-## 5. Try TCP-based discovery
+**Answer:** **N**.
 
-If ICMP is filtered, a TCP probe to a likely open port can still provide a response:
+Follow the visualised packet path in the room. The simulation shows computer6 does not receive that request.
 
-```bash
-nmap -sn -PS22,80,443 TARGET_SUBNET
-```
+### Question: “How many devices can see the ARP Request?”
 
-The `-PS` option sends TCP SYN discovery probes to the listed ports. This is still a host-discovery scan; it does not perform a full port scan. Use only the ports and subnet allowed by the lab.
+**Answer:** **4**.
 
-A TCP RST or SYN/ACK response can indicate that a host is present even when it ignores ICMP echo requests. If the port is filtered, the result may remain ambiguous.
+This is a repeated question in the interactive sequence; use the packet visualisation to confirm the same broadcast count.
 
-## 6. Compare the methods
+### Question: “Did computer6 reply to the ARP Request? (Y/N)”
 
-When the task asks me to compare discovery methods, I run the required command against the same lab scope and note which addresses appear in each result. Differences are expected because hosts and firewalls can respond differently to different probe types.
+**Answer:** **Y**.
 
-I should not conclude that a host is offline just because one scan did not discover it. The correct conclusion is narrower: the host did not respond to the probes used under those network conditions.
+The second ARP scenario in the room shows computer6 replying to the request. Read the current simulation state carefully because the question refers to a different request from the earlier receive question.
 
-## 7. Read and save the output
+### Question: “What is the type of packet that computer1 sent before the ping?”
 
-Save the result when I need to compare scans:
+**Answer:** **ARP Request**.
 
-```bash
-nmap -sn -oN live-hosts.txt TARGET_SUBNET
-```
+Computer1 needs the local MAC address before it can send the Ethernet frame for the ping.
 
-The output file records the discovered hosts and gives me something to review later. If a task asks for the number of hosts, count the hosts reported as up, not the number of lines in the whole report.
+### Question: “What is the type of packet that computer1 received before being able to send the ping?”
 
-## Troubleshooting
+**Answer:** **ARP Response**.
 
-- **No hosts discovered:** confirm the machine is running, the IP range is correct, and the VPN route exists.
-- **Ping fails:** try the Nmap method required by the room; ICMP can be blocked.
-- **Scan seems to take too long:** check that the subnet is the one assigned by the lab and not a much larger range.
-- **Different scans show different hosts:** compare which probes each scan uses and whether a firewall may be filtering them.
-- **Nmap says the host is down:** use `-Pn` only when the task calls for skipping host discovery and scanning a known target. It tells Nmap to treat the host as online; it does not prove the host is actually reachable.
+The response supplies the IP-to-MAC mapping that the host needs for local delivery.
 
-## What I took from this room
+### Question: “How many computers responded to the ping request?”
 
-Host discovery is the first step in mapping a network, but its results depend on the probes and network controls. A careful scan uses the correct scope, saves the output, and treats “no response” as an observation rather than proof that a host does not exist.
+**Answer:** **1**.
 
-Reference: https://tryhackme.com/room/nmap01
+Only one computer in the simulation responds to the ping request. Do not confuse the number of devices that can see a broadcast ARP request with the number of hosts that reply to the ICMP ping.
+
+### Question: “What is the name of the first device that responded to the first ARP Request?”
+
+**Answer:** **router**.
+
+### Question: “What is the name of the first device that responded to the second ARP Request?”
+
+**Answer:** **computer5**.
+
+### Question: “Send another Ping Request. Did it require new ARP Requests? (Y/N)”
+
+**Answer:** **N**.
+
+The host has cached the ARP mapping from the previous exchange, so it does not need to resolve the same IP address again immediately.
+
+### Question: “How many devices are you able to discover using ARP requests?”
+
+**Answer:** **3**.
+
+This is the result shown by the room's ARP discovery simulation.
+
+## Task 4: Nmap Host Discovery Controls
+
+Nmap offers several probes for determining whether a host is up. A discovery option does not scan every port; it selects a particular probe type.
+
+### ICMP discovery options
+
+- **-PE:** ICMP Echo Request, similar to the probe used by ping.
+- **-PP:** ICMP Timestamp Request.
+- **-PM:** ICMP Address Mask Request.
+
+### Question: “What is the option required to tell Nmap to use ICMP Timestamp to discover live hosts?”
+
+**Answer:** `-PP`.
+
+### Question: “What is the option required to tell Nmap to use ICMP Address Mask to discover live hosts?”
+
+**Answer:** `-PM`.
+
+### Question: “What is the option required to tell Nmap to use ICMP Echo to discover live hosts?”
+
+**Answer:** `-PE`.
+
+An example of a host-discovery scan using ICMP Echo is:
+
+\`\`\`bash
+nmap -sn -PE TARGET_SUBNET
+\`\`\`
+
+- **-sn** performs host discovery without a port scan.
+- **-PE** uses ICMP Echo Requests.
+- **TARGET_SUBNET** is the authorised network range supplied by the room.
+
+## Task 5: TCP and UDP Host Discovery
+
+TCP discovery probes can be useful when ICMP is filtered. A TCP SYN ping sends a SYN packet to a selected port. A TCP ACK ping sends an ACK packet and observes the response. A firewall may treat them differently.
+
+### Question: “Which TCP ping scan does not require a privileged account?”
+
+**Answer:** **TCP SYN Ping**.
+
+### Question: “Which TCP ping scan requires a privileged account?”
+
+**Answer:** **TCP ACK Ping**.
+
+### Question: “What option do you need to add to Nmap to run a TCP SYN ping scan on the telnet port?”
+
+**Answer:** `-PS23`.
+
+An example command is:
+
+\`\`\`bash
+nmap -sn -PS23 TARGET_SUBNET
+\`\`\`
+
+The **-PS23** option sends TCP SYN discovery probes to TCP port 23, commonly used by Telnet. The command is for the authorised lab range only.
+
+UDP discovery can also be used when the target's network behaviour makes it useful. Nmap's UDP probe option is `-PU`, optionally followed by a port list. A lack of response may be ambiguous because UDP services often do not reply to unexpected packets.
+
+## Task 6: Reverse DNS Lookup
+
+Reverse DNS attempts to map an IP address to a hostname using PTR records. It can help label discovered hosts, but names may be missing, generic, or out of date.
+
+### Question: “We want Nmap to issue a reverse DNS lookup for all the possibles hosts on a subnet, hoping to get some insights from the names. What option should we add?”
+
+**Answer:** `-R`.
+
+Example:
+
+\`\`\`bash
+nmap -sn -R TARGET_SUBNET
+\`\`\`
+
+The **-R** option forces reverse DNS resolution for target addresses. This may add time to a scan and does not guarantee that every address has a PTR record.
+
+## Troubleshooting and practical notes
+
+- A host that does not answer ICMP may still be online.
+- ARP discovery works on the local network segment and is not routed across the Internet.
+- Cached neighbour entries can remove the need for another ARP request.
+- A TCP SYN probe and TCP ACK probe behave differently and may require different privileges.
+- Reverse DNS can return no name or a name that does not match the current host.
+- Always use the target range specified by the lab and save scan output for review.
+
+## Key takeaways
+
+Host discovery is about choosing the right probe for the network. ARP is useful on a local Ethernet segment, ICMP probes test IP-level reachability, TCP probes can work when ICMP is filtered, and reverse DNS can add hostnames. Interpret the result in context rather than treating silence as proof that a host is offline.

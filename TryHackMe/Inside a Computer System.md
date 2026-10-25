@@ -1,4 +1,4 @@
-# Inside a Computer System: TryHackMe Walkthrough
+# Inside a Computer System: Complete TryHackMe Walkthrough
 
 Official room: https://tryhackme.com/room/insideacomputer
 
@@ -6,152 +6,119 @@ Official room: https://tryhackme.com/room/insideacomputer
 
 **Category:** Computer fundamentals  
 **Difficulty:** Beginner  
-**Focus:** Computer components, their functions, and the startup sequence from power-on to operating-system handoff.
+**Focus:** PC components, component functions, firmware, and the startup sequence from power-on to operating-system handoff.
 
-Before securing a computer, it helps to understand the hardware and firmware that make it work. This room uses a castle analogy and two interactive static sites: one for identifying PC components and another for stepping through the boot process.
+This interactive room is about hardware and startup, not a traditional exploit chain. There is no network scanning, initial access, or privilege escalation unless the live room explicitly introduces such a task. It provides two browser-based activities: component identification and the boot sequence.
 
-## Task 1: Introduction
+## Phase 1: Reconnaissance & Component Enumeration
 
-The room's main idea is that you cannot effectively defend a system if you do not understand its components and how they interact. You need to know where information lives, how users and devices connect, and what controls the system's startup.
+### Task 1: Introduction
 
-### Question: “Why does the room say you must understand a computer before securing it?”
+The room's central idea is that defending a system requires understanding its components and how they interact. You need to know where information lives, how devices connect, and which layers control startup and execution.
+
+**Question: “Why does the room say you must understand a computer before securing it?”**
 
 **Answer:** Defending a system you do not understand is like defending a castle you have never seen. You need to understand the layout, how people and data enter, and who can access or change important resources.
 
-## Task 2: Identify PC Components
+### Task 2: Identify PC Components
 
-Open the component-identification exercise using **View Site**. Match each component to its role.
+Open the component-identification activity using View Site and match each component to the role described.
 
-### Question: “What is the motherboard compared to in the human-body analogy, and what does it do?”
+**Question: “What is the motherboard compared to in the human-body analogy, and what does it do?”**
 
-**Answer:** It is compared to the skeleton and nervous system. It holds components in place and connects them through the CPU socket, RAM slots, expansion slots, and ports.
+**Answer:** The motherboard is compared to the skeleton and nervous system. It holds components in place and connects them through the CPU socket, RAM slots, expansion slots, and ports.
 
-### Question: “What does the CPU do, and how do modern CPUs improve throughput?”
+**Question: “What does the CPU do, and how do modern CPUs improve throughput?”**
 
-**Answer:** The CPU executes instructions. Modern CPUs have multiple cores that can process instructions in parallel. The CPU connects through a socket on the motherboard.
+**Answer:** The CPU executes instructions. Modern CPUs use multiple cores to process different instruction streams in parallel. The CPU connects through a socket on the motherboard.
 
-### Question: “What is RAM, and why is it called volatile?”
+**Question: “What is RAM, and why is it called volatile?”**
 
 **Answer:** RAM is short-term working memory that holds data the CPU needs quickly. It is volatile because its contents are lost when power is removed.
 
-### Question: “How do HDDs and SSDs differ as long-term storage?”
+**Question: “How do HDDs and SSDs differ as long-term storage?”**
 
-**Answer:** HDDs use moving mechanical parts and are generally slower but can offer high capacity at low cost. SSDs use memory chips and have no moving parts, so they are typically faster. Both can connect through SATA or PCI Express, depending on the device.
+**Answer:** HDDs use moving mechanical parts and are generally slower; SSDs use memory chips and have no moving parts, so they are usually faster. Both can connect through interfaces such as SATA or PCI Express, depending on the device.
 
-### Question: “What is the role of a network adapter?”
+**Question: “What is the role of a network adapter?”**
 
-**Answer:** It allows a computer to communicate with other systems over a wired or wireless network. It may be built into the motherboard or added as an expansion card.
+**Answer:** It allows the computer to communicate with other systems over a wired or wireless network. It may be integrated or installed as an expansion card.
 
-### Question: “Why must the PSU be sized carefully for a system?”
+**Question: “Why must the PSU be sized carefully for a system?”**
 
-**Answer:** The power supply unit provides energy to all components. If it cannot supply enough power for the system's needs, the computer may fail or become unstable.
+**Answer:** The power supply unit provides energy to the components. Insufficient power can cause instability or prevent the system from running reliably.
 
-### Question: “What does a graphics card do, and how does it usually connect?”
+**Question: “What does a graphics card do, and how does it usually connect?”**
 
-**Answer:** A graphics card processes visual data from the operating system and applications for display on a monitor. A discrete graphics card commonly connects through a PCI Express slot.
+**Answer:** A graphics card processes visual data for display. A discrete card commonly connects through a PCI Express slot.
 
-### Question: “Give examples of input devices, output devices, and common connectors.”
+**Question: “Give examples of input devices, output devices, and common connectors.”**
 
 **Answer:**
 - **Input:** keyboard, microphone, mouse, scanner.
 - **Output:** monitor, printer, speakers.
 - **Connectors:** USB, HDMI, DisplayPort.
 
-## Task 3: Follow the Boot Sequence
+## Phase 2: Firmware and Boot-Sequence Analysis
 
-Open the boot-sequence exercise using **View Site** and step through each stage. The purpose is to understand how the computer starts hardware, checks it, chooses a boot device, and transfers control to the operating system.
+### Task 3: Follow the Boot Sequence
 
-### Question: “What happens in Step 1 when you press the power button?”
+Open the boot-sequence activity using View Site and step through each stage. The sequence explains how the computer starts hardware, checks components, chooses a boot device, and transfers control to the OS.
+
+**Question: “What happens in Step 1 when you press the power button?”**
 
 **Answer:** A signal is sent to the power supply unit to allow power to flow through the system.
 
-### Question: “What firmware manages component startup, and how does BIOS relate?”
+**Question: “What firmware manages component startup, and how does BIOS relate?”**
 
-**Answer:** UEFI, the Unified Extensible Firmware Interface, manages startup on modern systems. BIOS performs a similar role but is the older firmware model.
+**Answer:** UEFI, the Unified Extensible Firmware Interface, manages startup on modern systems. BIOS provides a similar role in older firmware designs.
 
-### Question: “What is POST (Power-On Self Test)?”
+**Question: “What is POST (Power-On Self Test)?”**
 
-**Answer:** POST checks that required components are present, configured correctly, and functioning sufficiently for startup to continue.
+**Answer:** POST checks that required components are present and functioning sufficiently for startup to continue.
 
-### Question: “How does the system choose where to boot from?”
+**Question: “How does the system choose where to boot from?”**
 
-**Answer:** UEFI uses an ordered boot-priority list. It checks the configured devices in order for a valid boot routine.
+**Answer:** UEFI uses an ordered boot-priority list and checks configured devices for a valid boot routine.
 
-### Question: “What does the bootloader do in the final boot step?”
+**Question: “What does the bootloader do in the final boot step?”**
 
-**Answer:** The bootloader starts the operating-system loading process and loads the OS into memory. Firmware then hands control to the operating system.
+**Answer:** The bootloader begins loading the operating system into memory, then control passes to the OS.
 
-## Task 4: Interactive flags
+Exact details vary by device and firmware, but this sequence is the room's basic mental model.
 
-The room displays a flag after each interactive exercise is completed:
+## Phase 3: Validate the Interactive Results
+
+The room provides a flag after each interactive exercise:
 - Identifying all PC components.
 - Completing the boot-sequence simulation.
 
-Retrieve both values from the active room and submit them. They are intentionally redacted in this public write-up as `THM{hidden}`.
+Open each interactive site, finish every required item, and record the flag displayed by the exercise. These values depend on the live task and are redacted as **THM{hidden}** here instead of guessed.
 
-## Component reference
+For a real computer, firmware settings, Secure Boot state, boot order, and bootloader integrity are useful security evidence. Do not change firmware or boot settings on a device you do not administer.
 
-| Component | Main role | Security relevance |
+## Phase 4: Room Questions & Flag Walkthrough
+
+| Task | Question focus | Answer |
 |---|---|---|
-| Motherboard | Connects hardware components | Firmware and device interfaces affect the platform's trust boundary |
-| CPU | Executes instructions | CPU vulnerabilities can affect isolation and execution |
-| RAM | Holds active data | Volatile memory may contain secrets and forensic evidence |
-| SSD/HDD | Persistent storage | Stores OS files, application data, logs, and credentials |
-| Network adapter | Connects to networks | Exposes the system to network traffic and remote services |
-| PSU | Supplies electrical power | Stable power is required for reliable operation |
-| Graphics card | Processes graphics workloads | Can also execute general-purpose compute tasks |
-| Input/output devices | Let users interact with the computer | Input devices can be abused for social engineering or hardware attacks |
+| Task 1 | Why understand computers before securing them? | Understand the system layout, data flow, and access boundaries |
+| Task 2 | Motherboard analogy | Skeleton/nervous system; connects components |
+| Task 2 | CPU role | Executes instructions; multiple cores can process in parallel |
+| Task 2 | RAM | Volatile working memory |
+| Task 2 | HDD vs SSD | HDD mechanical; SSD solid-state and typically faster |
+| Task 2 | Network adapter | Enables wired/wireless communication |
+| Task 2 | PSU purpose | Supplies power |
+| Task 2 | Graphics card | Processes graphics; often connects via PCIe |
+| Task 2 | Input/output examples | Keyboard/mouse; monitor/printer; USB/HDMI/DisplayPort |
+| Task 3 | Power button | Signals system power-on |
+| Task 3 | Modern firmware | UEFI; BIOS is the older design |
+| Task 3 | POST | Basic startup hardware checks |
+| Task 3 | Boot selection | UEFI follows boot priority |
+| Task 3 | Bootloader | Starts OS loading |
+| Interactive exercises | Flags | Retrieve from the live room; redacted as THM{hidden} |
 
-## Boot sequence reference
+## Phase 5: Key Takeaways & Remediation
 
-1. The power button signals the system to start.
-2. The power supply provides power to the components.
-3. UEFI firmware starts.
-4. POST checks key hardware components.
-5. UEFI selects a boot device based on configured priority.
-6. The bootloader begins loading the operating system into RAM.
-7. Control passes to the operating system.
+The motherboard connects hardware, the CPU executes instructions, RAM holds active data, storage retains data, and the network adapter enables communication. During startup, firmware checks the system, selects a boot device, and launches the bootloader.
 
-Exact implementation details vary by device and firmware, but the room's sequence provides the basic mental model.
-
-## Key takeaways
-
-The motherboard connects components, the CPU executes instructions, RAM holds active data, storage retains data, and the network adapter enables communication. During startup, firmware checks the system, selects a boot device, and launches the bootloader. These basics help security analysts understand hardware trust, boot integrity, and where evidence may exist.
-
-## Expanded practical study guide
-
-### 1. CPU, memory, and storage
-
-The CPU executes instructions. RAM holds working data for active processes and is normally volatile, while persistent storage retains data across shutdowns. The operating system coordinates access to these resources and isolates processes from one another.
-
-A CPU core can execute instructions, and modern processors use caches to reduce the time needed to access frequently used data. The operating system schedules runnable threads, handles interrupts, and provides system calls so applications can request privileged services safely.
-
-### 2. Input, output, and buses
-
-Input devices provide data to the system; output devices present results. Storage, network, display, and peripheral controllers communicate through buses and device interfaces. A device driver lets the operating system interact with a particular device.
-
-Hardware faults can resemble software problems. When diagnosing an issue, record the symptoms and determine whether they occur before the operating system loads, only in one application, or across multiple applications.
-
-### 3. Operating-system responsibilities
-
-The OS manages processes, memory, filesystems, device access, users, permissions, networking, and logs. User applications normally run with limited privileges. The kernel mediates sensitive operations, helping prevent one process from directly controlling another process's memory or system resources.
-
-### 4. Files and data representation
-
-Files contain bytes interpreted according to a format. The extension is a naming convention, not proof of content. Use `file` to identify likely formats and a suitable parser to inspect them. Never execute an unknown file merely to learn what it does.
-
-### 5. Security implications
-
-Least privilege limits the damage caused by a compromised account or application. Secure boot and code-signing mechanisms can help establish trust in the boot chain and software, while updates fix known vulnerabilities. Disk encryption protects data at rest when implemented and keyed correctly, but it does not protect data from an already-authorized process running on an unlocked system.
-
-### 6. Answering room tasks
-
-Map each question to the component or responsibility it describes: CPU execution, volatile memory, persistent storage, device I/O, kernel services, or application behaviour. Use the exact terminology in the room and distinguish a hardware component from the operating-system function that manages it.
-
-### 7. Review and troubleshooting
-
-When a computer behaves unexpectedly, change one variable at a time and note when the symptom occurs. Check system logs, resource usage, device status, and recent changes. Do not assume every performance issue is a malware incident or every crash is a hardware failure.
-
-### 8. Key takeaway
-
-A computer system is a coordinated set of hardware and software layers. Understanding the responsibility of each layer helps explain performance, reliability, and security problems without jumping to unsupported conclusions.
+For security, enable Secure Boot where supported, protect firmware configuration with strong administrative controls, keep firmware updated, restrict physical access, and document authorized boot media. Disk encryption and a secure boot chain can protect data and startup integrity, but they do not eliminate risks from an already-authorized process or compromised operating system.

@@ -1,23 +1,47 @@
-# RA: Oh My WebServer — TryHackMe
+# RA: Oh My WebServer — TryHackMe Walkthrough
 
 Room: https://tryhackme.com/room/ohmywebserver
 
-This machine challenge is about investigating an exposed web service and following the evidence provided by the target. I should confirm the exact room page and the active target before assuming that a particular exploit path applies.
+This room is a vulnerable-server challenge. The reliable approach is to enumerate the exposed services, identify the web server and its version, validate the relevant weakness, and verify impact on the assigned machine. The target IP and service configuration can change between instances.
 
-## Initial scan
+## 1. Start the lab and scan the target
 
-With the lab target assigned, I can start with:
+Start the machine and record its current address. Run a basic service scan:
 
-```bash
-nmap -sV -sC -oN webserver-scan.txt TARGET_IP
-```
+    nmap -sC -sV -oN ohmywebserver-nmap.txt TARGET_IP
 
-The output helps identify ports and service versions. I should inspect the actual results and check whether the exposed software is affected by a known issue. A version banner alone is not sufficient proof, because banners can be incomplete or misleading.
+If needed, scan all TCP ports:
 
-## Validate carefully
+    nmap -p- --min-rate 1000 -oN ohmywebserver-allports.txt TARGET_IP
 
-If the room directs me to a known vulnerability, I should understand what the proof of concept does before running it. Testing should remain limited to the room's target, and I should avoid destructive actions. After access is obtained, I need to inspect the current account and permissions before investigating any further escalation path.
+Use the address supplied by the room. Review open ports and service banners. A server banner can help identify the software, but it is not sufficient by itself to prove that a vulnerability is present.
+
+## 2. Inspect the web service
+
+Open the web server in a browser and record the status code, page content, headers, and redirects. Use the correct scheme and port from the scan. If the default page is missing or an error appears, check whether the service expects a particular hostname or path.
+
+If the room asks you to enumerate directories, use a wordlist available in the AttackBox and review promising paths manually. Do not assume a directory exists because it appeared in an unrelated scan.
+
+## 3. Identify the server and relevant vulnerability
+
+Compare the detected software and version with the room's clue and reliable documentation. Check whether the vulnerability applies to that exact version and configuration. Vendors may backport fixes, and proxies may alter the visible banner.
+
+If the task demonstrates a server-side weakness, identify the affected endpoint or request and reproduce the smallest safe proof. Avoid destructive tests or actions that could affect other users.
+
+## 4. Validate access and impact
+
+If the intended exercise grants access to the host, verify the current user and host identity before proceeding. A web-server process may run under a restricted account, so successful code execution is not automatically root access.
+
+Record the exact evidence that proves the issue: the request, response, server behaviour, or session details. Do not claim a successful exploit merely because a tool printed a completion message.
+
+## 5. Remediation
+
+Keep the web server and dependencies patched, remove unused modules, disable unnecessary features, and restrict the service account's permissions. Hide detailed error messages from public responses while retaining appropriate server-side logs. Monitor unusual requests and unexpected child processes.
+
+## 6. Working through the room
+
+Follow the current task's hints and use the target's actual output to select the next step. If the task asks for a version, service, or file, copy it from the lab. If an exploit fails, verify the version, port, and prerequisites before trying another approach.
 
 ## What I took from this room
 
-Web server exploitation depends on the service version, configuration, and evidence from enumeration. The reliable method is to identify the service, validate the suspected weakness, and document the result rather than assume a generic exploit will work on every server.
+A vulnerable web server should be approached like any other target: discover the service, confirm the relevant weakness, demonstrate impact safely, and recommend a fix. The exact machine details must come from the active lab, not a remembered output.

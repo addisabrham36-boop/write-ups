@@ -89,3 +89,33 @@ Stop listeners and temporary services, remove test artefacts where the scope per
 ## Key takeaways
 
 A consistent methodology makes security testing more reliable: define scope, discover the attack surface, enumerate services, validate weaknesses, demonstrate impact safely, and report actionable fixes. The value is in the evidence and reasoning, not in the number of tools executed.
+
+## Expanded methodology from scope to report
+
+### 1. Authorization and objectives
+
+Confirm scope, permitted methods, excluded systems, test window, and success criteria. A technically successful test can still fail professionally if it crosses the authorization boundary or disrupts an excluded system.
+
+### 2. Reconnaissance and enumeration
+
+Gather information that identifies the attack surface. Passive recon uses public data; active recon probes the target. Enumeration turns discovery into details about services, endpoints, users, and permissions. Save commands and outputs, then use each result to choose the next test.
+
+### 3. Vulnerability analysis
+
+Compare observed configuration and behaviour with reliable advisories and the application's intended design. Validate that the vulnerable feature is present. A version string, scanner result, or published proof of concept is not by itself proof that the target is exploitable.
+
+### 4. Exploitation and privilege analysis
+
+When authorized, use the least disruptive test that demonstrates the flaw. Record precondition, request or command, effect, and resulting identity. Distinguish initial access from privilege escalation and verify the effective user before claiming root or SYSTEM.
+
+### 5. Evidence and cleanup
+
+Preserve relevant evidence, remove temporary artifacts when required, terminate test sessions, and restore the environment according to the rules. Avoid accessing unrelated records or establishing persistence just to demonstrate impact.
+
+### 6. Reporting
+
+A useful finding includes title, severity rationale, affected asset, reproducible steps, sanitized evidence, impact, root cause, and remediation. Explain how the fix prevents the attack path and how to retest it. Separate observed facts from assumptions.
+
+### 7. Room questions
+
+Map each question to the stage it describes and use evidence from the live room. Report exact values only when verified and redact flags as flag{hidden}.

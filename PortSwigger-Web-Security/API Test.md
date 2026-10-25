@@ -338,3 +338,47 @@ so that how i did this labs
 ![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/ff694be0-a58d-4409-84e0-14ec3ec1613d.png align="center")
 
 ***Thank you for reading!***
+
+## Expanded API testing methodology
+
+### 1. Map the API surface
+
+Start from the in-scope application and identify API routes through the browser's Network panel, JavaScript references, OpenAPI/Swagger documentation, or requests supplied by the lab. Record the HTTP method, path, content type, authentication context, and purpose. Do not assume a route is safe because it is undocumented.
+
+A route inventory can use this structure:
+
+| Method and path | Purpose | Auth context | User-controlled fields | Expected permission |
+|---|---|---|---|---|
+| GET /resource | Read resource | Test user | Object ID | Owner or approved role |
+| POST /resource | Create resource | Test user | Request body | Authorized user |
+| PATCH /resource/{id} | Modify resource | Test user | ID and fields | Owner or approved role |
+
+Replace these examples with endpoints actually observed in the lab.
+
+### 2. Preserve and replay a baseline request
+
+Capture a legitimate request in Burp Suite and send it to Repeater. Identify which headers carry authentication, which fields select an object, and which parts the server appears to validate. Keep one unmodified baseline so changes can be compared one at a time.
+
+### 3. Test authorization by object and function
+
+Check whether the server verifies that the authenticated identity may access the requested object. In a lab with two test accounts, compare the request made by each account. A sequential or unpredictable ID is not a substitute for authorization. Also check whether a low-privileged account can invoke a privileged function directly even when the UI hides the relevant button.
+
+### 4. Test input validation and API semantics
+
+Determine how the API handles unexpected types, extra JSON properties, missing fields, duplicate fields, unsupported methods, and invalid state transitions. Avoid sending destructive values. For each test, record the baseline response, modified request, observed status and body, and any state change that proves impact.
+
+### 5. Review mass assignment and data exposure
+
+Compare the fields returned by the API with those required by the client. Check whether server-side protected fields such as role, owner, price, or approval state can be supplied by a client. Do not assume that a field is writable just because it appears in a response. Verify the effect in the lab.
+
+### 6. Troubleshooting
+
+If a request behaves differently in Repeater, compare cookies, authorization headers, content type, origin, CSRF token, and request body. A 401 often signals missing or invalid authentication; 403 may indicate insufficient permission, but applications do not always follow this convention. Inspect the response and server behaviour.
+
+### 7. Remediation
+
+Apply object-level and function-level authorization on every request, validate schemas server-side, allowlist writable properties, minimize returned data, rate-limit sensitive operations, and log high-risk changes. Use explicit API versioning and maintain an inventory of exposed routes.
+
+### 8. Evidence and task answers
+
+For each PortSwigger lab, map the answer to the exact endpoint, request modification, and observed impact. Keep the reproducer minimal and non-destructive. Do not invent a status code or response; it depends on the lab instance. Redact session tokens and flags in public notes.

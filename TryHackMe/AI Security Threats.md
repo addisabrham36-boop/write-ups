@@ -84,9 +84,9 @@ The task demonstrates using AI to support security analysis and investigation. A
 
 The room's example firewall event is:
 
-\`\`\`text
+```text
 Jun 19 03:14:22 helix-fw01 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=185.220.101.47 DST=10.0.0.5 PROTO=TCP DPT=22
-\`\`\`
+```
 
 Interpretation:
 - The event timestamp is Jun 19 at 03:14:22.
@@ -101,11 +101,11 @@ This event supports the conclusion that a TCP connection attempt to port 22 was 
 
 The room also supplies a simulated suspicious email:
 
-\`\`\`text
+```text
 From: security@helix-financial-secure.com
 Subject: Urgent: Unusual sign-in detected
 Body: We detected a sign-in on your Helix Financial account from Romania. Verify your identity immediately or access will be suspended: https://helix-financial-secure.com/verify
-\`\`\`
+```
 
 Assess the sender domain, urgency, requested action, and link destination. A lookalike hostname and threat of account suspension are suspicious indicators. Do not open a live URL merely because an AI tool labels it suspicious.
 

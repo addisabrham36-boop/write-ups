@@ -63,3 +63,37 @@ Keep API keys out of source code and prompts. Use a secret manager and rotate cr
 For each test, record the endpoint, user role, exact input, response, tool activity, evidence of actual impact, and recommended fix. Do not claim an exploit succeeded based only on generated text. Use only the lab target and redact flags or secrets in public notes.
 
 The main controls are least privilege, server-side authorisation, controlled retrieval, safe output handling, human approval for high-impact actions, provenance tracking, and monitoring. No single system prompt or filter solves all LLM security risks.
+
+## Expanded LLM application assessment
+
+### 1. Map the complete system
+
+An LLM application commonly includes a user interface, orchestration code, model endpoint, prompt template, retrieval or search layer, tools, memory, logs, and third-party integrations. Threats often arise at the connections between these components rather than in the model alone. Draw the data flow and mark which inputs are attacker-controlled and which identities have access to sensitive resources.
+
+### 2. Treat prompts and retrieved content as untrusted
+
+Prompt injection can appear in a direct user message or in indirect content such as a web page, uploaded file, or retrieved document. The key question is whether untrusted content can cause the application to violate a security boundary. A model following a strange instruction is not enough; assess whether it disclosed protected data or performed an unauthorized action.
+
+### 3. Review tool permissions
+
+Inventory tools and the operations each can perform. Check whether a tool can read files, access external services, modify records, execute code, or send messages. Use narrow server-side permissions, structured arguments, allowlists, resource limits, and independent authorization checks. Do not rely on a prompt telling the model to use tools safely.
+
+### 4. Protect data and retrieval
+
+Apply access controls before private content is retrieved and passed to the model. Partition data by tenant and user, prevent secrets from entering prompts unnecessarily, and verify that logs do not retain credentials or sensitive records without a defined need. A model refusing to reveal a document is not a substitute for retrieval authorization.
+
+### 5. Handle output safely
+
+Model-generated output can be incorrect, maliciously influenced, or malformed. Validate schemas, apply context-appropriate output encoding, and never pass arbitrary model text directly into a shell, SQL engine, HTML renderer, or privileged tool. Keep consequential actions behind policy checks and human approval where appropriate.
+
+### 6. Availability, supply chain, and monitoring
+
+Set request quotas, token budgets, timeouts, and concurrency limits. Track model versions, dataset provenance, package sources, and plugin changes. Log relevant decisions and tool calls while minimizing sensitive content. Test upgrades before deployment and maintain a rollback path.
+
+### 7. Practical test evidence
+
+For each room scenario, record the normal behaviour, the test input, the resulting model response, any downstream tool action, and whether that action was authorized. A text response alone is not proof that a backend action occurred. Use only the provided lab and avoid probing unrelated provider systems.
+
+### 8. Room tasks and remediation
+
+Use the active room's examples for exact question values. Map each issue to its root cause, violated security property, and enforcement point. Prefer server-side authorization, least privilege, safe parsers, output validation, model provenance, and incident monitoring over prompt-only mitigations. Redact flags as `flag{hidden}`.

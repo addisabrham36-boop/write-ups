@@ -1,81 +1,65 @@
 # LLM Security: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/llmsecurity
+Official room: https://tryhackme.com/room/llmsecurity
 
-Large language models produce text based on learned patterns and the context they receive. They can be useful, but they do not reliably distinguish trusted instructions from malicious content in every situation. Once an application connects a model to private data or tools, that limitation becomes a security concern.
+## Room Overview & Information
 
-## 1. Map the LLM application
+**Category:** AI and application security  
+**Focus:** Prompt injection, data disclosure, output handling, tool access, and secure deployment.
 
-Before testing, identify the pieces around the model:
+An LLM generates output from input and context. It does not automatically know which content is trusted or whether a requested action is authorised. Security depends on the surrounding application: what data is supplied, what tools are available, and which controls execute outside the model.
 
-- User interface and API.
-- System and developer instructions.
-- User prompts and uploaded files.
-- Retrieval system and document permissions.
-- Model provider or self-hosted inference service.
-- Tools, plugins, and external APIs.
-- Authentication, authorisation, logs, and secrets.
+## Phase 1: Map the architecture
 
-This map matters because a model's generated text is not the only risk. A tool may send an email, query a database, update a ticket, or access files. Those actions must be protected by normal application security controls.
+A deployed LLM application may include a frontend, API gateway, inference service, system prompt, retrieval-augmented generation (RAG), plugins, and external tools. Map these components before testing. The chat box is only one entry point; APIs, document uploads, retrieval, and administration routes may expose other attack surfaces.
 
-## 2. Prompt injection
+## Phase 2: Prompt injection
 
-Prompt injection is an attempt to make a model disregard intended behaviour or follow malicious instructions. It can be direct, when a user puts the instructions in their prompt, or indirect, when the instructions appear in a webpage, document, email, or retrieved record that the model is asked to analyse.
+Prompt injection occurs when untrusted content attempts to influence the model's instructions. It may be direct, through a user prompt, or indirect, through a webpage, email, PDF, or retrieved document.
 
-A safe test in an authorised lab is to observe whether untrusted text changes the response or causes a tool to behave outside its intended scope. Record the input, the model response, any tool call, and the resulting application action. Do not infer that a real action happened just because the model says it did.
+In the authorised lab:
+1. Use the harmless test case supplied by the room.
+2. Record the exact input and model response.
+3. Inspect whether a tool call was requested.
+4. Verify whether the application authorised and executed it.
+5. Confirm any disclosure or state change in the underlying system.
+6. Document evidence and limitations.
 
-Defences include separating trusted instructions from untrusted content, restricting the data and tools available to the model, and validating actions outside the model. Delimiters and careful prompting may help, but they are not reliable security boundaries by themselves.
+A model's statement that it has accessed a file is not proof. Check the system that owns the file or action.
 
-## 3. Retrieval-augmented generation (RAG)
+## Phase 3: Sensitive information disclosure
 
-RAG retrieves documents and adds them to the model's context. It can improve factual grounding, but it also creates risks:
+Private data can leak through model output, retrieval, logs, system prompts, or poorly scoped API responses. Do not store secrets in prompts and assume the model will keep them private.
 
-1. A user asks a question.
-2. The application searches a document store.
-3. Retrieved passages are inserted into the model context.
-4. The model generates an answer from the prompt and passages.
+For RAG systems, enforce user permissions before documents are retrieved and placed in context. Filtering only the final response may be too late if the model has already received protected content.
 
-If the application checks access only after retrieval, a user may receive information from another user's documents. Enforce permissions before retrieval and ensure the response cannot expose data from a higher-trust context. Retrieved documents must also be treated as untrusted content because they may contain indirect prompt injection.
+## Phase 4: Tool and agent security
 
-## 4. Insecure output handling
+Tools can expand an agent's capabilities to search files, call APIs, send email, run code, or modify records. Each tool should have a separate authorisation check and a narrow schema.
 
-A model can generate HTML, SQL-like text, shell commands, URLs, or tool arguments. Passing this output directly into another system can create injection or unsafe-action problems.
+Use read-only access when possible, validate arguments, require human approval for high-impact actions, apply timeouts and quotas, and log tool requests and results. A prompt that tells a model not to delete files is not equivalent to removing its ability to delete files.
 
-The receiving component must parse and validate the value using its own rules. Use parameterised database queries, context-aware output encoding, allowlisted tool actions, and strict argument schemas. Never treat generated text as trusted executable code merely because it came from an AI model.
+## Phase 5: Output handling
 
-## 5. Sensitive information and model access
+Treat model output as untrusted data. If it is inserted into HTML, SQL, shell commands, or source code, apply the correct context-specific protection.
 
-Avoid putting secrets in prompts or system instructions where they are not needed. Store credentials in a secret manager, scope them narrowly, and make the application enforce authorisation. A model should not be the only thing deciding whether a user can access a record.
+- Use parameterised queries for SQL.
+- Escape HTML according to its output context.
+- Avoid shell commands built from model-generated strings.
+- Validate structured output against a schema.
+- Treat model-generated URLs and paths as untrusted.
+- Verify claims before using them in high-impact decisions.
 
-Model files, vector stores, training data, logs, and inference APIs also need access controls. Monitor repeated extraction attempts, unusual query volume, and requests that target protected records.
+Valid-looking JSON is not necessarily safe or correct. Parse it and validate the fields.
 
-## 6. Excessive agency and unsafe tools
+## Phase 6: Model supply chain
 
-An agent has excessive agency when it can take actions with more authority than necessary, or when it can act without adequate approval. Reduce this risk by:
+Track model names, versions, hashes, dependencies, and approval status. Download artifacts from trusted sources and verify integrity before loading them. Some serialized formats can execute code during deserialization, so inspect untrusted artifacts using safe methods in an isolated environment.
 
-- Giving tools narrowly scoped permissions.
-- Separating read-only tools from tools that modify state.
-- Validating user authority for every sensitive operation.
-- Requiring human approval for high-impact actions.
-- Limiting recursive calls, execution time, and resource consumption.
-- Keeping a record of the request, tool arguments, authorisation decision, and outcome.
+Keep API keys out of source code and prompts. Use a secret manager and rotate credentials if exposure is suspected.
 
-The tool service must enforce these controls. A prompt saying “never delete anything” is not a replacement for a permission check.
+## Phase 7: Reporting and remediation
 
-## 7. Practical task workflow
+For each test, record the endpoint, user role, exact input, response, tool activity, evidence of actual impact, and recommended fix. Do not claim an exploit succeeded based only on generated text. Use only the lab target and redact flags or secrets in public notes.
 
-For each room task, first identify the risk being demonstrated. Then inspect the provided prompt, retrieved content, model response, or tool call. Answer the question based on the evidence shown by the exercise.
-
-A useful finding format is:
-
-- **Observation:** what the application did.
-- **Security issue:** which trust boundary or control failed.
-- **Impact:** what information or action could be affected.
-- **Mitigation:** the control that should be implemented.
-- **Retest:** how to prove the control blocks the same attack.
-
-If the live room uses an interactive agent, follow its current instructions and use the feedback to verify your answer. I do not invent agent output, completion status, or flags.
-
-## What I took from this room
-
-LLM security is mostly about controlling the connection between generated text and real data or actions. The model can interpret requests, but authentication, authorisation, validation, secret handling, and audit logging must be enforced by the surrounding application.
+The main controls are least privilege, server-side authorisation, controlled retrieval, safe output handling, human approval for high-impact actions, provenance tracking, and monitoring. No single system prompt or filter solves all LLM security risks.

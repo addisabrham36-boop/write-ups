@@ -19,11 +19,11 @@ Start the machine provided by TryHackMe and follow the room's instructions for a
 
 If the exercise provides a Docker-based environment, inspect the running container and its version using the commands supplied by the room. Typical local inspection commands are:
 
-\`\`\`bash
+```bash
 docker ps --format '{{.Names}}  {{.Image}}  {{.Status}}'
 docker exec CONTAINER_NAME php -v
 curl -i http://127.0.0.1:8088/index.php
-\`\`\`
+```
 
 - **docker ps** lists running containers.
 - **--format** controls the displayed container name, image, and status.

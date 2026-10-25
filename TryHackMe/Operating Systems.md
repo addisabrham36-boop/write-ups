@@ -49,3 +49,54 @@ For each task, identify whether it describes the kernel, process management, mem
 ## What I took from this room
 
 The operating system is a resource manager and a security boundary. Processes, memory, filesystems, service identities, permissions, and logs all help explain how a system behaves and where a compromise may have occurred.
+
+## Phase 1: Inspect the current system
+
+Record the operating system, current account, and basic resource state before making changes:
+
+```bash
+whoami
+id
+uname -a
+cat /etc/os-release
+ps aux
+df -h
+free -h
+```
+
+These commands identify the user and groups, kernel/platform details, OS release, running processes, filesystem capacity, and memory usage. The exact output depends on the machine; use the active lab rather than a copied transcript.
+
+On Windows, similar information can be obtained through Settings, Task Manager, System Information, and PowerShell.
+
+## Phase 2: Understand privilege boundaries
+
+The kernel mediates access to hardware and sensitive system resources. Applications normally run in user space and request privileged operations through system calls or operating-system APIs. Least privilege reduces the damage a compromised process can cause.
+
+Linux file permissions describe read, write, and execute access for the owner, group, and others; Windows uses access-control lists and security tokens. A process name or account name alone does not establish its effective permissions. Verify the identity, groups, execution context, and access rules.
+
+## Phase 3: Processes, services, and startup
+
+A process is an executing program, while a thread is an execution path within a process. Services run background work such as networking, logging, web hosting, and scheduled jobs. A service that runs with excessive privileges or executes a writable script can create an escalation path.
+
+Inspect unknown processes before terminating them. Record their path, parent process, owner, command line, and network behaviour. During incident response, avoid actions that destroy volatile evidence unless containment requires them.
+
+## Phase 4: Filesystems, logs, and incident investigation
+
+Persistent files may survive reboot, while RAM and some process state are volatile. Forensic collection may need to preserve both, depending on the incident. File timestamps can be modified, and local logs may be incomplete or tampered with, so correlate multiple sources.
+
+For a Linux file of interest, useful commands include:
+
+```bash
+ls -la PATH
+stat PATH
+file PATH
+sha256sum PATH
+```
+
+These show directory metadata, detailed file metadata, likely file type, and a byte-level fingerprint. A hash can demonstrate that two copies match; it does not independently establish authenticity.
+
+## Phase 5: Room tasks and remediation
+
+Map each task to the relevant concept: kernel/user space, processes, RAM/storage, filesystem, permissions, services, or logs. Use commands in the room environment and record the exact result.
+
+Keep the OS supported, patch known vulnerabilities, restrict administrative accounts, remove unnecessary services, review privileged permissions, protect logs, and test backup recovery. Do not run the entire system as root simply to avoid fixing permission problems.

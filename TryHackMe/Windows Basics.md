@@ -1,57 +1,105 @@
 # Windows Basics: TryHackMe Walkthrough
 
-Room: https://tryhackme.com/room/windowsbasics
+Official room: https://tryhackme.com/room/windowsbasics
 
-Windows is widely used on personal computers and in enterprise environments. For security work, it is useful to understand the filesystem, user accounts, processes, services, networking, and event logs. These are the places an analyst often checks when investigating a host.
+## Room Overview & Information
 
-## 1. Windows filesystem
+**Category:** Operating-system fundamentals  
+**Difficulty:** Beginner  
+**Focus:** Windows interface, filesystem, users, processes, services, and basic administrative tools.
 
-Windows commonly uses drive letters such as C: and directories such as C:\Windows, C:\Users, and C:\Program Files. User profile directories store settings and user data. Application binaries and configuration may be placed in different locations depending on the installer and system policy.
+Windows is widely used on personal devices and enterprise networks. Security analysts need to understand how users log in, where files live, how programs run, how services start, and where system events are recorded.
 
-In File Explorer, enable the view options required to inspect hidden files when investigating a system. Hidden files are not encrypted or protected merely because they are hidden. Access is controlled by permissions.
+## Phase 1: Navigate the interface and filesystem
 
-## 2. Users and permissions
+Windows commonly uses drive letters such as `C:\`. The system directory is often `C:\Windows`, and user profiles are commonly stored under `C:\Users\USERNAME`. Paths and installed applications vary by machine.
 
-Windows accounts may be local or managed through a domain. Group membership affects what actions a user can perform. Administrator privileges should be limited because a compromised administrator account can affect the whole machine.
+In Command Prompt, use:
 
-In PowerShell, useful identity commands include whoami, whoami /groups, and Get-LocalUser. Use them to inspect the current account and local accounts in an authorised environment. The output depends on the machine and permissions.
+```cmd
+whoami
+cd
+dir
+dir /a
+type notes.txt
+```
 
-## 3. Processes and services
+- `whoami` prints the current identity.
+- `cd` shows or changes the current directory.
+- `dir` lists directory entries.
+- `dir /a` includes hidden and system entries.
+- `type` prints a text file.
 
-A process is a running program. A service is a background component that can start automatically or on demand. Unexpected processes, unfamiliar executable paths, and services configured to run with excessive privileges can be useful investigation leads.
+In PowerShell, similar commands include `Get-Location`, `Get-ChildItem -Force`, and `Get-Content notes.txt`.
 
-Useful PowerShell commands include Get-Process and Get-Service. Task Manager provides a graphical view of processes and startup activity. Do not terminate an unfamiliar process until you understand what it does; it may be a critical system component or evidence in an incident.
+## Phase 2: Users and groups
 
-## 4. Command Prompt and PowerShell
+A user account represents an identity. Groups help assign permissions to multiple users. Membership in the local Administrators group gives elevated rights and should be limited to accounts that need them.
 
-Command Prompt and PowerShell are command-line environments, but they have different syntax and capabilities. PowerShell works with structured objects and provides cmdlets for system administration.
+Inspect identity and group membership:
 
-Examples of basic commands:
-- whoami: show the current identity.
-- ipconfig /all: display network configuration.
-- netstat -ano: show network connections and associated process IDs.
-- Get-Process: list running processes in PowerShell.
-- Get-Service: list services in PowerShell.
-- Get-EventLog or Get-WinEvent: query event logs, subject to permissions and available logs.
+```cmd
+whoami /all
+net user
+net localgroup
+```
 
-Run commands in the appropriate shell. A Command Prompt command may not work unchanged in PowerShell, and a PowerShell cmdlet is not a standard executable in every shell.
+`whoami /all` shows the current identity, groups, and privileges. `net user` lists local user accounts, and `net localgroup` lists local groups. Some information may require administrative permissions.
 
-## 5. Networking
+Do not assume a user is an administrator because their username looks important. Check the group membership and effective privileges.
 
-ipconfig /all shows interface addresses, gateways, DNS servers, and related configuration. Test a connection with an approved diagnostic tool and separate name resolution from network reachability. A failed ping does not prove a host is offline because ICMP may be blocked.
+## Phase 3: Processes and services
 
-netstat -ano can show listening ports and active connections, including the process ID. Correlate that ID with a process listing before drawing conclusions.
+A process is a running program. A service is a background component that can start automatically and provide functions such as networking, logging, or application hosting.
 
-## 6. Event logs
+In PowerShell:
 
-Windows Event Viewer organises records into logs such as System, Application, and Security. Security logs can include logon events, account changes, and privilege-related activity when auditing is configured. PowerShell can query logs, but access depends on privileges and policy.
+```powershell
+Get-Process
+Get-Service
+Get-EventLog -LogName System -Newest 20
+```
 
-During an investigation, record the event ID, timestamp, account, host, and message. One event rarely proves an entire attack chain. Correlate authentication events with process, network, and endpoint records.
+The first command lists processes, the second lists services, and the third shows recent events from the legacy System event log interface where supported. Modern systems may use other PowerShell event-log cmdlets and providers.
 
-## 7. Working through the room
+In Task Manager, inspect the process name, resource usage, and details. A suspicious name alone is not enough to prove malware. Check the executable path, publisher, parent process, user, and network activity where available.
 
-Follow the task's exact environment and identify whether it asks about a path, command, account, service, process, or log. Use the tool shown in the task and read the actual output. Do not assume your personal Windows machine has the same users or files as the room's machine.
+## Phase 4: Windows Event Viewer
 
-## What I took from this room
+Event Viewer organises logs into categories such as Application, Security, and System. Security events can show authentication and account activity when the relevant audit policy is enabled. System events can show service and driver issues. Application logs may show errors from software.
 
-Windows security work starts with knowing where to find accounts, processes, services, network configuration, and event logs. Understanding these basics makes it easier to investigate alerts and recognise suspicious changes.
+When investigating an event, record the timestamp, event ID, source, account, computer, and message. Event IDs are useful, but the same number can mean different things across providers. Read the event source and details rather than relying on the ID alone.
+
+## Phase 5: Basic network inspection
+
+```cmd
+ipconfig /all
+route print
+netstat -ano
+nslookup example.com
+```
+
+- `ipconfig /all` shows interface addresses, DNS configuration, and other network details.
+- `route print` displays the routing table.
+- `netstat -ano` lists connections/listeners, numeric addresses, and associated process IDs.
+- `nslookup` queries DNS.
+
+These commands help distinguish a name-resolution issue from a routing or service problem. Do not expose full network configuration publicly if it includes sensitive internal information.
+
+## Phase 6: Working through the room
+
+For each question, use the interface or command specified by the task and read the value from the lab. If the task asks for a hidden file, inspect hidden entries; if it asks for a user or process, verify it using the appropriate tool. Do not copy account names, file paths, or output from a different Windows instance.
+
+## Phase 7: Security lessons
+
+- Use standard user accounts for daily work and elevate only when required.
+- Keep Windows and applications patched.
+- Enable useful audit policies and forward logs centrally.
+- Restrict remote administration and exposed services.
+- Review service permissions and startup entries.
+- Use endpoint protection and investigate suspicious process behaviour.
+- Protect backups and credentials.
+
+## Key takeaways
+
+Windows administration and security investigation rely on understanding identity, permissions, processes, services, logs, and networking. The best first step is to inspect the actual system state and use evidence, rather than assuming that every Windows machine has the same configuration.

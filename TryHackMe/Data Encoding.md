@@ -1,4 +1,4 @@
-# Data Encoding: TryHackMe Walkthrough
+# Data Encoding: Complete TryHackMe Walkthrough
 
 Official room: https://tryhackme.com/room/dataencoding
 
@@ -6,145 +6,137 @@ Official room: https://tryhackme.com/room/dataencoding
 
 **Category:** Computer fundamentals  
 **Difficulty:** Beginner  
-**Focus:** ASCII, Unicode, UTF-16, UTF-32, and how computers represent text.
+**Topics:** ASCII, Unicode, UTF-8, UTF-16, UTF-32, hexadecimal, Base64, and how computers represent text.
 
-Computers store and process data as numbers and bytes. Character encodings define how characters map to numeric values. Encoding is not encryption: it is a representation that allows systems to store and exchange text consistently.
+This is an educational room rather than a penetration-testing target. Network scanning, initial access, and privilege escalation are not applicable. The practical work is to identify the requested encoding and interpret the exact code point or output.
 
-## Task 1: Introduction
+## Phase 1: Reconnaissance & Enumeration of the Input
 
-The room introduces the idea that text is stored as numeric values. The correct interpretation depends on the character encoding being used.
+Before converting a value, identify whether the task asks for a character code, Unicode code point, sequence of encoded bytes, or an encoding such as Base64. These are not interchangeable:
 
-## Task 2: ASCII
+- **Character:** the visible symbol or text.
+- **Code point:** the number assigned to a character by Unicode.
+- **Encoding:** a rule for representing code points as bytes or code units.
+- **Base64:** a reversible representation of bytes using printable characters.
+- **Hash:** a digest intended not to be reversed.
+- **Encryption:** a keyed operation intended to provide confidentiality.
 
-ASCII is a character encoding that maps letters, digits, punctuation, and control characters to numeric values. The classic ASCII set uses seven bits and defines values from 0 to 127. Many familiar characters have standard decimal codes.
+A code point does not uniquely describe the bytes of every encoding form. The same Unicode point can be represented as different byte sequences in UTF-8 and UTF-16.
 
-### Question: “What is the ASCII code in decimal for the character @?”
+## Phase 2: Character Encoding Tasks
+
+### Task 1: Introduction
+
+The room introduces the idea that text is stored and processed as numeric values. Character encodings define how text maps to numbers and bytes.
+
+### Task 2: ASCII
+
+ASCII is a seven-bit character encoding covering values 0 through 127. It includes letters, digits, punctuation, and control characters.
+
+**Question:** “What is the ASCII code in decimal for the character @?”
 
 **Answer:** **64**.
 
-The at sign maps to decimal 64 in ASCII.
+Verify locally:
 
-### Question: “What is the character that has the ASCII code of 35 in decimal?”
+```python
+print(ord("@"))
+```
 
-**Answer:** `#`.
+The ord() function returns the numeric code point for the character. For ASCII characters, that value matches the classic ASCII code.
 
-Decimal 35 represents the number sign/hash character.
+**Question:** “What is the character that has the ASCII code of 35 in decimal?”
 
-### Question: “What is the name of the character that has the ASCII code of 7?”
+**Answer:** **#**.
+
+Verify:
+
+```python
+print(chr(35))
+```
+
+The chr() function converts a valid Unicode code point to its character.
+
+**Question:** “What is the name of the character that has the ASCII code of 7?”
 
 **Answer:** **BEL**.
 
-BEL is the bell control character. It is a control code rather than a printable letter or symbol.
+BEL is the bell control character. It is not a printable alphabetic character; historically, it signals an alert on compatible terminals or devices.
 
-## Task 3: Unicode
+### Task 3: Unicode
 
-Unicode assigns code points to characters across many writing systems and symbol sets. UTF-8, UTF-16, and UTF-32 are different ways of encoding Unicode code points as bytes or code units.
+Unicode assigns code points to characters across a wide range of scripts and symbols. UTF-8, UTF-16, and UTF-32 are different ways of encoding Unicode code points.
 
-- **UTF-8** uses one to four bytes per code point.
-- **UTF-16** uses one or two 16-bit code units.
-- **UTF-32** uses a fixed 32-bit code unit for each code point.
+- **UTF-8:** one to four bytes per Unicode code point.
+- **UTF-16:** one or two 16-bit code units.
+- **UTF-32:** one 32-bit code unit for each code point.
 
-A Unicode code point is commonly written as `U+` followed by hexadecimal digits. The number of hexadecimal digits in a displayed value does not necessarily indicate the number of bytes used by UTF-8.
+A Unicode code point is written as U+ followed by hexadecimal digits.
 
-### Question: “What is the UTF-32 encoding of the character U+1F60C (smiling face with closed eyes)?”
+**Question:** “What is the UTF-32 encoding of the character U+1F60C (smiling face with closed eyes)?”
 
-**Answer:** `U+0001F60C`.
+**Answer:** **U+0001F60C**.
 
-UTF-32 displays the code point in a 32-bit form, padded with leading zeros.
+UTF-32 represents the code point in a 32-bit form, padded with leading zeros.
 
-### Question: “What is the UTF-16 encoding of シ? Note that ツ and シ are two different characters.”
+**Question:** “What is the UTF-16 encoding of シ? Note that ツ and シ are two different characters.”
 
-**Answer:** `U+30B7`.
+**Answer:** **U+30B7**.
 
-The character シ is Japanese katakana Shi. It is distinct from ツ, which is katakana Tsu.
+The character シ is katakana Shi. It differs from ツ, katakana Tsu.
 
-### Question: “What is the character that has the following UTF-32 encoding U+0001F60E?”
+**Question:** “What is the character that has the following UTF-32 encoding U+0001F60E?”
 
-**Answer:** The smiling face with sunglasses character, Unicode code point `U+1F60E`.
+**Answer:** Smiling face with sunglasses, code point **U+1F60E**.
 
-Use the code point to identify the character in a Unicode chart or the room's interactive viewer.
+**Question:** “What is the character that has the following UTF-16 encoding U+2658?”
 
-### Question: “What is the character that has the following UTF-16 encoding U+2658?”
+**Answer:** White chess knight, **U+2658**.
 
-**Answer:** The white chess knight, `U+2658`.
+### Verify Unicode locally
 
-The character belongs to the Unicode chess-symbol block.
+Python can display a character from a code point and show its numeric value:
 
-## How to verify a character
-
-If you need to inspect a Unicode code point locally, Python can display its character and code point:
-
-\`\`\`python
+```python
 character = chr(0x1F60E)
 print(character)
 print(f"U+{ord(character):04X}")
-\`\`\`
+```
 
-- `chr()` converts a numeric code point to a character.
-- `ord()` returns the code point for a character.
-- The format specifier `04X` prints hexadecimal with at least four digits.
+- chr() converts a numeric Unicode code point into a character.
+- ord() returns the code point for a character.
+- The 04X format prints uppercase hexadecimal with at least four digits.
 
-For a UTF-16 or UTF-32 byte representation, the byte order and encoding form matter. A Unicode code point is not the same thing as the raw bytes stored by every encoding.
+If a question requests raw UTF-16 or UTF-32 bytes, byte order and encoding form matter. Do not answer with the code point alone unless the question asks for the code point or uses the room's notation.
 
-## Task 4: Conclusion
+### Task 4: Conclusion
 
-### Question: “If you are curious to see how computers manipulate data, join the Python Demo room (coming soon).”
+**Question:** “If you are curious to see how computers manipulate data, join the Python Demo room (coming soon).”
 
 **Answer:** No answer needed.
 
-## Key takeaways
+## Phase 3: Troubleshooting and Common Misinterpretations
 
-ASCII assigns numeric codes to a limited character set. Unicode defines code points for a much wider range of characters, while UTF-8, UTF-16, and UTF-32 encode those code points differently. Always distinguish a character's code point from the byte sequence used to store it.
+- Do not confuse decimal with hexadecimal.
+- Do not confuse a Unicode code point with an encoded byte sequence.
+- A visible symbol may consist of more than one code point, for example with combining marks or emoji sequences.
+- UTF-8 and UTF-16 can encode the same character differently.
+- ASCII control codes such as BEL may not display as printable glyphs.
+- Base64 is not encryption and does not require a secret key.
 
-## Expanded decoding workflow
+## Phase 4: Room Questions & Answer Summary
 
-### 1. Identify the representation before decoding
+| Question | Answer |
+|---|---|
+| Decimal ASCII code for @ | **64** |
+| Character at ASCII decimal 35 | **#** |
+| Name of ASCII code 7 | **BEL** |
+| UTF-32 encoding of U+1F60C | **U+0001F60C** |
+| UTF-16 encoding of シ | **U+30B7** |
+| Character for U+0001F60E | Smiling face with sunglasses |
+| Character for U+2658 | White chess knight |
+| Join the Python Demo room | No answer needed |
 
-Encoding changes how data is represented; it does not necessarily conceal the content. Look at the character set, padding, separators, length, and task clues before choosing a decoder. Repeated blind decoding can turn a useful clue into an unstructured mess.
+## Phase 5: Key Takeaways & Remediation
 
-### 2. Base64
-
-Base64 commonly uses letters, digits, plus, slash, and optional equals-sign padding. Decode a value supplied by the room with:
-
-```bash
-printf '%s' 'ENCODED_VALUE' | base64 --decode
-```
-
-Use the exact string from the task. If the command reports invalid input, check for copied whitespace, URL-safe Base64 characters, or missing padding. Do not assume the output is readable text; it may be binary or another encoded layer.
-
-### 3. Hexadecimal
-
-Hex represents each byte using two hexadecimal digits. Decode only when the string is valid hex:
-
-```bash
-printf '%s' '48656c6c6f' | xxd -r -p
-```
-
-The example decodes a demonstration string, not a room answer. Hex data can represent text, machine code, a hash, or arbitrary bytes, so interpret the result in context.
-
-### 4. URL encoding
-
-URL encoding represents bytes using percent escapes, such as `%20` for a space. It is common in query parameters and form submissions. Use the browser's URL tools or a trusted local decoder and preserve the original request for comparison. Do not decode twice unless the evidence shows the application performs multiple decoding passes.
-
-### 5. Binary, octal, and character codes
-
-Binary is a sequence of bits. If the task provides groups of eight bits, convert each group to a byte and then interpret it using the stated character encoding. Check whether the groups are separated consistently and whether leading zeros are significant. Octal and decimal character codes likewise require the correct character table.
-
-ASCII covers a limited set of characters; Unicode uses broader code points and multiple encodings such as UTF-8. A number is not necessarily a character code just because it can be converted into a letter.
-
-### 6. Layered encodings and ciphers
-
-A string can be encoded multiple times or combined with a substitution cipher. Use structural clues to decide what to try next. Base64 often has recognizable padding and character distribution; hexadecimal contains only hex digits; Caesar or Atbash transformations preserve alphabetic structure. A sensible decoded result is a clue, not proof that the transformation was correct.
-
-### 7. Troubleshooting
-
-- Preserve the exact original input before changing it.
-- Remove only accidental whitespace, not meaningful separators.
-- Check whether the data is URL-safe Base64 or ordinary Base64.
-- Use a byte-oriented tool if the result is not valid UTF-8.
-- Do not decode hashes as if they were encrypted data.
-- Verify the final result against the room's context and expected format.
-
-### 8. Answer handling
-
-For every question, write down the input, the selected encoding, the command or decoder used, and the resulting value. Retrieve the actual answer from the active room. Do not use a demonstration string as the room's answer, and redact any flag as `flag{hidden}` in public notes.
+Character encodings let software consistently represent text across systems. Use the exact representation requested by the task, and distinguish the character, its Unicode code point, and its encoded bytes. When debugging corrupted text, check the source encoding, byte order where relevant, and whether the data was decoded more than once. Do not use encoding as a substitute for encryption or access control.

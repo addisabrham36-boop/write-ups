@@ -112,3 +112,29 @@ Each step proves a different point. A delivered email does not prove that it was
 ## Key takeaways
 
 Phishing works by making a request appear routine and urgent. This room shows how a simulated email can lead to a test credential and how password reuse can extend the impact to a mailbox. Unique passwords, MFA, independent verification, and quick reporting reduce the risk.
+
+## Expanded email investigation workflow
+
+### 1. Read the task and preserve the message
+
+Identify the message or simulated email the room asks you to inspect. Capture the sender, subject, recipient, timestamp, attachment information, and raw headers available in the exercise. Keep the original evidence and work from a copy.
+
+### 2. Inspect sender and routing details
+
+Compare the display name with the actual email address. Review Reply-To and Return-Path, and inspect Authentication-Results for SPF, DKIM, and DMARC. These mechanisms help validate domain-level authorization and message integrity, but a successful check does not guarantee the content is safe or the sender account is uncompromised.
+
+### 3. Examine links and attachments
+
+Hover or inspect a link to reveal its real destination without opening it. Compare the domain, subdomain, path, and expected organization. Check attachment names and types; a familiar icon or extension does not prove a file is harmless. Use the room's safe preview or sandbox rather than executing unknown content.
+
+### 4. Consider the social context
+
+Determine whether the message asks for a password, payment, MFA approval, unusual download, or urgent exception to normal process. Verify unexpected financial or account requests through a second trusted channel. A seasonal or event-themed message may create urgency, but context alone is not proof.
+
+### 5. Follow the response workflow
+
+Report the message, preserve its headers and indicators, and search for similar deliveries if the exercise calls for it. If credentials may have been submitted, revoke sessions and reset them through the approved process. Do not forward a malicious attachment to colleagues as a warning.
+
+### 6. Room tasks
+
+For every question, identify the exact header, link, domain, sender, attachment, or clue that supports the answer. Copy values from the active example and note why they matter. Avoid inferring a malicious verdict from one visual clue. Public notes should redact flags as `flag{hidden}` and should not include personal or credential data.

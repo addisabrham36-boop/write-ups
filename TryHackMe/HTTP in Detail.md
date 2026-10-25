@@ -233,49 +233,23 @@ Here, `-X GET` explicitly sets the method, although GET is already curl's defaul
 
 The main lesson is that HTTP is structured communication. Once I can read the method, path, headers, body, and status code separately, I can understand what a browser is asking for and what the server is returning.
 
-## Expanded HTTP practical reference
+## Phase 9: Room task and answer checklist
 
-### 1. Inspect a request and response
+The room's interactive request emulator is the authority for its example values. For each question, identify the relevant request line, method, status code, header, cookie, or encoding and read it from the current exercise.
 
-HTTP is an application protocol used to exchange requests and responses. A request contains a method, path, version, headers, and sometimes a body. A response contains a status code, headers, and optional content.
+| Question focus | What to inspect |
+|---|---|
+| Build or parse a URL | Scheme, host, port, path, query, fragment |
+| Identify the request method | Request line |
+| Understand a status result | Status code and response body |
+| Inspect server metadata | Response headers |
+| Understand browser state | Set-Cookie and subsequent Cookie header |
+| Distinguish HTTP from HTTPS | Scheme and TLS connection |
+| Read or submit form data | Method, Content-Type, and body |
+| Follow a redirect | 3xx status and Location header |
 
-Use curl to inspect a known lab URL:
+A cookie may be set in one response and then sent by the browser in a later request. The browser's fragment portion of a URL is not normally sent to the server. HTTPS adds TLS to protect the connection, but it does not prove that the destination is honest or that application authorization is correct.
 
-```bash
-curl -i http://TARGET_HOST/
-curl -I http://TARGET_HOST/
-```
+## Security and troubleshooting checklist
 
-`-i` prints response headers with the body; `-I` sends a HEAD request and displays headers only. A server may handle HEAD differently from GET, so use `-i` when the task needs the actual page response.
-
-### 2. Methods and status codes
-
-GET retrieves a representation; POST submits data; PUT commonly replaces a resource; PATCH applies a partial update; DELETE requests removal. Actual authorization and side effects depend on the application. A method name alone does not prove the action is permitted.
-
-Status codes are grouped into informational (1xx), success (2xx), redirection (3xx), client error (4xx), and server error (5xx). Common examples include 200 OK, 301/302 redirects, 400 malformed request, 401 authentication required or failed, 403 forbidden, 404 not found, 429 rate limited, and 500 internal server error. Interpret them in context; applications sometimes use codes inconsistently.
-
-### 3. Headers, cookies, and sessions
-
-Headers carry metadata such as Host, User-Agent, Content-Type, Authorization, and caching controls. Cookies may contain a session identifier or preferences. Treat session cookies and bearer tokens as secrets; redact them from screenshots and public notes.
-
-Inspect redirect behaviour and cookies:
-
-```bash
-curl -i -L http://TARGET_HOST/
-```
-
-`-L` follows redirects. Use it only when the task needs the final destination; otherwise the first response may contain the relevant Location header.
-
-### 4. Content types and request bodies
-
-Content-Type describes the format of a request or response body, such as application/json or application/x-www-form-urlencoded. A mismatch between the declared type and actual content can cause validation errors or expose parsing inconsistencies. Inspect the request in browser Developer Tools or an intercepting proxy when the room asks about form submissions.
-
-### 5. HTTPS and TLS
-
-HTTPS wraps HTTP in TLS to provide confidentiality and integrity in transit and to authenticate the server according to certificate validation. A padlock does not prove the website's business is legitimate or that its application is secure. Certificate warnings should not be ignored on real services.
-
-### 6. Troubleshooting and task answers
-
-If a request fails, check the scheme, hostname, port, redirects, and exact status code. A 404 may indicate the wrong path or a deliberately hidden resource; it does not necessarily mean the host is down. If curl and the browser behave differently, compare cookies, headers, proxy settings, and authentication state.
-
-For each room question, identify whether it asks for a method, header, status code, cookie, or protocol property. Verify the exact value in the live request or response. Do not copy tokens or invent output; redact flags as `flag{hidden}` in public notes.
+When a request behaves unexpectedly, compare method, host, path, query, headers, cookies, content type, and body. Check whether a redirect changes the destination or whether authentication state differs between the browser and a command-line client. Use secure cookie attributes, validate redirects, apply server-side authorization, and avoid exposing sensitive details in errors.

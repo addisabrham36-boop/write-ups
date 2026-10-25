@@ -171,3 +171,56 @@ A successful ping does not prove that every service is available. Firewalls can 
 ## Key takeaways
 
 LAN topologies describe how devices connect; switches forward frames within a LAN; routers connect networks; subnetting divides address space; ARP maps local IPv4 addresses to MAC addresses; and DHCP distributes network configuration. These basics support both troubleshooting and secure network design.
+
+## Expanded LAN study guide
+
+### 1. What a LAN provides
+
+A Local Area Network connects devices within a limited area, such as a home, office, lab, or campus. Ethernet and Wi-Fi are common link technologies. A switch forwards Ethernet frames within a local network; a router forwards IP packets between different networks.
+
+### 2. MAC addresses and ARP
+
+Ethernet frames use source and destination MAC addresses on a local link. IPv4 uses ARP to discover the MAC address associated with a local IPv4 address. ARP does not route traffic across the internet; it resolves a local next-hop address.
+
+On Linux, inspect neighbour mappings with:
+
+```bash
+ip neigh
+```
+
+The table is a cache and may be incomplete until devices communicate. A missing entry does not prove the device is absent.
+
+### 3. IP addressing and subnetting
+
+IPv4 addresses are 32-bit values written in dotted-decimal notation. A subnet mask or CIDR prefix identifies the network portion. Hosts use this information to decide whether to send directly to a local device or forward traffic through a gateway.
+
+Inspect local addresses and routes:
+
+```bash
+ip addr
+ip route
+```
+
+Do not infer a network's actual range from a common example. Read the lab's assigned address and prefix.
+
+### 4. Switches, routers, and gateways
+
+A switch learns which MAC addresses are reachable through its ports and forwards frames accordingly. A router examines the destination IP address and chooses a route. The default gateway is the router a host uses when it has no more specific route.
+
+Broadcast domains and collision domains are related but different concepts. Switches generally separate collision domains per port, while VLANs and routers shape broadcast-domain boundaries.
+
+### 5. DHCP and DNS
+
+DHCP commonly assigns an IP address, subnet mask, default gateway, and DNS resolver. DNS resolves hostnames to records. If a host has a valid IP but cannot resolve names, the issue may be DNS rather than the physical LAN.
+
+### 6. Troubleshooting a LAN
+
+Check the interface state, address, subnet, default route, and neighbour table. Then test the gateway and the intended service. A failed ping may be caused by ICMP filtering, so use an application-level test where appropriate.
+
+### 7. Security considerations
+
+Segment sensitive devices, protect switch and wireless administration, use strong Wi-Fi authentication, disable unused ports where appropriate, and monitor unexpected devices. A LAN is not inherently trusted just because traffic is local.
+
+### 8. Answering the room tasks
+
+For each question, identify whether it describes a frame, MAC address, IP address, switch, router, gateway, DHCP, DNS, or subnet. Use the room's specific values and definitions. Do not treat a MAC address as an IP address or assume every device on a LAN can communicate without firewall rules.

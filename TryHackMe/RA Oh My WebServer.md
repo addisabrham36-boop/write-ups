@@ -263,47 +263,22 @@ Root-level command execution on the internal host
 
 Oh My WebServer is not a single exploit. It chains a vulnerable web server, a dangerous Linux capability, and an internal management-service vulnerability. Verify each stage separately, distinguish container root from host root, and obtain both flags from the active room. The durable fixes are patching, least privilege, removal of unsafe capabilities, and strict network segmentation.
 
-## Phase 2: Vulnerability analysis and initial access
+## Phase 6: Final verification and task evidence
 
-The version clue matters because Apache HTTP Server 2.4.49 contained a path-traversal issue tracked as CVE-2021-41773; exploitation conditions and impact differ by configuration, and the related CVE-2021-42013 affected the subsequent release. Verify the exact target version and the room's configuration before selecting a proof. A banner alone is not sufficient.
+For each stage, save the result that proves the transition:
 
-In the authorized lab, follow the room's intended request path to confirm the vulnerability. Capture the request, response, and the harmless command output used to prove execution. Do not use destructive commands or send the technique to another server.
+| Stage | Evidence |
+|---|---|
+| Apache exposure | Nmap scan and response banner |
+| Path traversal/RCE | The authorised request and harmless command output |
+| Initial shell | whoami, id, hostname, and container context |
+| Capability escalation | getcap output and verified root identity inside the container |
+| Internal service | Observed route and reachable OMI endpoint |
+| Host compromise | Successful command output showing host-level identity |
+| User/root flags | Exact values from the live target, redacted publicly as flag{hidden} |
 
-The vulnerable web process is running in a container in this chain. When code execution succeeds, inspect identity and context before proceeding:
+Do not use a root identity inside the container as proof of host compromise. Verify the internal OMI step separately and obtain the final flag only from the active machine.
 
-    whoami
-    id
-    hostname
-    pwd
-    cat /proc/1/cgroup
-    findmnt
+## Final remediation checklist
 
-These checks help distinguish the container's view from the host. A root identity inside a container does not automatically imply host root.
-
-## Phase 3: Capability and internal-service analysis
-
-Enumerate Linux capabilities rather than assuming that every privileged process has traditional SUID permissions:
-
-    getcap -r / 2>/dev/null
-
-Capabilities divide traditional root powers into smaller units. An executable with an unsafe capability can gain more authority than intended. Verify which binary is unusual, which capability it holds, and whether the room's exploit depends on that capability.
-
-Next, inspect network interfaces and routes from the container and identify services reachable only from inside that network. Do not scan unrelated private networks; use the target's observed routes and the room scope. The lab's second stage concerns an internal OMI management service associated with CVE-2021-38647 (OMIGOD). Check the affected version and required configuration before treating the service as vulnerable.
-
-## Phase 4: Validate the chain and collect flags
-
-For each transition, record the account, environment, and observable proof. Keep container privilege, host privilege, and the final root flag as separate milestones. If a command runs in the container, do not claim it changed the host unless the result can be independently confirmed from the host context.
-
-The room-specific flag values must come from the deployed instance. Do not substitute a flag from an online walkthrough if the active machine returns a different value.
-
-## Phase 5: Root-cause remediation
-
-- Patch Apache and OMI to supported, fixed versions.
-- Remove public exposure of management interfaces; bind them to trusted interfaces and firewall access.
-- Run the web application as a dedicated unprivileged account.
-- Remove unnecessary Linux capabilities and audit container security settings.
-- Restrict outbound and lateral network access from containers.
-- Monitor exploitation attempts, suspicious child processes, capability use, and internal service access.
-- Rebuild affected containers from trusted images and rotate secrets if compromise is suspected.
-
-This room demonstrates why a container should be treated as a separate but not absolute trust boundary. The secure design limits the web process, host mounts, capabilities, internal services, and network reachability independently.
+Patch Apache and OMI to fixed supported releases, disable unnecessary CGI, remove dangerous capabilities such as cap_setuid from interpreters, run the web process with minimal privileges, restrict container egress, and block untrusted access to internal management services. Monitor abnormal child processes and management-service requests. Rebuild a compromised host from trusted artifacts when its integrity cannot be established.

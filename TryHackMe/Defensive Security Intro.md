@@ -1,97 +1,78 @@
 # Defensive Security Intro: TryHackMe Walkthrough
 
-Official room: https://tryhackme.com/room/dsicyber1013n3
+Official room: https://tryhackme.com/room/defensivesecurityintro
 
 ## Room Overview & Information
 
-**Category:** Defensive security / SOC  
-**Difficulty:** Beginner  
-**Scenario:** Investigate suspicious activity against FakeBank, identify the source and the attacker's latest URL discovery attempt, then block the source using the simulated firewall.
+**Category:** Defensive security  
+**Difficulty:** Easy  
+**Focus:** Blue Team responsibilities, Security Operations Centres (SOCs), Digital Forensics and Incident Response (DFIR), and common malware threats.
 
-This room demonstrates the defensive workflow: detect, investigate, contain, and then improve the controls. The dashboard is a simulated lab, so use the values displayed in your active instance. The source IP and latest URL are evidence to read from the dashboard, not values to guess from a write-up.
+Offensive security tests systems by simulating attacker behaviour. Defensive security focuses on protecting systems, detecting suspicious activity, investigating incidents, and reducing harm. This room introduces the people and processes that help organisations defend their networks.
 
-## Task 1: Become the Defender
+## Task 1: Introduction to Defensive Security
 
-The Security Operations Centre (SOC) is the central team responsible for monitoring and responding to security events. A SOC combines people, processes, and tools such as alert dashboards, SIEM platforms, endpoint telemetry, and incident-response procedures.
+Defensive security includes monitoring, threat intelligence, incident response, malware analysis, and security engineering. These functions work together: monitoring detects a possible event, investigation determines what happened, and response contains the threat and restores trusted operation.
 
-**Question: “What does the acronym ‘SOC’ stand for?”**
+### Question: “Which team focuses on defensive security?”
 
-Answer: **Security Operations Centre** (also written *Security Operations Center*).
+**Answer: Blue Team.**
 
-A SOC does not simply collect alerts. Analysts triage signals, establish whether activity is malicious, determine scope and impact, coordinate containment, and document the result.
+The Blue Team protects systems and data, monitors for suspicious behaviour, and responds to incidents. It may include SOC analysts, incident responders, threat hunters, security engineers, and other defensive specialists.
 
-## Task 2: Phase 1: An Attack Begins
+## Task 2: Areas of Defensive Security
 
-Open the monitoring dashboard using the room's **View Site** button. The scenario reports hundreds of login attempts against FakeBank. A baseline describes expected activity; unusual deviations can create alerts, but an alert alone does not prove an attack.
+### Security Operations Centre (SOC)
 
-**Question: “Review the ‘Suspicious Login’ alert. What username is being used?”**
+A SOC monitors security telemetry from endpoints, servers, identity systems, networks, and applications. Analysts triage alerts, correlate events, identify likely incidents, and escalate activity that needs deeper investigation.
 
-1. Open the dashboard from the room.
-2. Locate the **Suspicious Login** alert.
-3. Open or expand its details.
-4. Find the username field in the event data.
-5. Copy the value exactly as shown.
+### Question: “What would you call a team of cyber security professionals that monitors a network and its systems for malicious events?”
 
-Do not substitute a common username or use the source IP as the answer. The username belongs to the alert evidence in the live simulator.
+**Answer: Security Operations Center (SOC).**
 
-## Task 3: Phase 2: An Attack Is Investigated
+The room uses the American spelling, Center. The British spelling, Centre, refers to the same function.
 
-The analyst must determine where the activity originates. Inspect the alert and related events in the dashboard, then identify the source address associated with the suspicious login attempts.
+### Digital Forensics and Incident Response (DFIR)
 
-When reviewing an event, distinguish:
-- **Source IP:** where the observed connection appears to originate.
-- **Destination:** the system being accessed.
-- **Username:** the account name involved in authentication.
-- **Timestamp:** when the event occurred.
-- **Action or result:** whether the attempt succeeded, failed, or triggered another event.
+Digital forensics preserves and analyses evidence to understand what happened. Incident response contains the incident, removes the cause, restores operations, and records lessons learned. Evidence can include logs, files, memory, network traffic, and authentication records.
 
-If the room asks for the suspicious source IP, copy it from the relevant alert. NAT, proxies, and VPNs can complicate attribution in real environments, so an IP is a useful indicator, not automatic proof of a person's identity.
+### Question: “What does DFIR stand for?”
 
-## Task 4: Phase 3: Identify the Attack
+**Answer: Digital Forensics and Incident Response.**
 
-The room asks you to inspect the **URL Discovery Attempts** list and examine the latest entry.
+DFIR teams need to preserve evidence carefully and separate confirmed observations from hypotheses. A good timeline combines multiple sources rather than relying on a single log entry.
 
-**Question: “Copy the latest URL that the attacker has tried to find and paste it below.”**
+### Malware analysis
 
-1. Open the **URL Discovery Attempts** list in the dashboard.
-2. Sort or inspect the entries by their timestamps.
-3. Select the latest entry, not merely the first URL in the list.
-4. Copy the complete URL path shown by the simulator.
-5. Submit it exactly as displayed.
+Malware analysis investigates suspicious files and behaviour to understand capabilities, indicators, and impact. Analysts may inspect hashes, strings, metadata, code, process activity, filesystem changes, and network connections. Samples should be analysed in an isolated environment, not run on a personal workstation.
 
-Rapid attempts to access many paths are consistent with content discovery or directory enumeration. The attacker may be searching for hidden pages, administrative routes, backups, or other exposed resources. The event list establishes what the simulator observed; it does not prove that the attacker successfully accessed the path.
+### Question: “Which kind of malware requires the user to pay money to regain access to their files?”
 
-## Task 5: Phase 4: Stop the Attack
+**Answer: Ransomware.**
 
-Containment is the immediate step to limit ongoing harm. The lab has already completed two security actions and asks you to add a firewall rule for the suspicious source IP shown in the practical.
+Ransomware commonly encrypts or otherwise blocks access to data and demands payment. Paying does not guarantee recovery. Defensive controls include offline or immutable backups, patching, least privilege, endpoint monitoring, and tested recovery procedures.
 
-The current lab instructions specify the IP `32.122.195.63`. Confirm that the simulator still displays this value before applying the rule.
+## Task 3: Follow Along
 
-1. Open the firewall-rule control.
-2. Enter the suspicious source IP.
-3. Choose **BLOCK** from the action dropdown.
-4. Press **Apply**.
-5. Wait for the success message.
-6. Copy the flag shown by the active room and submit it there.
+The room asks you to follow the introductory material and obtain the flag displayed by the exercise.
 
-Blocking the address prevents the simulated source from continuing to connect. In a real environment, an IP block can also affect shared NAT gateways or legitimate users, so responders should assess the impact and monitor whether the activity moves to another source.
+### Question: “What is the flag that you obtained by following along?”
 
-## Phase 6: Verify containment and continue the investigation
+Follow the active room's instructions and copy the flag shown by the task. The public repository intentionally redacts the value as `THM{hidden}`.
 
-After blocking, verify that the simulator confirms the rule was applied. A success message is evidence that the configuration change was accepted; in a production incident, the analyst would also check firewall logs and subsequent events to confirm that traffic was actually blocked.
+## How the concepts work together
 
-Containment is not the same as eradication. After the immediate attack is stopped, the organisation should investigate how the attacker reached the system, patch the underlying weakness, review authentication events, and monitor for persistence or alternate source addresses.
+A simple defensive workflow is:
 
-## Defensive analysis
+1. **Detect:** monitoring tools raise an alert.
+2. **Triage:** an analyst checks the alert's evidence and context.
+3. **Investigate:** related logs and artefacts are correlated to establish what happened.
+4. **Contain:** access or systems are restricted to stop ongoing harm.
+5. **Eradicate and recover:** the root cause is removed and systems return to trusted operation.
+6. **Improve:** detections, controls, and procedures are updated to reduce recurrence.
 
-The observed rapid URL discovery attempts suggest the attacker is mapping the application's exposed paths. Useful follow-up actions in a real SOC include:
-- Preserve the relevant alert and request logs.
-- Check whether any discovered paths returned sensitive data.
-- Review successful logins and account changes near the same time.
-- Apply rate limits or web application protections where appropriate.
-- Fix access-control weaknesses rather than relying only on blocking one IP.
-- Record the decision, time, rule, expected effect, and rollback procedure.
+Not every alert is a confirmed incident. Analysts should verify evidence, record uncertainty, and escalate when the impact or complexity exceeds their authority.
 
 ## Key takeaways
 
-This room walks through the SOC cycle from alert to containment. Identify the account and source from the alert, inspect the latest URL discovery event, block the confirmed source in the simulated firewall, and verify the change. Use the active dashboard for dynamic values and do not invent a flag or event result.
+The Blue Team provides defensive security. A SOC monitors systems for suspicious events, DFIR investigates and responds to incidents, and malware analysts help identify what malicious software does. Ransomware is a type of malware that can deny access to files and demand payment. The room's flag should be obtained from the live exercise and redacted in public notes.

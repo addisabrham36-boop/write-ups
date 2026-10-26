@@ -1,4 +1,4 @@
-# Prompt Engineering: Complete TryHackMe Walkthrough
+# Prompt Engineering
 
 Official room: https://tryhackme.com/room/promptengineering
 
@@ -92,9 +92,3 @@ The room is interactive and may change examples over time. For each task:
 6. Submit the result only after the interface confirms the task.
 
 No fixed question text or completion token is reproduced here unless it has been observed directly in the room. Do not invent an answer based on what a task would usually ask.
-
-## Phase 5: Key Takeaways & Remediation
-
-Prompt engineering improves communication and consistency, but it does not replace software validation, access control, or factual verification. Secure AI applications should separate instructions from untrusted content, validate output, constrain tools, enforce authorization on the server, protect sensitive data, and monitor risky behaviour.
-
-A useful prompt is one whose result can be checked against clear criteria. The best workflow is baseline, one controlled change, evidence-based evaluation, and independent verification.

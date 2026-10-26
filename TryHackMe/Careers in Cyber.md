@@ -1,4 +1,4 @@
-# Careers in Cyber: Complete TryHackMe Walkthrough
+# Careers in Cyber
 
 Official room: https://tryhackme.com/room/careersincyber
 
@@ -101,7 +101,3 @@ For every project, record the objective, environment, steps, evidence, conclusio
 | Launch Careers Quiz | What should the quiz result mean? | A starting point for further exploration |
 
 The wording and answer options may change when the room is updated. Use the live interface as the source of truth for exact quiz values.
-
-## Phase 5: Key Takeaways & Remediation
-
-Cybersecurity is not a single job and does not have one universal educational route. Build core skills, select a track based on interests, practise in authorised environments, document findings clearly, and keep learning as technology changes. Certifications can help structure study, but practical competence and communication remain essential.

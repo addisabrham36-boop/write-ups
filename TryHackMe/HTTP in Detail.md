@@ -1,4 +1,4 @@
-# HTTP in Detail: TryHackMe Walkthrough
+# HTTP in Detail
 
 Official room: https://tryhackme.com/room/httpindetail
 

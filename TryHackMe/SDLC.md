@@ -1,4 +1,4 @@
-# Software Development Lifecycle: Complete TryHackMe Walkthrough
+# Software Development Lifecycle
 
 Official room: https://tryhackme.com/room/sdlc
 

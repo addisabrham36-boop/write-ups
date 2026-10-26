@@ -1,4 +1,4 @@
-# Android Hacking 101: TryHackMe Walkthrough
+# Android Hacking 101
 
 Official room: https://tryhackme.com/room/androidhacking101
 

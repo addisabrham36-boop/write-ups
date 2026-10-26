@@ -1,4 +1,4 @@
-# AI Threat Modelling: Complete TryHackMe Walkthrough
+# AI Threat Modelling
 
 Official room: https://tryhackme.com/room/aithreatmodelling
 
@@ -97,9 +97,3 @@ Test controls against both expected and adversarial input. A control is not veri
 For each task, identify the asset, trust boundary, threat, impact, and mitigation requested. If the question asks for a rating, use the room's scale rather than inventing a new one. If it asks for a configuration value or flag, retrieve it from the live exercise.
 
 Record assumptions, supporting evidence, residual risk, and the owner of the recommended mitigation. Do not claim the application is secure just because the design includes a control; verify how it behaves.
-
-## Phase 5: Key Takeaways & Remediation
-
-Good AI threat modelling starts with the system and its trust boundaries, then follows concrete attack paths to assets and impact. Revisit the model whenever tools, data sources, model versions, or permissions change. Enforce permissions in code, protect model and data provenance, validate output, limit resource use, and monitor sensitive actions.
-
-The model's instructions are not a replacement for authorization. The component that owns the resource must enforce the permission.

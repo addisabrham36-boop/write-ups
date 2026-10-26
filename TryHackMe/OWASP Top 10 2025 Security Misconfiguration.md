@@ -55,33 +55,3 @@ The flag is redacted as `THM{hidden}`.
 The issue is not that the API accepts a URL parameter. The problem is that invalid input triggers an error handler that exposes internal state. The response may reveal stack traces, variable values, configuration, file paths, or secrets.
 
 A production service should validate the input and return a generic client-facing error. Detailed diagnostic data belongs in access-controlled server logs.
-
-## Phase 5: Remediation
-
-- Disable debug mode in production.
-- Validate user IDs and reject malformed input.
-- Return a generic error response without internal details.
-- Log diagnostic information on the server with restricted access.
-- Ensure secrets and flags are not included in exception messages.
-- Add regression tests for invalid identifiers and unexpected exceptions.
-- Review other endpoints for the same error-handling pattern.
-
-## Key takeaways
-
-Security misconfiguration can expose sensitive information without a complex exploit. The room's practical is solved by comparing a normal API request with an invalid one and reading the leaked flag from the error response. The fix is to validate input and keep detailed diagnostics out of client-facing responses.
-
-## Phase 6: Question and evidence checklist
-
-The room's practical focuses on a user-management API that leaks debug information when given an invalid user ID.
-
-1. Request a valid record using the endpoint described above.
-2. Record the expected response shape.
-3. Send the invalid identifier used by the task.
-4. Inspect the error body for the flag and internal information.
-5. Submit the exact flag from the active instance; the public copy uses THM{hidden}.
-
-Don't assume a 500 response is the vulnerability by itself. The issue is the sensitive details returned to the client. A safe client-facing error may be 400 or 404, but it should not reveal stack traces, secrets, local paths, or debug state.
-
-## Final remediation checklist
-
-Disable production debug mode, validate identifiers, use generic error responses, and write detailed diagnostics only to restricted server-side logs. Add regression tests for malformed IDs and unexpected exceptions. Review other endpoints for shared error handlers or debug settings so the same disclosure cannot be reached through a different route.

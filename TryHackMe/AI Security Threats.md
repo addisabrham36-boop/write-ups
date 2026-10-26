@@ -1,4 +1,4 @@
-# AI Security Threats: Complete TryHackMe Walkthrough
+# AI Security Threats
 
 Official room: https://tryhackme.com/room/aisecuritythreats
 
@@ -224,16 +224,3 @@ The recap covers AI, machine learning, neural networks, LLMs, prompt injection, 
 | 5 | Recommended access control | RBAC |
 | 5 | AI-specific ISO standard named in the lesson | ISO/IEC 27090 |
 | 6 | Graduation flag | Complete live orientation assessment |
-
-## Phase 5: Key Takeaways & Remediation
-
-- Protect training data from unauthorised modification and track model provenance.
-- Enforce authentication and authorisation in the service layer, not only in prompts.
-- Protect model APIs from extraction and abuse.
-- Minimise sensitive data in prompts and retrieval context.
-- Test AI systems for prompt injection, privacy leakage, unsafe tool invocation, and model drift.
-- Use AI for security operations as an analyst aid; verify its claims against raw telemetry.
-- Keep model weights, training pipelines, plugins, and deployment credentials under controlled access.
-- Redact session-specific flags and private data from public write-ups.
-
-AI introduces new attack surfaces while also helping defenders process evidence faster. Security still depends on access control, trusted data, validated findings, and clearly defined human accountability.

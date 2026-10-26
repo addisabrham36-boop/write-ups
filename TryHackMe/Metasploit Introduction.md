@@ -148,7 +148,3 @@ The room introduces the framework and its module workflow rather than one fixed 
 6. Submit the value requested by the live room.
 
 No fixed exploit result or flag should be invented. Module names and available options can change between framework versions, so the live console and room's current task are the authority.
-
-## Phase 5: Key Takeaways & Remediation
-
-Metasploit is most effective after reconnaissance. Search for a module, read its requirements, configure the correct target, run only the authorised test, and verify the result. Then fix the vulnerability itself: patch affected software, disable unnecessary services, restrict network exposure, run services with least privilege, and monitor exploitation indicators. Keep a reproducible evidence record and close sessions when the task is complete.

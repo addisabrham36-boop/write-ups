@@ -1,4 +1,4 @@
-# Offensive Security Intro: Complete TryHackMe Walkthrough
+# Offensive Security Intro
 
 Official room: https://tryhackme.com/room/offensivesecurityintro
 
@@ -57,9 +57,3 @@ The displayed message proves only that the simulated task accepted the answer. I
 |---|---|
 | Which option represents simulating a hacker's actions to find vulnerabilities? | **Offensive Security** |
 | What message appears above the account balance after the correct interaction? | **BANK-HACKED** |
-
-## Phase 5: Key Takeaways & Remediation
-
-Offensive security is an authorised process for identifying weaknesses. A useful test should produce reproducible evidence, explain impact, and recommend a fix. In a real assessment, confirm permission and scope before testing, use the least disruptive method that proves the issue, protect any sensitive data encountered, and report findings clearly.
-
-The practical's lesson is about the method and its boundaries, not about attacking a real bank.

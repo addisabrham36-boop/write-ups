@@ -1,101 +1,107 @@
-# CyberHeroes: Complete TryHackMe Walkthrough
+# CyberHeroes
 
-Official room: https://tryhackme.com/room/cyberheroes
+Welcome to the CyberHeroes room walkthrough on TryHackMe!
 
-## Room Overview & Information
+{% embed url="https://tryhackme.com/room/cyberheroes" %}
 
-**Category:** Web application security  
-**Difficulty:** Easy  
-**Objective:** Inspect client-side authentication code, recover the lab's expected credentials, and retrieve the flag.
+***
 
-CyberHeroes is a client-side authentication challenge. The important weakness is that the login decision is implemented in JavaScript delivered to the browser. Client-side code can be inspected and modified, so it cannot be trusted to protect a secret page.
+CyberHeroes is an easy web application challenge centered around client-side authentication bypass. Our objective is to analyze the login page, identify the flaw in the authentication mechanism, recover the credentials, and retrieve the flag.
 
-## Phase 1: Reconnaissance & Enumeration
+---
 
-### 1. Start the machine and inspect the web application
+## 1. Initial Reconnaissance
 
-Start the room machine and copy the current IP address. Do not reuse an address from an older session. Open the site in the AttackBox browser:
+We start by navigating to the target web application:
 
 ```text
-http://MACHINE_IP/
+http://<TARGET_IP>/
 ```
 
-If required, open the login page:
+The home page introduces the "CyberHeroes" squad. Looking through the navigation bar, there is a **Login** link leading to:
 
 ```text
-http://MACHINE_IP/login.html
+http://<TARGET_IP>/login.html
 ```
 
-If the site fails to load, confirm that the machine has finished booting and that the AttackBox or VPN is connected. Use the website's own links to discover paths rather than guessing unrelated endpoints.
+We are presented with a clean login form asking for a username and password.
 
-### 2. Inspect the page source
+---
 
-Use the browser's View Page Source command or Ctrl+U. Search for the login form and the JavaScript function named authenticate. The code checks two variables:
-- **a** represents the username input.
-- **b** represents the password input.
+## 2. Inspecting the Page Source
 
-The comparison includes the username h3ck3rBoi and calls a string-reversal function for the password. The crucial point is that the browser is given the logic required to decide whether authentication succeeds.
+Before attempting any brute-forcing or automated scans, we inspect the page source (`Ctrl + U` or Right-Click -> *View Page Source*).
 
-## Phase 2: Vulnerability Analysis & Initial Access
+Inside `login.html`, we find an embedded `<script>` tag containing the following `authenticate()` JavaScript function:
 
-### 3. Reverse the password string
+```javascript
+function authenticate() {
+    a = document.getElementById('uname')
+    b = document.getElementById('pass')
+    const RevereString = str => [...str].reverse().join('');
+    if (a.value=="h3ck3rBoi" & b.value==RevereString("54321@terceSrepuS")) {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("flag").innerHTML = this.responseText;
+                document.getElementById("todel").innerHTML = "";
+                document.getElementById("rm").remove();
+            }
+        };
+        xhttp.open("GET", "RandomLo0o0o0o0o0o0o0o0o0o0gpath12345_Flag_"+a.value+"_"+b.value+".txt", true);
+        xhttp.send();
+    } else {
+        alert("Incorrect Password, try again.. you got this hacker !");
+    }
+}
+```
 
-The JavaScript source contains this value:
+### Analyzing the Flaw:
+The authentication decision is implemented entirely on the **client side** within the user's browser:
+1. **Username (`a.value`)**: Directly checked against `"h3ck3rBoi"`.
+2. **Password (`b.value`)**: Compared against `RevereString("54321@terceSrepuS")`.
+3. Reversing `"54321@terceSrepuS"` yields:
+   ```text
+   SuperSecret@12345
+   ```
 
+Because client-side validation is completely controllable by the user, we have the valid credentials without interacting with any backend database.
+
+---
+
+## 3. Exploitation & Retrieving the Flag
+
+We have two ways to retrieve the flag:
+
+### Method 1: Form Login
+1. Navigate to `http://<TARGET_IP>/login.html`.
+2. Enter the recovered credentials:
+   - **Username:** `h3ck3rBoi`
+   - **Password:** `SuperSecret@12345`
+3. Click **Login**. The page dynamically executes the `XMLHttpRequest` and prints the flag.
+
+### Method 2: Direct URL Request
+Observing the `XMLHttpRequest` endpoint:
 ```text
-54321@terceSrepuS
+RandomLo0o0o0o0o0o0o0o0o0o0gpath12345_Flag_h3ck3rBoi_SuperSecret@12345.txt
+```
+We can directly fetch the flag using `curl`:
+
+```bash
+curl http://<TARGET_IP>/RandomLo0o0o0o0o0o0o0o0o0o0gpath12345_Flag_h3ck3rBoi_SuperSecret@12345.txt
 ```
 
-Reverse its characters from end to beginning:
-
+### Output:
 ```text
-SuperSecret@12345
+flag{edb0be532c540b1a150c3a7e85d2466e}
 ```
 
-This is the password expected by the client-side check. The corresponding username in the same comparison is:
+---
 
-```text
-h3ck3rBoi
-```
+## 🏁 Questions & Answers
 
-These credentials apply only to the deliberately vulnerable room. Never reuse a lab password on another service.
+| Task / Question | Answer |
+| :--- | :--- |
+| **Give the flag that was displayed!** | `flag{edb0be532c540b1a150c3a7e85d2466e}` |
 
-### 4. Confirm the authentication weakness
-
-Return to the login form and enter the values found in the source:
-- Username: **h3ck3rBoi**
-- Password: **SuperSecret@12345**
-
-Submit the form and follow the resulting page. If it accepts the values, read the flag displayed by the active room. This public write-up uses **flag{hidden}** rather than publishing the instance's flag.
-
-The issue is not that reversing a string is a strong password recovery technique. It is that the expected password and comparison logic are shipped to the client. An attacker can inspect the script, modify the function, or bypass it entirely.
-
-## Phase 3: Post-Exploitation and Security Boundary Validation
-
-This room does not provide a host shell or a separate privilege-escalation path. The relevant post-authentication check is whether the protected content is actually enforced by the server. Try opening the protected route directly in a fresh browser session as the room permits. If the content can be retrieved without server-side authentication, that confirms the client-side check is not an effective access-control boundary.
-
-A secure design submits credentials to a server over HTTPS. The server validates a stored password hash, creates a protected session, and enforces authorization on every subsequent request. The protected data should not be delivered simply because a client-side JavaScript variable indicates success.
-
-## Phase 4: Room Questions & Flags Walkthrough
-
-| Objective | Answer or evidence |
-|---|---|
-| Which page should be inspected? | The login page and its JavaScript source |
-| What is the username checked by the script? | **h3ck3rBoi** |
-| What string appears before reversing the password? | **54321@terceSrepuS** |
-| What password results after reversing it? | **SuperSecret@12345** |
-| How is the flag obtained? | Submit the lab credentials, follow the accepted page, and read the flag; redacted here as **flag{hidden}** |
-
-Verify the content from the live machine. The flag value is not copied into this note.
-
-## Phase 5: Key Takeaways & Remediation
-
-- Perform authentication and authorization on the server.
-- Store passwords using a suitable password-hashing scheme such as Argon2id, scrypt, or bcrypt.
-- Use secure session cookies and invalidate sessions on logout.
-- Enforce authorization on every protected route and API request.
-- Never embed passwords, API keys, or secret flags in HTML or JavaScript.
-- Use HTTPS, rate limits, and monitoring for authentication endpoints.
-- Add tests proving that directly requesting a protected page without a valid session is rejected.
-
-CyberHeroes is solved by inspecting the source instead of brute-forcing the login form. The deeper lesson is that client-side checks are for user experience, not security; the server must make and enforce the authentication decision.
+***

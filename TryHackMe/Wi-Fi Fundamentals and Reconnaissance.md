@@ -1,4 +1,4 @@
-# Wi-Fi Fundamentals and Reconnaissance: TryHackMe Walkthrough
+# Wi-Fi Fundamentals and Reconnaissance
 
 Official room: https://tryhackme.com/room/wififundamentalsandrecon
 

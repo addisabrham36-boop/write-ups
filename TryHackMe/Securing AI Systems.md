@@ -1,4 +1,4 @@
-# Securing AI Systems: TryHackMe Walkthrough
+# Securing AI Systems
 
 Official room: https://tryhackme.com/room/securingaisystems
 

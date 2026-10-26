@@ -79,15 +79,3 @@ If real credentials were accidentally entered into a phishing page, change them 
 | What will you use this tool for? | Educational Purposes |
 | What is the weakest link in cyber-security? | Humans |
 | Do most phishing pages have HTTPS (Yay/Nay)? | Yay |
-
-## Phase 5: Key Takeaways & Remediation
-
-- Verify hostnames instead of judging sites by branding alone.
-- Use a password manager that recognises the legitimate domain.
-- Prefer phishing-resistant MFA.
-- Filter suspicious email and inspect domains/redirects.
-- Provide a safe way for users to report suspected phishing without fear of blame.
-- Monitor suspicious authentication, mailbox changes, and unusual sessions.
-- Keep phishing simulations approved and limited to test users and training infrastructure.
-
-The central lesson is that a phishing page can look polished and use HTTPS while still being fraudulent. The destination and the context matter more than the page's visual appearance.

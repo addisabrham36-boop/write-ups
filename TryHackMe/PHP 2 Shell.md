@@ -1,149 +1,68 @@
-# PHP2Shell: TryHackMe Walkthrough
+# PHP 2 Shell
 
-Official room: https://tryhackme.com/room/cvephp2shell
+{% embed url="https://tryhackme.com/room/cvephp2shell" %}
 
-## Room Overview & Information
+This room covers a critical two-CVE chain in PHP's runtime: **CVE-2026-109618** (memory disclosure / ASLR bypass via `session.upload_progress`) and **CVE-2026-109619** (use-after-free leading to RCE). It's a guided room — you follow along with an SSH session while reading the theory.
 
-**Category:** Web server vulnerability research / memory corruption  
-**Difficulty:** Advanced technical challenge  
-**Vulnerabilities:** CVE-2026-109618 (memory disclosure) and CVE-2026-109619 (remote code execution)  
-**Focus:** PHP runtime internals, upload-progress handling, memory safety, Apache worker processes, ASLR, patching, and detection.
+---
 
-PHP2Shell is a runtime-level vulnerability chain. It is not an ordinary application bug: a trivial PHP page can be affected because the flaw exists in PHP's request-processing and memory-management behaviour. The room's goal is to understand the vulnerability and verify its impact inside the isolated lab.
+## Setup
 
-Because this is a newly disclosed critical remote-code-execution issue, this public write-up focuses on the room's reconnaissance, root cause, evidence, and remediation. It does not reproduce a weaponised exploit script or a copy-paste remote execution payload.
-
-## Phase 1: Confirm the lab environment
-
-Start the machine provided by TryHackMe and follow the room's instructions for accessing the target. The current room uses a local lab service; do not substitute a public website or a different PHP server.
-
-If the exercise provides a Docker-based environment, inspect the running container and its version using the commands supplied by the room. Typical local inspection commands are:
+SSH into the target with the provided credentials:
 
 ```bash
-docker ps --format '{{.Names}}  {{.Image}}  {{.Status}}'
-docker exec CONTAINER_NAME php -v
-curl -i http://127.0.0.1:8088/index.php
+ssh ubuntu@MACHINE_IP
 ```
 
-- **docker ps** lists running containers.
-- **--format** controls the displayed container name, image, and status.
-- **docker exec** runs a command inside a container you administer.
-- **php -v** reports the PHP runtime version.
-- **curl -i** requests the local lab page and includes response headers.
+---
 
-Replace CONTAINER_NAME and the port with the values shown by the active room. Do not run Docker commands against a production host unless you are its authorised administrator.
+## The Vulnerability Chain
 
-If the application source is provided, inspect it only to establish what the application itself does. The room's example is deliberately simple; the key issue is in the PHP runtime rather than a complex application function.
+### CVE-2026-109618 — Memory Leak
 
-## Phase 2: Understand the vulnerability chain
+PHP's `session.upload_progress` feature is enabled by default and processes multipart form data **before** any application code runs. When an out-of-memory (OOM) condition is forced during upload tracking, PHP skips its cleanup routines and leaves stale pointer data in memory.
 
-The room covers two related vulnerabilities:
+Crafted requests targeting the upload progress endpoint leak process memory — enough to defeat ASLR (Address Space Layout Randomization).
 
-- **CVE-2026-109618:** memory disclosure that can expose unintended worker-memory contents through an HTTP response.
-- **CVE-2026-109619:** memory corruption that can potentially lead to remote code execution.
+### CVE-2026-109619 — Use-After-Free → RCE
 
-The chain uses PHP's upload-progress feature, which can record progress information for multipart file uploads in server-side session data. The feature is legitimate, but the vulnerable runtime can enter an inconsistent memory state when a memory-limit failure interrupts normal cleanup.
+With ASLR bypassed, the use-after-free condition from the stale global state can be exploited to hijack control flow. Combined with the leaked addresses from CVE-2026-109618, we get reliable RCE as the web server user.
 
-### Why the memory-limit bailout matters
+---
 
-PHP has a per-request memory limit. When a request exceeds it, PHP can perform an emergency bailout instead of completing normal cleanup. The vulnerability involves a timing window in which a pointer may remain in an invalid state after memory has been released.
+## Exploitation
 
-A dangling or uninitialised pointer refers to memory that is no longer valid for the expected object. If later code uses that pointer, the result may include memory disclosure or memory corruption. The weakness is associated with CWE-824, Access of Uninitialised Pointer.
+Run the exploit chain from the lab environment:
 
-### Why worker reuse matters
+```bash
+# The room provides the exploit script — run it against localhost
+python3 exploit.py http://MACHINE_IP/
+```
 
-In the affected Apache prefork plus mod_php deployment, Apache worker processes handle multiple requests over their lifetime. If a request leaves internal state inconsistent, a later request handled by the same worker may encounter that state again. The worker reuse behaviour is part of the vulnerability's exploitability in the room's configuration.
+Once RCE is confirmed, read the flag:
 
-This is why the issue must be understood as a runtime and worker-lifecycle problem, not just a bad line in a PHP application.
+```bash
+cat /flag.txt
+# or wherever the room places it
+```
 
-## Phase 3: ASLR and memory disclosure
+---
 
-Address Space Layout Randomization (ASLR) changes where code and memory regions are mapped, making fixed addresses unreliable. The room demonstrates that the memory-disclosure stage can reveal address information from the vulnerable process. That information can weaken the protection ASLR is intended to provide.
+## Detection & Mitigation
 
-A memory leak is not the same as remote code execution. The two CVEs have different roles in the chain: one provides information, while the other can corrupt execution state. A full impact assessment should distinguish the evidence for each stage.
+The only complete fix is updating PHP to patched versions:
+- PHP **8.5.12**, **8.4.27**, **8.3.36**, or **8.2.35**
 
-## Phase 4: Validate the result in the lab
+Disabling `session.upload_progress` in `php.ini` is a partial workaround but doesn't fully close the attack surface.
 
-Follow the room's current instructions and use its provided proof mechanism to validate the impact. Keep the test inside the deployed environment. Verify the result from the lab's own output rather than relying only on an exploit tool's success message.
+---
 
-If the task provides a command-execution proof, record:
-- The request or action that triggered the lab result.
-- The response evidence.
-- The execution identity reported by the environment.
-- The affected PHP version and server configuration.
-- Any errors or worker restarts observed.
+## 🏁 Questions & Answers
 
-A process running as the web-server account is still a serious compromise, but it is not automatically root. State the privileges actually demonstrated.
-
-### Room flag
-
-If the active task asks for a flag, retrieve it from the lab using the intended proof path and submit it to TryHackMe. The value is intentionally omitted here; use `flag{hidden}` in this public write-up.
-
-## Phase 5: Detection
-
-Useful signals include:
-- Unexpectedly large or malformed session-cookie values in response headers.
-- Multipart POST requests with unusually large bodies or excessive fields.
-- Repeated upload-progress fields combined with memory-limit errors.
-- PHP worker crashes, restarts, or out-of-memory errors.
-- Unusual child processes or outbound connections from PHP workers.
-
-No single indicator is conclusive. Correlate web access logs, PHP error logs, process telemetry, reverse-proxy logs, and network events. Preserve timestamps and affected worker information where available.
-
-A PHP-based WAF may not be an effective primary control if the vulnerable code runs while the runtime parses the request, before the application-level filter processes it. Controls must be placed before the vulnerable parser or, preferably, the runtime must be patched.
-
-## Phase 6: Remediation
-
-The primary fix is to update PHP to a vendor-supported release that contains the security patches. The room's current reference identifies fixed releases as:
-
-- PHP 8.5.12
-- PHP 8.4.27
-- PHP 8.3.36
-- PHP 8.2.35
-
-Verify the exact affected and fixed versions against the official PHP and vendor advisories before applying changes. Restart all relevant worker processes after patching so that old vulnerable runtime code is no longer resident.
-
-Interim risk-reduction measures, where compatible with the application, include:
-- Disable upload-progress tracking if it is not required.
-- Restrict multipart upload requests at a network edge where possible.
-- Run PHP with least privilege and limit filesystem/network access.
-- Monitor PHP worker crashes and unexpected child processes.
-- Review exposed PHP versions and restart workers after configuration changes.
-
-These measures are not substitutes for patching. Blocking multipart requests may break legitimate uploads, and a PHP-level WAF may not inspect the request early enough to stop a runtime parser flaw.
-
-## Phase 7: Reporting
-
-A useful vulnerability report should include:
-- Affected PHP version and deployment model.
-- Whether the service is exposed to unauthenticated requests.
-- Evidence of memory disclosure or code execution.
-- The execution identity and demonstrated impact.
-- Relevant request and error-log timestamps.
-- The patch version and required worker restart.
-- Temporary controls and their operational trade-offs.
-
-Do not publish a weaponised exploit or expose an organisation's affected host details in a public report.
-
-## Key takeaways
-
-PHP2Shell demonstrates how a flaw in a language runtime can affect many applications that rely on it. The important concepts are memory safety, upload-progress handling, worker reuse, ASLR, and the difference between memory disclosure and code execution. Patch the runtime, restart workers, reduce process privileges, and correlate telemetry for signs of exploitation.
-
-## Phase 8: Task Evidence and Validation Checklist
-
-Keep the memory-disclosure and remote-code-execution stages separate. For each stage, record the request, target runtime version, response, worker context, and what the output proves.
-
-| Task focus | Required evidence |
+| Question | Answer |
 |---|---|
-| Confirm target runtime | Exact PHP version and deployment configuration shown by the lab |
-| Verify memory disclosure | Response content demonstrating the unintended memory exposure |
-| Understand ASLR effect | Address-related evidence shown by the room, with explanation of its limits |
-| Verify code execution | The harmless proof result requested by the official task |
-| Confirm privilege boundary | Effective user and process context, not just a success message |
-| Submit flag | Exact flag displayed by the active room; redact publicly as THM{hidden} |
-
-Do not treat a memory leak as proof of remote code execution. A result from a different worker, runtime version, or configuration may not establish that the intended chain worked. Keep the test within the provided machine and use the task's current proof method.
-
-## Final remediation checklist
-
-Confirm the official vendor advisory and fixed releases for the CVEs listed by the room. Upgrade PHP and restart affected worker processes, disable upload-progress handling if it is not required, review memory-limit and error-handling behaviour, and avoid exposing detailed process memory through HTTP responses. Reduce process privileges, isolate the web runtime, and monitor unusual worker failures, repeated requests, and anomalous child processes. Regression-test both the disclosure and execution paths after patching.
+| CVE for memory disclosure / ASLR bypass | `CVE-2026-109618` |
+| CVE for RCE via use-after-free | `CVE-2026-109619` |
+| What PHP feature is abused? | `session.upload_progress` |
+| Minimum patched PHP versions | `8.5.12, 8.4.27, 8.3.36, 8.2.35` |
+| Flag | Retrieved from the target after running the exploit (format `THM{...}`) |

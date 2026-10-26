@@ -1,4 +1,4 @@
-# Phishing Basics: Complete TryHackMe Walkthrough
+# Phishing Basics
 
 Official room: https://tryhackme.com/room/phishing
 
@@ -72,15 +72,3 @@ A phishing investigation may examine email headers, URL redirects, DNS and web-s
 ## Phase 4: Room Questions & Task Walkthrough
 
 For each example message, assess the sender, wording, URL destination, attachment, and requested action. If the task asks which clue makes a message suspicious, identify the specific field or behaviour rather than selecting an answer based only on tone. The room's examples and feedback are the authority for any interactive response.
-
-## Phase 5: Key Takeaways & Remediation
-
-- Use MFA and phishing-resistant authentication where possible.
-- Deploy email authentication and filtering.
-- Block known malicious domains and attachments.
-- Train users to report suspicious messages without fear of blame.
-- Verify payment or bank-detail changes through a second channel.
-- Use least privilege and limit the impact of a compromised account.
-- Maintain a fast process for revoking sessions and resetting exposed credentials.
-
-Phishing succeeds by manipulating trust and urgency. Inspect the real sender and destination, validate unusual requests independently, avoid opening unexpected files, and report suspicious messages quickly. No single visual clue proves a message is safe or malicious; evaluate the evidence as a whole.

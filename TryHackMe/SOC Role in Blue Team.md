@@ -1,4 +1,4 @@
-# SOC Role in Blue Team: Complete TryHackMe Walkthrough
+# SOC Role in Blue Team
 
 Official room: https://tryhackme.com/room/socroleinblueteam
 
@@ -64,9 +64,3 @@ Useful operational measurements include time to detect, time to triage, time to 
 The room's exact interactive questions may change. For each task, identify whether it concerns the SOC mission, analyst responsibilities, tier roles, escalation, or career progression. Use the official task wording and options; do not invent a quiz answer that has not been observed in the room.
 
 For a scenario question, the safest general method is to validate raw telemetry, gather context, document the evidence, and escalate according to impact and playbook. Do not label an event confirmed malicious from a severity score alone.
-
-## Phase 5: Key Takeaways & Remediation
-
-A SOC is a coordinated function in the broader Blue Team. Useful operations require reliable telemetry, alert validation, contextual investigations, clear escalation paths, documented playbooks, and ongoing detection improvement. Analysts should distinguish facts from assumptions and communicate uncertainty plainly.
-
-A portfolio investigation should explain the question, evidence, timeline, decision, and remediation while removing credentials, customer data, and other sensitive information.

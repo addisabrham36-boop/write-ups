@@ -1,4 +1,4 @@
-# Operating Systems: Complete TryHackMe Walkthrough
+# Operating Systems
 
 Official room: https://tryhackme.com/room/operatingsystems:introduction
 

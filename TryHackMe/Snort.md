@@ -1,4 +1,4 @@
-# Snort: TryHackMe Walkthrough
+# Snort
 
 Official room: https://tryhackme.com/room/snort
 

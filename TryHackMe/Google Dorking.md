@@ -1,4 +1,4 @@
-# Google Dorking: TryHackMe Walkthrough
+# Google Dorking
 
 Official room: https://tryhackme.com/room/googledorking
 

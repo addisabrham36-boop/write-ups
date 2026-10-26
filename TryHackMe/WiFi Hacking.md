@@ -1,4 +1,4 @@
-# Wi-Fi Hacking: TryHackMe Walkthrough
+# Wi-Fi Hacking
 
 Official room: https://tryhackme.com/room/wifihacking
 

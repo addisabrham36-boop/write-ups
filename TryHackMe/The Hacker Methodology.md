@@ -1,4 +1,4 @@
-# The Hacker Methodology: TryHackMe Walkthrough
+# The Hacker Methodology
 
 Official room: https://tryhackme.com/room/hackermethodology
 

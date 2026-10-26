@@ -1,4 +1,4 @@
-# Cryptography for Dummies: Complete TryHackMe Walkthrough
+# Cryptography for Dummies
 
 Official room: https://tryhackme.com/room/cryptographyfordummies
 
@@ -136,9 +136,3 @@ The output reveals the secret word. Base64 can be reversed without a key; do not
 | Who created MD5? | Ronald Rivest |
 | Base64 of “cryptographyisuseful” | `Y3J5cHRvZ3JhcGh5aXN1c2VmdWw=` |
 | Secret word decoded from Base64 | `watermelon` |
-
-## Phase 5: Key Takeaways & Remediation
-
-Use modern, reviewed cryptographic libraries. Do not invent a cipher, store passwords using MD5, or hard-code private keys in source code. Use dedicated password-hashing schemes such as Argon2id, scrypt, or bcrypt with salts and appropriate work factors. For encryption, choose authenticated encryption with correct nonce handling, protect keys separately from ciphertext, and rotate keys when exposure is suspected.
-
-Hashing is not encryption, Base64 is not secrecy, and asymmetric cryptography does not replace secure protocol design or key management.

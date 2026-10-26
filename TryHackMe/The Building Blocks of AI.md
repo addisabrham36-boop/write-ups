@@ -1,4 +1,4 @@
-# The Building Blocks of AI: Complete TryHackMe Walkthrough
+# The Building Blocks of AI
 
 Official room: https://tryhackme.com/room/thebuildingblocksofai
 

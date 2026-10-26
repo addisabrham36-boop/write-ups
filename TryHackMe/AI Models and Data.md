@@ -1,4 +1,4 @@
-# AI Models and Data: Complete TryHackMe Walkthrough
+# AI Models and Data
 
 Official room: https://tryhackme.com/room/aimodelsanddata
 
@@ -64,16 +64,3 @@ For each question, determine which evidence class it asks about:
 - A security-impact question should explain the affected property and the evidence for impact.
 
 Preserve exact names and hash characters. Obtain machine-specific values from the active room; do not invent row counts, labels, hashes, or flags.
-
-## Phase 5: Key Takeaways & Remediation
-
-- Track dataset provenance, licensing, versions, and owners.
-- Review labels, duplicates, outliers, and suspicious patterns before training.
-- Keep evaluation data separate from training data.
-- Protect model registries, build credentials, and release approvals.
-- Verify artifact integrity before deployment.
-- Test unexpected behaviour using representative and adversarial inputs.
-- Log model versions and relevant inference metadata.
-- Maintain a rollback path for a suspicious release.
-
-Model security is not only about architecture. Data provenance, preprocessing, packaging, deployment, and monitoring all affect the final behaviour.

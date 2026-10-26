@@ -1,4 +1,4 @@
-# Junior Security Analyst Intro: TryHackMe Walkthrough
+# Junior Security Analyst Intro
 
 Official room: https://tryhackme.com/room/jrsecanalystintrouxo
 

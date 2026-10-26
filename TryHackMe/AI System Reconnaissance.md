@@ -1,4 +1,4 @@
-# AI System Reconnaissance: Complete TryHackMe Walkthrough
+# AI System Reconnaissance
 
 Official room: https://tryhackme.com/room/aisystemreconnaissance
 
@@ -81,9 +81,3 @@ No privilege escalation is implied by API mapping. If a specific lab provides an
 For each task, identify the requested page, header, route, model setting, retrieval source, or behaviour. Save the exact request and a sanitized response when permitted. Use the live room for exact endpoint names, values, and flags; do not make up answers based on common application patterns.
 
 Separate confirmed facts from assumptions and record the time and tool version. Redact sessions and flags in public notes.
-
-## Phase 5: Key Takeaways & Remediation
-
-Reduce exposed surface area, remove debug routes, authenticate administrative APIs, enforce per-user retrieval authorization, restrict tool permissions, validate uploads, rate-limit expensive inference, and keep secrets out of client-side bundles and logs. Maintain an endpoint inventory and retest it when the model, plugin set, or orchestration code changes.
-
-AI reconnaissance is ordinary application reconnaissance with extra attention to model, retrieval, and tool boundaries. The result should be an evidence-based map of what exists, who can access it, and which components need deeper testing.

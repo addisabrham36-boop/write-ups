@@ -1,4 +1,4 @@
-# Windows Basics: TryHackMe Walkthrough
+# Windows Basics
 
 Official room: https://tryhackme.com/room/windowsbasics
 

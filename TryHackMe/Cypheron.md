@@ -1,4 +1,4 @@
-# Cypheron: Complete TryHackMe Walkthrough
+# Cypheron
 
 Official room: https://tryhackme.com/room/cypheron
 
@@ -136,25 +136,3 @@ Keep each flag mapped to the action or artifact that revealed it. Do not assume 
 2. **“Whats the root flag?”** Validate the separate privilege-escalation path, prove root-level context, then read the root flag.
 
 The flags are represented as `flag{hidden}` in this public copy. Obtain the exact values from the active instance and submit those values there.
-
-## Phase 5: Key Takeaways & Remediation
-
-### Model supply-chain security
-- Use authenticated update channels and signed or otherwise verifiable artifacts.
-- Keep model provenance, version, hash, and approval records.
-- Avoid unsafe deserialization of untrusted objects.
-- Separate model loading from privileged services and restrict network egress.
-- Monitor inference and model-serving nodes for unexpected child processes and outbound connections.
-
-### File-processing security
-- Validate file content as well as filename and MIME type.
-- Store uploads outside executable web paths.
-- Sandbox document/model processors and run them as low-privilege identities.
-- Restrict filesystem access, network egress, CPU, memory, and execution time.
-- Authenticate internal workflow endpoints and validate every job's permissions.
-- Avoid shell interpretation of user-controlled values.
-
-### Evidence and reporting
-Keep the original artifact hash, exact HTTP requests, tool versions, relevant logs, effective identities, and flag locations in the private lab notes. Distinguish observed behaviour from hypotheses. A model response alone is not proof of a network beacon, an upload is not proof of code execution, and a low-privilege shell is not proof of root.
-
-The room combines AI-specific threats with conventional application and host security. Model provenance, serialization, file processing, privilege boundaries, and network access should be treated as separate control layers.

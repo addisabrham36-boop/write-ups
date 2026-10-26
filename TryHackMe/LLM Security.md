@@ -1,4 +1,4 @@
-# LLM Security: TryHackMe Walkthrough
+# LLM Security
 
 Official room: https://tryhackme.com/room/llmsecurity
 

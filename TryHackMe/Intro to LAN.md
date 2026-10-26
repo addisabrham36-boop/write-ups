@@ -1,4 +1,4 @@
-# Intro to LAN: Complete TryHackMe Walkthrough
+# Intro to LAN
 
 Official room: https://tryhackme.com/room/introtolan
 
@@ -186,7 +186,3 @@ The commands show the current machine's configuration. A successful ping does no
 | Task 4 | Client requests offered address | DHCP Request |
 | Task 4 | Server's final DHCP packet | DHCP ACK |
 | Topology interactive exercise | Flag | Read from the active site; redacted as THM{hidden} |
-
-## Phase 5: Key Takeaways & Remediation
-
-LAN topologies describe how devices connect; switches forward frames within a LAN; routers connect networks; subnetting divides address space; ARP maps local IPv4 addresses to MAC addresses; and DHCP distributes network settings. Secure networks segment sensitive devices, restrict administration, monitor unexpected devices, and protect DHCP and wireless infrastructure. Understanding these basics helps both troubleshoot faults and explain network-related security events.

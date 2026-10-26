@@ -1,4 +1,4 @@
-# Search Skills: TryHackMe Walkthrough
+# Search Skills
 
 Official room: https://tryhackme.com/room/searchskills
 

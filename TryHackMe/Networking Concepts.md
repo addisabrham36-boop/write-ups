@@ -1,4 +1,4 @@
-# Networking Concepts: TryHackMe Walkthrough
+# Networking Concepts
 
 Room: https://tryhackme.com/room/networkingconcepts
 

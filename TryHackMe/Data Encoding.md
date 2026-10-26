@@ -1,4 +1,4 @@
-# Data Encoding: Complete TryHackMe Walkthrough
+# Data Encoding
 
 Official room: https://tryhackme.com/room/dataencoding
 
@@ -136,7 +136,3 @@ If a question requests raw UTF-16 or UTF-32 bytes, byte order and encoding form 
 | Character for U+0001F60E | Smiling face with sunglasses |
 | Character for U+2658 | White chess knight |
 | Join the Python Demo room | No answer needed |
-
-## Phase 5: Key Takeaways & Remediation
-
-Character encodings let software consistently represent text across systems. Use the exact representation requested by the task, and distinguish the character, its Unicode code point, and its encoded bytes. When debugging corrupted text, check the source encoding, byte order where relevant, and whether the data was decoded more than once. Do not use encoding as a substitute for encryption or access control.

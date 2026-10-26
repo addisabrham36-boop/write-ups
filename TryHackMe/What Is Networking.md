@@ -1,4 +1,4 @@
-# What Is Networking?: TryHackMe Walkthrough
+# What Is Networking?
 
 Official room: https://tryhackme.com/room/whatisnetworking
 

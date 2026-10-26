@@ -58,36 +58,3 @@ The note is instance-specific lab content, so this public write-up intentionally
 A valid finding needs more than a changed URL. Verify that the account data belongs to a different user and that the server returns it despite the current user's lack of permission. Keep a record of the original and modified request, the relevant response, and the impact.
 
 Do not attempt to alter balances or access more data than the room requires. Read-only proof is sufficient for this task.
-
-## Phase 5: Remediation
-
-- Derive the acting user from the authenticated server-side session.
-- Check ownership or role permissions on every request.
-- Do not trust a client-supplied account identifier as proof of authorisation.
-- Apply the same checks to read, update, delete, export, and API operations.
-- Add automated tests for cross-user and cross-role access.
-- Log repeated denied access attempts and alert on suspicious patterns.
-
-Random IDs and encoded IDs may reduce guessing but do not replace authorisation checks.
-
-## Key takeaways
-
-Broken access control is a server-side decision failure. The practical demonstrates horizontal privilege escalation: a normal user can see another user's data by manipulating an object reference. The correct fix is to check the current user's permission for every requested object and action.
-
-## Phase 6: Room question and evidence checklist
-
-For the room's account page, preserve the baseline request with the currently authenticated user's account identifier. Then change only the object identifier in the authorised lab and compare the returned record.
-
-| Evidence | What it establishes |
-|---|---|
-| Original account request | Normal, authorised baseline |
-| Modified object identifier | The precise controlled change |
-| Returned account details | Whether a different user's resource was disclosed |
-| Authenticated session identity | Which user made the request |
-| Expected access policy | Why the access should have been denied |
-
-A successful response is not sufficient by itself: verify the response contains another user's protected data or that the restricted change actually occurred. The answer depends on the current interactive account details, so copy the exact value shown by the lab.
-
-## Final remediation checklist
-
-Enforce object-level permissions server-side on every request, derive the current user from the authenticated session rather than client-supplied identifiers, use deny-by-default policies, and add tests for both permitted and denied access. Random identifiers make guessing harder but do not replace authorization checks.

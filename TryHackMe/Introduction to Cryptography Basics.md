@@ -1,4 +1,4 @@
-# Introduction to Cryptography Basics: TryHackMe Walkthrough
+# Introduction to Cryptography Basics
 
 Official room: https://tryhackme.com/room/cryptographybasics
 

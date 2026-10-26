@@ -1,4 +1,4 @@
-# AI Forensics: Complete TryHackMe Walkthrough
+# AI Forensics
 
 Official room: https://tryhackme.com/room/aiforensics
 
@@ -83,16 +83,4 @@ For each room question:
 4. Record the command/tool and relevant output.
 5. State what the evidence proves and what remains uncertain.
 
-If a task requests a hash, preserve the full digest. If it requests a filename, retain the exact spelling. Flags and task-specific artifacts must be read from the active room; they are not guessed here or replaced with invented terminal output.
-
-## Phase 5: Key Takeaways & Remediation
-
-- Maintain provenance and version history for models and datasets.
-- Use authenticated registries, signed manifests, and controlled release approvals.
-- Avoid unsafe object deserialization and analyse untrusted artifacts in isolation.
-- Enforce authorization in application and tool code, not through prompts alone.
-- Preserve meaningful inference and tool-use logs without recording unnecessary secrets.
-- Correlate multiple sources before attributing behaviour to a backdoor or compromise.
-- Document methods and limitations so another analyst can reproduce the result.
-
-AI changes the kinds of artifacts investigators inspect, but the core forensic method remains preserve, identify, correlate, verify, and report.
+If a task requests a hash, preserve the full digest. If it requests a filename, retain the exact spelling. 

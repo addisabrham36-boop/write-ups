@@ -1,4 +1,4 @@
-# Python Core Concepts: Complete TryHackMe Walkthrough
+# Python Core Concepts
 
 Official room: https://tryhackme.com/room/pythonbasics
 
@@ -163,7 +163,3 @@ Check typical failure points:
 - A dictionary key may be absent.
 - A loop may run forever if its exit condition never becomes true.
 - An unhandled exception can stop a script before it finishes.
-
-## Phase 5: Key Takeaways & Remediation
-
-Python becomes useful when the basics are clear: values, conditions, loops, functions, files, and exceptions. In security work, validate inputs, handle errors explicitly, protect secrets, and produce results that can be checked against the original evidence. Do not execute untrusted code or rely on a string-matching script as the sole basis for a security decision.

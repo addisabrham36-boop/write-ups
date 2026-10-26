@@ -1,4 +1,4 @@
-# DNS in Detail: TryHackMe Walkthrough
+# DNS in Detail
 
 Official room: https://tryhackme.com/room/dnsindetail
 

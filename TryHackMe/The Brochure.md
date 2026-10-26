@@ -1,4 +1,4 @@
-# The Brochure: Complete TryHackMe Walkthrough
+# The Brochure
 
 Official room: https://tryhackme.com/room/hh-thebrochure-081f3e36
 
@@ -99,15 +99,3 @@ Use the sequence below to complete the task:
 7. Follow the resulting clue and submit the flag shown by the active room.
 
 The flag should be redacted in this public repository as `THM{hidden}`, but the live task requires the exact value shown by TryHackMe.
-
-## Phase 5: Key Takeaways & Remediation
-
-- OSINT often relies on correlating several small public clues rather than exploiting a service.
-- Inspect the supplied artifact before assuming metadata or steganography is the solution.
-- Preserve the original file and record the tool used to inspect it.
-- Search the exact brand name and verify the profile matches the brochure.
-- Base64 is encoding, not encryption. Do not use it to protect credentials or secrets.
-- Public social-media relationships can expose unintended links between accounts.
-- Collect only the information required by the authorised exercise.
-
-The correct method is to follow the evidence chain from the brochure to the matching public account, inspect the unusual follower, decode the provided value, and verify the resulting flag against the live task. No unrelated server enumeration or exploitation is part of this room.

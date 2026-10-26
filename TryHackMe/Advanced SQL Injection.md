@@ -1,4 +1,4 @@
-# Advanced SQL Injection: TryHackMe Walkthrough
+# Advanced SQL Injection
 
 Room: https://tryhackme.com/room/advancedsqlinjection
 
@@ -209,8 +209,3 @@ This SQL Server feature can run operating-system commands when enabled and suffi
 | Out-of-band SQLi | Separate callback from a database-side operation | Results can travel through a channel other than the page response |
 | Header-based SQLi | Header value reaches a query unsafely | Inputs other than visible form fields can reach SQL sinks |
 | Automation | Scanner report followed by manual confirmation | Tools prioritize tests; evidence confirms the finding |
-
-## Phase 5: Remediation
-
-Use parameterized queries for every query path, including jobs that later reuse stored data. Do not concatenate user data into query strings. Avoid blacklist-only filtering and do not depend on keyword case. Restrict database privileges so web accounts cannot alter schema or modify data they do not need. Disable unsafe database features such as xp_cmdshell unless they are explicitly required and tightly controlled. Log database errors server-side and return generic client errors rather than exposing implementation details.
-

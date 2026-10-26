@@ -79,13 +79,18 @@ Wi-Fi is a radio-based network link with its own discovery, authentication, and 
 
 When a question asks for an SSID, BSSID, channel, frequency, authentication method, or security protocol, read the exact field in the lab output. Do not infer the frequency from the channel number without checking the band, and do not confuse the network name with the radio identifier.
 
-| Concept | Correct interpretation |
-|---|---|
-| SSID | Human-readable wireless network name |
-| BSSID | Identifier of a specific access-point radio |
-| Channel | Radio channel within a band |
-| Authentication | How a client proves it may connect |
-| Encryption | How wireless traffic is protected in transit |
-| Hidden SSID | Broadcast behaviour, not access control |
+---
 
-For defensive deployments, use current WPA settings, unique passphrases, modern firmware, guest isolation, and certificate validation for enterprise networks. Review client behaviour as well as AP configuration.
+## 🏁 Questions & Answers
+
+| Task | Question | Answer |
+|---|---|---|
+| **Task 2** | What is the MAC address of an access point's radio called? | `BSSID` |
+| **Task 3** | Management frame transmitted periodically by APs to advertise their presence? | `Beacon` |
+| **Task 3** | Management frame transmitted by clients searching for networks? | `Probe Request` |
+| **Task 4** | Wireless card mode required to capture traffic not addressed to your device? | `Monitor mode` |
+| **Task 5** | Tool from the aircrack-ng suite used to capture packets and enumerate APs? | `airodump-ng` |
+| **Task 6** | Frames from which hidden SSIDs are captured during reconnection? | `Association frames` |
+
+*For complete attack vectors and WPA2 4-way handshake cracking, see [Wi-Fi Fundamentals and Reconnaissance](./Wi-Fi%20Fundamentals%20and%20Reconnaissance.md).*
+

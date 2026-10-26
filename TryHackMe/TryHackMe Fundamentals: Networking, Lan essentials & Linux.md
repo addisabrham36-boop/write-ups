@@ -273,3 +273,21 @@ On Linux, the owner, group, mode bits, ACLs, capabilities, and mount options may
 7. Record what changed after each test.
 
 Use this approach for the room's practical questions and don't copy outputs from another VM. The goal is to connect each result to the appropriate layer: physical/link, IP routing, transport, DNS, application, or operating-system permissions.
+
+---
+
+## 🏁 Practical Knowledge & Verification Reference
+
+| Domain | Core Concept / Question | Key Command or Value |
+|---|---|---|
+| **Linux Architecture** | Where are core system-wide configuration files stored? | `/etc` |
+| **Linux Permissions** | What numerical octal mode represents `rwxr-xr--`? | `754` |
+| **Linux Security** | What special permission executes files with the binary owner's privileges? | `SUID` (Octal `4000`) |
+| **Linux Processes** | What signal forcefully terminates an unresponsive process? | `SIGKILL` (`kill -9`) |
+| **Networking** | Which Layer 2 protocol maps an IPv4 address to a hardware MAC? | `ARP` (Address Resolution Protocol) |
+| **Networking** | What is the 4-step DHCP lease handshake sequence? | `DORA` (Discover, Offer, Request, Acknowledge) |
+| **Networking** | What is the usable host count on a `/24` IPv4 subnet? | `254` ($2^8 - 2$) |
+| **Networking** | Which transport protocol guarantees sequenced, reliable delivery? | `TCP` (Transmission Control Protocol) |
+| **Reconnaissance** | What Nmap flag executes non-intrusive ping host discovery without port scanning? | `nmap -sn` |
+| **Traffic Analysis** | What Wireshark filter isolates unencrypted HTTP POST authentication attempts? | `http.request.method == "POST"` |
+

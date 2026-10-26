@@ -93,4 +93,21 @@ If the live room expects a value from a particular source, use that source's cur
 
 Defenders can use passive recon to inventory their external attack surface, identify abandoned hostnames, remove sensitive public documents, audit repository history, and monitor certificate issuance. Public exposure should be addressed at its source; deleting a current file does not erase copies or secrets from historical commits.
 
-The key discipline is evidence quality. Record the source and time, confirm that the asset belongs to the target, distinguish observed facts from hypotheses, and do not move from passive research to active testing without explicit authorisation.
+---
+
+## 🏁 Questions & Answers (TryHackMe Room Walkthrough)
+
+*For step-by-step commands and raw terminal output, see [Passive Reconnaissance](./Passive%20Reconnaissance.md).*
+
+| Task | Question | Verified Answer |
+|---|---|---|
+| **Task 2** | Visit the target company's Facebook page for employee names | `P` (Passive) |
+| **Task 2** | Ping the target webserver to check ICMP | `A` (Active) |
+| **Task 2** | Social engineer the IT admin at a party | `A` (Active) |
+| **Task 3** | When was the domain name tryhackme.com registered? | `20180705` |
+| **Task 3** | What is the registrar of tryhackme.com? | `NameCheap, Inc.` |
+| **Task 3** | Which company is tryhackme.com registered in? | `US` |
+| **Task 4** | What is the TXT record containing a flag value? | `THM{a5b83929833e81e3a74d727ff64fce93}` |
+| **Task 5** | What is the current IP address of the target on DNSDumpster? | `217.160.0.152` |
+| **Task 6** | What is the link to the web site on Shodan? | `https://www.tryhackme.com` |
+

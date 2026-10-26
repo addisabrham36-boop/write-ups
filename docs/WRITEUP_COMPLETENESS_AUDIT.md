@@ -16,12 +16,12 @@ This document represents the formal second-pass audit of all technical write-ups
 
 | Category | Total Documents | Completeness Status |
 |---|---|---|
-| **TryHackMe — CTF Machine Walkthroughs** | 25 | 100% COMPLETE |
+| **TryHackMe — CTF Machine Walkthroughs** | 26 | 100% COMPLETE |
 | **TryHackMe — Theory & Applied Modules** | 62 | 100% COMPLETE |
-| **TryHackMe — Advent of Cyber Series** | 3 (48 Days + 10 Prep) | 100% COMPLETE |
+| **TryHackMe — Advent of Cyber Series** | 75 (72 Daily Walkthroughs + 3 Year Indexes) | 100% COMPLETE (See [Master Audit](./ADVENT_OF_CYBER_MASTER_AUDIT.md)) |
 | **PortSwigger Web Security Academy** | 1 (5 Master Labs) | 100% COMPLETE |
 | **Repository Root Index** | 1 | 100% COMPLETE |
-| **Total Tracked Documentation Assets** | 92 | **ALL VERIFIED** |
+| **Total Tracked Documentation Assets** | 165+ | **ALL VERIFIED** |
 
 ---
 

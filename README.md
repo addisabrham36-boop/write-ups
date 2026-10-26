@@ -22,9 +22,13 @@ Where a result depends on a live environment, the write-up should explain how to
 
 ## Advent of Cyber
 
-- [Advent of Cyber 2022](./TryHackMe/Advent%20of%20Cyber%202022.md)
-- [Advent of Cyber 2023](./TryHackMe/Advent%20of%20Cyber%202023.md)
+- [Advent of Cyber 2024 (24 Individual Daily Walkthroughs)](./TryHackMe/Advent-of-Cyber-2024/README.md)
+- [Advent of Cyber 2023 (24 Individual Daily Walkthroughs)](./TryHackMe/Advent-of-Cyber-2023/README.md)
+- [Advent of Cyber 2022 (24 Individual Daily Walkthroughs)](./TryHackMe/Advent-of-Cyber-2022/README.md)
 - [Advent of Cyber Prep Track](./TryHackMe/Advent%20of%20Cyber%20Prep%20Track.md)
+- [Advent of Cyber 2023 Monolithic Reference](./TryHackMe/Advent%20of%20Cyber%202023.md)
+- [Advent of Cyber 2022 Monolithic Reference](./TryHackMe/Advent%20of%20Cyber%202022.md)
+- [Advent of Cyber Master Audit](./docs/ADVENT_OF_CYBER_MASTER_AUDIT.md)
 
 ## Networking and operating systems
 
@@ -92,6 +96,7 @@ Where a result depends on a live environment, the write-up should explain how to
 
 - [API Test](./PortSwigger-Web-Security/API%20Test.md)
 - [Advanced SQL Injection](./TryHackMe/Advanced%20SQL%20Injection.md)
+- [Light](./TryHackMe/Light.md)
 - [OWASP Top 10 2025 A01 Broken Access Control](./TryHackMe/OWASP%20Top%2010%202025%20A01%20Broken%20Access%20Control.md)
 - [OWASP Top 10 2025 Application Design Flaws](./TryHackMe/OWASP%20Top%2010%202025%20Application%20Design%20Flaws.md)
 - [OWASP Top 10 2025 Injection](./TryHackMe/OWASP%20Top%2010%202025%20Injection.md)

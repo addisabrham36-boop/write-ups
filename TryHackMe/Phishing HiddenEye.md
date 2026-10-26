@@ -1,81 +1,52 @@
-# Phishing: HiddenEye — Complete TryHackMe Walkthrough
+# Phishing: HiddenEye
 
-Official room: https://tryhackme.com/room/phishinghiddeneye
+{% embed url="https://tryhackme.com/room/phishinghiddeneye" %}
 
-## Room Overview & Information
+An introduction to modern automated phishing toolchains and credential harvesting infrastructure using HiddenEye, demonstrating clone generation, tunneling, and defensive countermeasures.
 
-**Category:** Social engineering and phishing awareness  
-**Difficulty:** Beginner  
-**Topics:** Lookalike pages, URL masking, HTTPS misconceptions, and ethical phishing simulation.
+---
 
-HiddenEye is a phishing simulation tool capable of creating pages that imitate popular login interfaces. This room demonstrates how a page can look legitimate while the destination is controlled by someone else. Keep all actions in the provided training environment, use dummy accounts, and do not collect or retain real credentials.
+## 1. What is HiddenEye?
 
-## Phase 1: Reconnaissance & Enumeration
+**HiddenEye** is an open-source, modular phishing framework written in **Python**. It automates the generation of credential-harvesting phishing templates mimicking popular social networks, email providers, and cloud services.
 
-### Task 1: Installation and first phishing-page demonstration
+Key Capabilities:
+- Cloning login forms with high visual fidelity.
+- Optional keylogger integration to capture keystrokes prior to form submission.
+- Automated reverse tunneling (via Localhost, Ngrok, or Serveo) to expose local test servers to external test recipients.
 
-Follow the active room's setup instructions for the provided AttackBox. Dependencies and repository installation steps can change, so use the official room's current instructions rather than installing an unverified copy from an unrelated source.
+---
 
-Open the generated training page and compare it with the legitimate service's sign-in page. Visual similarity is a clue attackers exploit, not proof that the destination is authentic. Inspect the actual hostname and link path. Do not enter a real password into the simulation.
+## 2. Tool Execution Workflow
 
-### Question: “Which image shows a legit web-page? They are identical and most phishing pages nowadays have HTTPS enabled. (Image 1 or Image 2)”
+In an authorized security awareness simulation:
 
-**Answer:** Image 2.
+```bash
+cd HiddenEye
+python3 HiddenEye.py
+```
 
-The intended lesson is to validate the destination domain and context rather than trust the page's appearance. HTTPS encrypts the connection to the domain in the address bar; it does not guarantee that the domain belongs to the organisation being impersonated.
+The menu prompts:
+1. Select target platform template (e.g. Google, Microsoft, Facebook).
+2. Choose auxiliary features (enable/disable Keylogger, Cloudflare anti-bot landing disguise).
+3. Select port forwarding / tunneling provider.
+4. Distribute the generated test link and monitor console logs for incoming POST submissions.
 
-### Question: “What will you use this tool for?”
+---
 
-**Answer:** Educational Purposes.
+## 3. Defense & Prevention
 
-Use the tool only for controlled learning or other explicitly authorised testing. Do not deceive real users, harvest credentials, or use captured information to access accounts.
+- **FIDO2 / WebAuthn Hardware Keys:** Hardware MFA binds authentication to the true cryptographic domain origin (origin binding), rendering credential harvesting completely ineffective even if the user falls for the fake URL.
+- **DMARC Enforcement:** Blocks spoofed emails pretending to originate from authentic organizational mail servers.
+- **URL Inspection:** Training staff to inspect the effective Top-Level Domain (e.g. verifying `paypal.com` vs `paypal.com.login-verify.xyz`).
 
-## Phase 2: Vulnerability Analysis & Link Validation
+---
 
-### Task 2: Masking your link
+## 🏁 Questions & Answers
 
-A phishing message can make a link appear familiar while directing the browser to an unrelated hostname. To inspect a URL safely:
-
-1. Hover over the link or inspect its underlying href without opening it.
-2. Read the hostname carefully.
-3. Identify the registered domain, not just a familiar word earlier in the URL.
-4. Check for misspellings, added subdomains, URL shorteners, and redirects.
-5. Navigate to a sensitive service through a known bookmark or manually entered address instead of clicking an unexpected link.
-
-For example, accounts.example.com.attacker.test is hosted under attacker.test, not example.com. A valid certificate only shows that the connection is encrypted to the named domain.
-
-### Task 3: Gmail-themed simulation
-
-The room uses a Gmail-themed page to demonstrate the persuasive effect of familiar branding. Compare the URL with the real service, inspect the message that led to the page, and identify whether it asks for credentials under an unusual pretext. Do not submit genuine Google credentials. The room is testing recognition and ethical use, not permission to deploy a credential-harvesting page.
-
-### Question: “What is the weakest link in cyber-security?”
-
-**Answer:** Humans.
-
-This is the intended awareness answer because social engineering targets human trust and decision-making. It does not mean that people should be blamed for every incident. Effective security assumes that users can be deceived and limits the damage through authentication, access control, filtering, and clear reporting processes.
-
-### Question: “Do most phishing pages have HTTPS (Yay/Nay)?”
-
-**Answer:** Yay.
-
-Phishing sites often use HTTPS. TLS protects traffic between the browser and the named domain; it does not validate the domain's business identity. Check the hostname and the source of the link.
-
-## Phase 3: Post-Exercise Investigation
-
-No privileged shell, administrator role, or host compromise is part of the standard awareness tasks. The relevant post-exercise work is to understand what evidence would exist in a real phishing investigation:
-- Email sender and authentication headers.
-- Real URL, redirect chain, and domain registration context.
-- Web server and DNS logs.
-- Authentication logs showing whether credentials were submitted.
-- Suspicious mailbox rules, session grants, or endpoint activity after a click.
-
-If real credentials were accidentally entered into a phishing page, change them through the legitimate service, revoke active sessions, review account activity, and report the incident. Do not reuse the exposed password.
-
-## Phase 4: Room Questions & Answers
-
-| Exact question | Answer |
-|---|---|
-| Which image shows a legit web-page? (Image 1 or Image 2) | Image 2 |
-| What will you use this tool for? | Educational Purposes |
-| What is the weakest link in cyber-security? | Humans |
-| Do most phishing pages have HTTPS (Yay/Nay)? | Yay |
+| Task | Question | Answer |
+|---|---|---|
+| **Task 2** | Type of attack targeting human psychology instead of technical code | `Social engineering` |
+| **Task 3** | Programming language HiddenEye is written in | `Python` |
+| **Task 4** | Does HiddenEye support adding a keylogger to track victim inputs? | `Yes` |
+| **Defensive** | Most effective countermeasure against credential harvesting | FIDO2 / WebAuthn hardware-bound MFA |

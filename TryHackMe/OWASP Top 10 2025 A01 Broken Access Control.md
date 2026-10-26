@@ -1,60 +1,46 @@
 # OWASP Top 10 2025: A01 Broken Access Control
 
-Official room: https://tryhackme.com/room/owasptopten2025one
+{% embed url="https://tryhackme.com/room/owasptop102025iaaafailures" %}
 
-## Room Overview & Information
+Analysis of OWASP A01: Broken Access Control within the 2025 IAAA (Identity, Authentication, Authorisation, Accountability) framework, focusing on horizontal vs vertical privilege escalation and IDOR.
 
-**Category:** Web application security  
-**Difficulty:** Beginner  
-**OWASP category:** A01 Broken Access Control  
-**Scenario:** Inspect a simulated banking site, identify another user's account through a client-controlled account identifier, and understand why the server must enforce object-level permissions.
+---
 
-This is a focused task within TryHackMe's IAAA Failures room. The static website is a deliberately vulnerable lab. Only manipulate the identifiers in that lab, not a real banking website.
+## 1. What is IAAA?
 
-## Phase 1: Understand the IAAA model
+IAAA defines the four pillars of access management:
+- **Identity:** Declaring who a user or entity claims to be.
+- **Authentication:** Verifying the declared identity (passwords, MFA, keys).
+- **Authorisation:** Determining what resources and actions the authenticated identity is permitted to access.
+- **Accountability:** Logging and tracing actions back to an identity (non-repudiation and auditing).
 
-- **Identity:** the account representing a person or service.
-- **Authentication:** proving control of that identity.
-- **Authorisation:** deciding what the identity may read or change.
-- **Accountability:** recording who did what, when, and from where.
+---
 
-These stages depend on one another. A user can be authenticated correctly and still be forbidden from viewing another customer's account. A session cookie proves something about the session; it does not grant unlimited access.
+## 2. Broken Access Control Concepts
 
-## Phase 2: Inspect the account page
+- **Vertical Privilege Escalation:** An unprivileged user accesses functions or data reserved for higher privilege tiers (e.g. standard user performing admin operations).
+- **Horizontal Privilege Escalation:** A user accesses functions or private data of another user possessing the exact same privilege tier (e.g. user A viewing user B's account balance via IDOR).
 
-Start the static site attached to the room. Inspect the URL while viewing your account. The task uses an `accountID` value in the URL. Record the initial value and the information shown for your current account.
+---
 
-For a real assessment, I would use browser Developer Tools or Burp Suite to inspect the request. The relevant question is whether the server checks the current session's ownership of the requested account, rather than blindly trusting the client-supplied identifier.
+## 3. IDOR Exploitation Walkthrough
 
-## Phase 3: Test object-level authorisation
+In the vulnerable web application, users view their balance through:
+```http
+GET /api/account?id=104 HTTP/1.1
+```
 
-Within the lab, change the `accountID` value to another value and inspect the returned account. Change only that identifier so the comparison is controlled. If the application returns another user's data without an authorisation check, it demonstrates an Insecure Direct Object Reference (IDOR), a common form of broken access control.
+By altering the `id` parameter sequentially or testing different object references, we access another user's profile without authorization checks:
+- Intercept the request in Burp Suite.
+- Increment the identifier to locate the account holding over $1,000,000.
+- Retrieve the sensitive note stored in their account profile.
 
-Continue the task until you identify the account with more than one million dollars. Open that account and read the note attached to it. Do not guess the ID or note from another guide; use the current lab's displayed values.
+---
 
-### Question 1
+## 🏁 Questions & Answers
 
-**“If you don't get access to more roles but can view the data of another users, what type of privilege escalation is this?”**
-
-Answer: **Horizontal privilege escalation.**
-
-The user remains at the same general privilege level but accesses another user's resources. Vertical escalation would involve gaining a higher role or performing an administrator-only action.
-
-### Question 2
-
-**“What is the note you found when viewing the user's account who had more than $ 1 million?”**
-
-Procedure:
-1. Continue testing the `accountID` value in the supplied static site.
-2. Identify the account whose balance exceeds $1 million.
-3. Open that account's page.
-4. Read the note field.
-5. Submit the exact note text shown by the lab.
-
-The note is instance-specific lab content, so this public write-up intentionally explains how to obtain it rather than inventing a value.
-
-## Phase 4: Validate the finding
-
-A valid finding needs more than a changed URL. Verify that the account data belongs to a different user and that the server returns it despite the current user's lack of permission. Keep a record of the original and modified request, the relevant response, and the impact.
-
-Do not attempt to alter balances or access more data than the room requires. Read-only proof is sufficient for this task.
+| Task | Question | Answer |
+|---|---|---|
+| **Task 2** | What does IAAA stand for? | `Identity, Authentication, Authorisation, Accountability` |
+| **Task 3** | Accessing data of another user at the same level is what type of privesc? | `horizontal privilege escalation` |
+| **Task 3** | Note found viewing the user account with over $1 million | Retrieved via IDOR by incrementing target account IDs |

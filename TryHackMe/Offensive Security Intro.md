@@ -1,59 +1,44 @@
 # Offensive Security Intro
 
-Official room: https://tryhackme.com/room/offensivesecurityintro
+{% embed url="https://tryhackme.com/room/offensivesecurityintro" %}
 
-## Room Overview & Information
+An introduction to the philosophy of offensive security and ethical hacking, walking through web enumeration with `dirb` and manipulating web transactions on the FakeBank application.
 
-**Category:** Offensive security fundamentals  
-**Difficulty:** Easy  
-**Objective:** Understand authorised offensive security and complete the simulated vulnerable-bank interaction.
+---
 
-This is an interactive introduction rather than a boot-to-root target. There is no real bank, no shell, and no privilege-escalation stage. The practical demonstrates how an intentionally scripted website responds when a user submits the required answer.
+## 1. What is Offensive Security?
 
-## Phase 1: Understand Offensive Security
+Offensive security involves actively testing systems, networks, and applications using the same tools and tactics employed by malicious adversaries to uncover and remediate vulnerabilities before they can be exploited.
 
-Offensive security uses attacker-style testing to discover and validate security weaknesses before they are abused by criminals. Examples include penetration testing, red teaming, and vulnerability research. A professional test has explicit permission, a defined scope, safety rules, evidence collection, and a report that helps the owner remediate findings.
+---
 
-The distinction between offensive security and unauthorised hacking is not the tool being used. It is the permission, scope, and conduct of the activity.
+## 2. Web Reconnaissance (FakeBank Lab)
 
-## Phase 2: Complete the simulated bank task
+1. Connect to the provided lab machine at `http://fakebank.thm`.
+2. Inspect the dashboard: the user's account number is displayed as **`8881`**.
+3. Run directory brute forcing with `dirb` to find hidden administrative or transfer routes:
+   ```bash
+   dirb http://fakebank.thm
+   ```
+4. In addition to `/images`, `dirb` discovers:
+   `http://fakebank.thm/bank-transfer`
 
-### 1. Open the lab site
+---
 
-Open the room's **View Site** link. This launches the fictional banking website used by the practical. Read the prompt, inspect the interactive controls, and do not navigate to a real bank site.
+## 3. Modifying Balances
 
-### Question: “Which of the following options better represents the process where you simulate a hacker's actions to find vulnerabilities in a system?”
+1. Navigate to `http://fakebank.thm/bank-transfer`.
+2. Enter your account number (`8881`) and transfer a positive deposit amount (e.g. `$2000`).
+3. Return to the account overview page. Once the balance flips positive, an alert banner renders the victory key:
+   `BANK-HACKED`
 
-**Answer:** **Offensive Security**.
+---
 
-The question asks for the professional discipline that simulates attacker behaviour to discover weaknesses. The aim is to identify issues in a controlled, authorised manner so they can be fixed before a real attack.
+## 🏁 Questions & Answers
 
-### 2. Verify the simulated result
-
-After submitting the correct answer, the page displays a message above the account balance.
-
-### Question: “Above your account balance, you should now see a message indicating the answer to this question. Can you find the answer you need?”
-
-**Answer:** **BANK-HACKED**.
-
-This is the text deliberately displayed by the simulation. It is not evidence that a real banking system was compromised.
-
-## Phase 3: How to Document an Offensive Test
-
-Although the room is very simple, a professional record should still separate action from result:
-
-1. **Objective:** identify what the task asks you to demonstrate.
-2. **Scope:** use only the site deployed by the room.
-3. **Action:** submit the room's required input.
-4. **Evidence:** record the output displayed by the page.
-5. **Interpretation:** explain what the application showed and what it did not prove.
-6. **Cleanup:** stop when the task is complete and avoid interacting with unrelated services.
-
-The displayed message proves only that the simulated task accepted the answer. It does not prove a general vulnerability exists in an external system.
-
-## Phase 4: Question and Answer Summary
-
-| Exact question | Answer |
-|---|---|
-| Which option represents simulating a hacker's actions to find vulnerabilities? | **Offensive Security** |
-| What message appears above the account balance after the correct interaction? | **BANK-HACKED** |
+| Task | Question | Answer |
+|---|---|---|
+| **Task 1** | Term describing simulating a hacker's actions to find weaknesses | `Offensive Security` |
+| **Task 2** | Account number in the FakeBank application | `8881` |
+| **Task 3** | Hidden URL discovered by dirb besides `/images` | `http://fakebank.thm/bank-transfer` |
+| **Task 4** | Words in green text when balance turns positive (ALL CAPS) | `BANK-HACKED` |

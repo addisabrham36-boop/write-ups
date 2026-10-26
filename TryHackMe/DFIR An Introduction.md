@@ -1,91 +1,51 @@
-# DFIR: An Introduction — TryHackMe Walkthrough
+# DFIR: An Introduction
 
-Official room: https://tryhackme.com/room/dfirintro
+{% embed url="https://tryhackme.com/room/dfiranintro" %}
 
-## Room Overview & Information
+An introduction to Digital Forensics and Incident Response (DFIR), forensic timeline generation, artifact extraction tools (Autopsy, KAPE, Volatility), and NIST/SANS incident lifecycle frameworks.
 
-**Category:** Defensive security / digital forensics  
-**Focus:** Evidence preservation, investigation timelines, containment, eradication, recovery, and reporting.
+---
 
-Digital Forensics and Incident Response (DFIR) combines evidence analysis with actions that contain and recover from security incidents. Forensics helps establish what happened; incident response limits harm and restores safe operations. The priorities overlap, but they are not identical.
+## 1. What is DFIR?
 
-## Phase 1: Preserve evidence
+**Digital Forensics and Incident Response (DFIR)** combines two complementary security specializations:
+1. **Digital Forensics:** The science of identifying, preserving, analyzing, and presenting digital evidence from disks, memory dumps, and network captures.
+2. **Incident Response:** The operational process of containing, eradicating, and recovering from an active security breach.
 
-Before an incident, organisations should know which logs exist, where they are stored, who can access them, and how to preserve them. During an investigation, record the source, collection time, collector, and handling history for each item.
+---
 
-Evidence may include endpoint logs, authentication records, network captures, DNS logs, firewall events, disk images, memory captures, suspicious files, email headers, browser artefacts, and configuration changes.
+## 2. Core Forensic Toolsets
 
-Preserve original evidence where possible and analyse working copies. Hashes help verify whether a file changed after collection, but a hash alone does not prove that evidence was collected correctly. Provenance and handling records still matter.
+- **Disk & File Analysis:** Autopsy, FTK Imager, KAPE.
+- **Memory Forensics:** Volatility, Rekall.
+- **Endpoint Triage:** Velociraptor, Redline.
 
-```bash
-file suspicious.bin
-sha256sum suspicious.bin
-stat suspicious.bin
-```
+---
 
-- **file** identifies the likely file type.
-- **sha256sum** calculates a SHA-256 digest.
-- **stat** displays filesystem metadata.
+## 3. The Incident Response Lifecycle
 
-These commands do not prove a file is malicious by themselves.
+Comparing the standard SANS 6-step lifecycle to the NIST SP 800-61 framework:
+- **Containment, Eradication, and Recovery:**
+  - **Eradication:** Evicting the adversary from the network, closing vulnerabilities, and removing artifacts.
+  - **Recovery:** Safely bringing compromised systems and services back online into production.
+- **Post-Incident Activity:** The NIST equivalent to the SANS **"Lessons Learned"** stage.
 
-## Phase 2: Build a timeline
+---
 
-Normalise timestamps and document time zones. Correlate records from multiple sources to reconstruct the likely sequence of events. Keep raw observations separate from the analyst's interpretation.
+## 4. Practical Timeline Exercise
 
-A timeline might begin with a suspicious login, followed by a process launch, access to sensitive files, and outbound network traffic. Each link should be supported by evidence. If a log source is missing, record that gap rather than inventing the missing event.
+Completing the log timeline reconstruction simulation provides the verification flag:
+`THM{DFIR_REPORT_DONE}`
 
-## Phase 3: Analyse common artefacts
+---
 
-- **Authentication logs** show when and how an account was used.
-- **Process records** can reveal what executed and under which identity.
-- **DNS and network logs** can show attempted or completed communication.
-- **Browser and email artefacts** can help explain user interaction.
-- **File metadata and hashes** support identification and comparison.
-- **Memory** may preserve running processes, connections, and other volatile state.
+## 🏁 Questions & Answers
 
-No single artefact usually tells the complete story. Cross-check findings and account for logging gaps, clock drift, and normal administrative activity.
-
-## Phase 4: Contain the incident
-
-Containment reduces ongoing harm. Depending on the situation, it may involve isolating an endpoint, disabling a compromised account, blocking a malicious indicator, or restricting access to a service. The correct action depends on business impact and the risk of allowing activity to continue.
-
-Containment should be coordinated with the system owner. Abruptly shutting down a host may destroy volatile evidence or disrupt critical operations. When immediate risk is high, preventing further damage may take priority, but document the decision.
-
-## Phase 5: Eradicate and recover
-
-Eradication removes the cause of compromise, such as malicious persistence, exposed credentials, or a vulnerable configuration. Recovery returns systems to trusted operation, often from verified backups or clean images.
-
-Deleting one suspicious file may not be enough if an attacker also created accounts, scheduled tasks, or stole credentials. After recovery, verify that the original entry point is fixed, credentials are rotated where needed, and monitoring is increased.
-
-## Phase 6: Reporting
-
-A clear DFIR report should include the scope, timeline, evidence sources, findings, impact, actions taken, remaining uncertainty, and recommendations. Distinguish confirmed facts from hypotheses. Include enough detail for another analyst to reproduce the reasoning without exposing personal data or secrets unnecessarily.
-
-## Phase 7: Working through the room
-
-For each task, identify whether it concerns evidence preservation, analysis, containment, eradication, recovery, or lessons learned. Follow the room's instructions for artefacts and tools. If a task asks for a timestamp, hash, or filename, read it from the provided evidence instead of substituting an example value.
-
-## Key takeaways
-
-DFIR requires both speed and discipline. Incident response limits harm, while forensic methods preserve the evidence needed to understand the incident and prevent recurrence. A good investigation records what is known, what remains uncertain, and why each action was taken.
-
-## Phase 8: Case-closure checklist
-
-Before closing an incident, verify that the timeline is consistent, evidence sources and time zones are recorded, and each conclusion is supported by an artifact or log. Record what is confirmed, what remains uncertain, and which evidence was not available.
-
-| Response stage | Completion evidence |
-|---|---|
-| Identification | Alert or report, affected assets, initial scope |
-| Preservation | Evidence source, time collected, hash where appropriate, handling record |
-| Analysis | Timeline, corroborating artifacts, alternative explanations considered |
-| Containment | Exact action, approval, implementation result, validation |
-| Eradication | Root cause removed, persistence checked, vulnerable entry point fixed |
-| Recovery | Trusted restoration, service validation, monitoring |
-| Lessons learned | Root cause, control gaps, corrective owner, retest plan |
-
-Don't shut down an affected machine or delete suspicious files reflexively. Depending on the incident, that can destroy volatile evidence. Follow the response plan and coordinate containment with the system owner.
-
-## Key remediation principles
-
-Centralise and protect logs, synchronise system clocks, restrict privileged access, patch the initial access path, rotate exposed credentials, restore from trusted sources when integrity is uncertain, and test that the same attack path no longer works. DFIR is not complete until the organisation understands the root cause and reduces the chance of recurrence.
+| Task | Question | Answer |
+|---|---|---|
+| **Task 2** | What does DFIR stand for? | `Digital Forensics and Incident Response` |
+| **Task 2** | DFIR requires expertise in Digital Forensics and what other field? | `Incident Response` |
+| **Task 3** | Flag obtained from timeline creation exercise | `THM{DFIR_REPORT_DONE}` |
+| **Task 5** | Stage where disrupted services are brought back online | `Recovery` |
+| **Task 5** | Stage where threat is evicted after forensic analysis | `Eradication` |
+| **Task 5** | NIST equivalent of SANS "Lessons learned" | `Post-incident Activity` |

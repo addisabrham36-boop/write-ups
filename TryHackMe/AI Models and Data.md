@@ -1,66 +1,50 @@
 # AI Models and Data
 
-Official room: https://tryhackme.com/room/aimodelsanddata
+{% embed url="https://tryhackme.com/room/aimodelsanddata" %}
 
-## Room Overview & Information
+A foundational exploration of machine learning data pipelines, data provenance, training epochs, overfitting vs generalisation, quantization optimizations, and federated learning architectures.
 
-**Category:** AI security, machine learning, and data integrity  
-**Objective:** Understand the relationship between model artifacts, training and evaluation data, inference behaviour, provenance, and security controls.
+---
 
-This is a conceptual and artifact-analysis room rather than a traditional boot-to-root host. Port scanning, shell access, and privilege escalation are not applicable unless the active task explicitly introduces them. Use the room's data and interface as the authority for exact task-specific values.
+## 1. Training Data & Provenance
 
-## Phase 1: Reconnaissance & Artifact Enumeration
+- **Data Provenance:** The verifiable historical record documenting where training data originated, when it was scraped, and whether it has undergone transformation or sanitization.
+- **Common Crawl:** The massive public web crawl corpus underpinning modern large language model foundations.
+- **ML-BOM (Machine Learning Bill of Materials):** The AI equivalent of an SBOM documenting dataset origins, pipeline steps, and licensing terms.
 
-### 1. Map the model lifecycle
+---
 
-An AI system can involve data collection, cleaning, labelling, training, evaluation, packaging, deployment, inference, and monitoring. A weakness at one stage can affect later stages. Poisoned training examples may influence behaviour long after the raw dataset is removed; a tampered model file may indicate a release-process compromise.
+## 2. Model Training & Optimization
 
-Record which artifacts the room provides: datasets, model weights, tokenizer files, configuration, prompts, output examples, and logs. Identify what each should contain and how its source is documented.
+- **Epoch:** One complete training cycle passing the entire dataset through the model architecture.
+- **Overfitting:** The failure mode where an ML model memorizes exact training samples rather than generalizing to unseen data.
+- **Quantisation:** Post-training optimization reducing weight precision (e.g. from FP32 to INT8/INT4), slashing memory footprint and computational requirements.
+- **Federated Learning:** Decentralized training where edge devices train on local data and submit only gradient/weight updates to a central server.
+- **Fine-tuning:** Continued supervised training of a foundational pre-trained model on specialized domain data.
+- **Model Card:** Standard documentation outlining model scope, training parameters, evaluation metrics, and safety boundaries.
 
-### 2. Inspect files safely
+---
 
-```bash
-file ARTIFACT
-sha256sum ARTIFACT
-stat ARTIFACT
-strings -n 6 ARTIFACT | head -n 80
-```
+## 3. Practical Exercise
 
-Replace ARTIFACT with a file from the room. The commands identify format, calculate a hash, record metadata, and extract a bounded sample of strings. Use the isolated lab for untrusted serialized models. Do not load unknown pickle-based model artifacts with unrestricted deserialization.
+Completing the training optimization lab produces the flag:
+`THM{A_m0del_Stud3nt}`
 
-## Phase 2: Model and Data Vulnerability Analysis
+---
 
-### 3. Check data quality
+## 🏁 Questions & Answers
 
-For tabular datasets, inspect column names, record counts, missing values, duplicates, and label distribution. For text datasets, investigate repeated phrases, unusual instructions, suspicious label associations, or records inconsistent with the described source. Avoid printing sensitive records into public notes.
-
-A suspicious example is a lead, not proof of poisoning. Stronger evidence is a repeatable relationship between a data pattern and model behaviour, supported by provenance or a trusted comparison dataset.
-
-### 4. Understand model behaviour
-
-A model maps input to output through learned parameters and a surrounding application. Results can change with preprocessing, prompt templates, retrieval context, tool access, decoding settings, and model version. Record those variables if they are available.
-
-A surprising output does not automatically prove compromise. It may reflect missing context, an ordinary model limitation, prompt injection, unsafe retrieval, or a malicious artifact. Define the security property at risk, such as confidentiality, integrity, availability, provenance, or control over a tool.
-
-### 5. Verify model provenance
-
-Compare artifact hashes with a trusted manifest when the room supplies one. A hash identifies exact bytes, but without a trusted reference it cannot establish that a file is legitimate. Signed manifests, authenticated registries, controlled build pipelines, and release approvals provide stronger provenance.
-
-Record the model or dataset version at inference time so a suspicious result can be linked to a particular release.
-
-## Phase 3: Validate Findings & Post-Investigation Handling
-
-Use repeatable comparisons to test suspected data poisoning or model backdoors. Save the baseline input/output pair, apply one controlled change, and compare results. Keep training, evaluation, and production data separate. Do not use a production model or real private data for exploratory tests without authorization.
-
-This room does not inherently involve gaining host privileges. If a task provides shell access, verify the identity and context before claiming access. Otherwise, document the model and data finding without inventing a system compromise.
-
-## Phase 4: Room Questions & Evidence Walkthrough
-
-For each question, determine which evidence class it asks about:
-- A data-property question should be answered from the actual dataset.
-- A model-behaviour question should be supported by a reproducible inference test.
-- An integrity question should be answered using an artifact version, hash, or authenticated manifest.
-- A provenance question should identify the source and release process.
-- A security-impact question should explain the affected property and the evidence for impact.
-
-Preserve exact names and hash characters. Obtain machine-specific values from the active room; do not invent row counts, labels, hashes, or flags.
+| Task | Question | Answer |
+|---|---|---|
+| **Task 2** | Ability to answer where data came from and if modified | `Data Provenance` |
+| **Task 2** | Public corpus underpinning essentially every major model family | `Common Crawl` |
+| **Task 2** | AI equivalent of an SBOM | `ML-BOM` |
+| **Task 3** | One complete pass through the entire dataset | `Epoch` |
+| **Task 3** | Problem when model memorizes training data | `Overfitting` |
+| **Task 3** | Technique reducing numerical precision of weights | `Quantisation` |
+| **Task 3** | Decentralized training sending only weight updates | `Federated Learning` |
+| **Task 4** | Continuing training a pre-trained model on domain data | `Fine-tuning` |
+| **Task 4** | Model already trained on a large general dataset | `Pre-trained Model` |
+| **Task 5** | Documentation describing what a model is and its limitations | `Model Card` |
+| **Task 5** | Billions of floating-point numbers in a model | `Weights` |
+| **Task 6** | Practical completion flag | `THM{A_m0del_Stud3nt}` |

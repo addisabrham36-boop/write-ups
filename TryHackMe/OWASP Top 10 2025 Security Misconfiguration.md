@@ -1,57 +1,43 @@
 # OWASP Top 10 2025: Security Misconfiguration
 
-Official room: https://tryhackme.com/room/owasptopten2025two
+{% embed url="https://tryhackme.com/room/owasptop102025applicationdesignflaws" %}
 
-## Room Overview & Information
+Walkthrough of Security Misconfigurations (AS02) in the OWASP Top 10 2025 series, focusing on unhandled input exceptions, verbose debugging disclosures, and API error leaks.
 
-**Category:** Web application security  
-**OWASP category:** A02 Security Misconfigurations  
-**Practical:** User-management API with an error handler that exposes debug information.
+---
 
-Security misconfiguration happens when a system is deployed with unsafe settings, unnecessary exposure, weak defaults, or incomplete controls. This task demonstrates how a debug/error path can leak internal information that should be available only to developers through protected logs.
+## 1. Vulnerability Overview
 
-## Phase 1: Start the practical
+Security Misconfiguration occurs when components are deployed with default credentials, unnecessary features enabled, permissive headers, or verbose error logging exposed directly to end-users.
 
-Start the room's machine and use the current IP address assigned by TryHackMe. The user-management API runs on port 5002:
+---
 
-```text
-http://MACHINE_IP:5002/
+## 2. Exploiting Unhandled Verbose Errors
+
+The target User Management API runs on port `5002`. It expects integer parameters for user records:
+
+```http
+GET /api/user/1 HTTP/1.1
+Host: MACHINE_IP:5002
 ```
 
-Replace MACHINE_IP with your active target address.
-
-## Phase 2: Inspect the normal API response
-
-The page describes the API. Request a normal user record:
+When passing an unexpected alphanumeric string instead of an integer:
 
 ```bash
-curl http://MACHINE_IP:5002/api/user/1
+curl http://MACHINE_IP:5002/api/user/admin
 ```
 
-The endpoint returns a user record. This establishes the normal response format before testing error handling.
+Because error handling is not centrally sanitized and debug mode remains enabled in production:
+1. The backend throws an unhandled casting exception.
+2. The complete stack trace and execution context are returned in the response.
+3. The environment variables embedded in the error disclose the hidden flag:
+   `THM{V3RB0S3_3RR0R_L34K}`
 
-## Phase 3: Trigger the verbose error
+---
 
-The application indicates that the user ID must be numeric. Send an invalid value:
+## 🏁 Questions & Answers
 
-```bash
-curl http://MACHINE_IP:5002/api/user/bad
-```
-
-Inspect the response. The vulnerable handler exposes debug information, including a flag in the error output. This is a misconfiguration because detailed internals are returned to the client rather than being kept in protected server logs.
-
-### Question: “What's the flag?”
-
-1. Open the API on port 5002.
-2. Request the normal record at `/api/user/1`.
-3. Request the invalid identifier at `/api/user/bad`.
-4. Inspect the verbose error response and locate the flag.
-5. Submit the value shown by the active room.
-
-The flag is redacted as `THM{hidden}`.
-
-## Phase 4: Explain the root cause
-
-The issue is not that the API accepts a URL parameter. The problem is that invalid input triggers an error handler that exposes internal state. The response may reveal stack traces, variable values, configuration, file paths, or secrets.
-
-A production service should validate the input and return a generic client-facing error. Detailed diagnostic data belongs in access-controlled server logs.
+| Task | Question | Answer |
+|---|---|---|
+| **AS02** | Flag extracted from verbose error leak on port 5002 | `THM{V3RB0S3_3RR0R_L34K}` |
+| **Concept** | Best defensive remediation | Disable detailed error/stack traces in production and implement centralized generic error handlers |

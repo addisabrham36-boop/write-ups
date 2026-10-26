@@ -1,112 +1,60 @@
 # The Hacker Methodology
 
-Official room: https://tryhackme.com/room/hackermethodology
+{% embed url="https://tryhackme.com/room/thehackermethodology" %}
 
-## Room Overview & Information
+A high-level exploration of the standardized penetration testing workflow: Reconnaissance, Enumeration & Scanning, Exploitation, Privilege Escalation, and Reporting.
 
-**Category:** Penetration-testing methodology  
-**Difficulty:** Beginner  
-**Focus:** Scope, reconnaissance, enumeration, vulnerability analysis, exploitation, impact assessment, and reporting.
+---
 
-A methodology is a repeatable way to approach a security assessment. Tools matter, but a clear sequence helps avoid missing obvious information, testing out-of-scope systems, or claiming a vulnerability without evidence.
+## 1. The Five Stages of Penetration Testing
 
-## Phase 1: Define the target and rules
-
-Before testing, identify the target, permitted techniques, time limits, and prohibited actions. In a training room, the deployed target and task instructions define the scope. A public IP or website is not automatically authorised for testing.
-
-Record the target address, required hostname mapping, and any restrictions. Keep notes on commands and observations so the work can be reproduced.
-
-## Phase 2: Reconnaissance
-
-Gather initial information about the target. Passive reconnaissance uses public sources such as DNS, search results, registration data, and public documentation. Active reconnaissance interacts with the target, for example by making HTTP requests or scanning ports.
-
-Separate verified facts from assumptions. A public certificate may reveal a hostname, but it does not prove the host is online. A service banner can help identify software, but it does not prove the software is vulnerable.
-
-For an authorised lab, a basic scan can be recorded with:
-
-```bash
-nmap -sC -sV -oN scan.txt TARGET_IP
+```mermaid
+flowchart LR
+    A[1. Reconnaissance] --> B[2. Scanning & Enumeration]
+    B --> C[3. Exploitation]
+    C --> D[4. Privilege Escalation]
+    D --> E[5. Reporting]
 ```
 
-The default scripts gather common service information, service-version detection probes open ports, and the output file preserves the results. Use the live address from the room.
+---
 
-## Phase 3: Enumeration
+## 2. Methodology Breakdown
 
-Enumeration takes initial discoveries and investigates them in more detail. If a port is open, identify the service, version, authentication method, and relevant application paths. If a web application is present, inspect its pages, inputs, source, and responses.
+### Stage 1: Reconnaissance
+Gathering open-source intelligence (OSINT) passively before interacting with target systems:
+- OSINT tools like `sublist3r` enumerate target **subdomains**.
+- Targeted search engine filtering is known as **Google Dorking**.
 
-Use a narrow tool for the question at hand:
-- A full port scan finds reachable TCP ports.
-- Service detection helps identify what is listening.
-- Directory discovery finds possible web paths.
-- Manual HTTP requests help validate application behaviour.
-- SMB or DNS tools reveal service-specific information when those services are in scope.
+### Stage 2: Enumeration & Scanning
+Directly probing ports and banners to discover active services, defining the target's total **attack surface**:
+- Major ecosystem tools: **Metasploit** (developed by Rapid7) and **Burp Suite** (developed by PortSwigger).
 
-Save output and review it rather than running every tool without a plan. Enumeration should reduce uncertainty and guide the next test.
+### Stage 3: Exploitation
+Delivering payloads to exploit discovered vulnerabilities.
 
-## Phase 4: Vulnerability analysis
+### Stage 4: Privilege Escalation
+Transitioning from initial low-privilege footholds to elevated system authorities:
+- On Windows, the ultimate objective alongside Administrator is **SYSTEM** (NT AUTHORITY\SYSTEM).
+- On Linux, discovering exposed or unencrypted SSH **keys** (e.g. `id_rsa`) enables lateral movement and root access.
 
-Compare the observed service and configuration with reliable documentation and advisories. Check the conditions required for a vulnerability and whether they apply to the target. Version numbers can be misleading because vendors may backport fixes without changing the public version string.
+### Stage 5: Reporting
+Penetration testers deliver a **full formal report** outlining finding titles, technical descriptions, severity ratings, and actionable **Remediation Recommendations**.
 
-Prioritise weaknesses by exploitability, exposure, privileges required, and impact. A potential weakness remains a hypothesis until the evidence supports it.
+---
 
-For a CVE-based issue, verify the affected versions, required feature, configuration, and available patch. A proof-of-concept script may be written for a different target and may be unsafe to run without review.
+## 🏁 Questions & Answers
 
-## Phase 5: Controlled exploitation
-
-Exploit only what the scope allows. Choose the least disruptive proof that establishes the weakness, and understand possible side effects before running a module or payload. After a successful test, verify the result through the target's actual state, not merely a tool's success message.
-
-If access is obtained, record the identity and privileges. Do not assume a low-privilege shell means administrator access. Avoid accessing unrelated private data or making unnecessary changes.
-
-## Phase 6: Post-exploitation and impact
-
-Post-exploitation checks the impact of access, such as whether a user can read sensitive files or cross a privilege boundary. In a lab, follow the exact objective and stop when the required evidence is collected.
-
-Useful verification questions include:
-- Which account is running the process?
-- What permissions does it have?
-- Which system or container is the session on?
-- Can the result be reproduced?
-- What data or action is actually accessible?
-- What remains unverified?
-
-A command execution result does not automatically prove root access, and root inside a container does not automatically prove host compromise.
-
-## Phase 7: Reporting
-
-A strong finding includes the affected asset, vulnerability, evidence, impact, reproduction steps, severity rationale, and remediation. The report should explain the attack path in a way that another analyst can verify.
-
-A useful finding separates:
-- **Observation:** what the tool or application actually returned.
-- **Interpretation:** why that behaviour indicates a weakness.
-- **Impact:** what an attacker could do under the demonstrated conditions.
-- **Remediation:** what change removes the root cause.
-- **Retest:** how the fix can be verified.
-
-## Phase 8: Cleanup and retesting
-
-Stop listeners and temporary services, remove test artefacts where the scope permits, and record any changes made during the test. After remediation, repeat the same test to confirm the weakness is closed. A patch may not be sufficient if an insecure configuration remains.
-
-## Key takeaways
-
-A consistent methodology makes security testing more reliable: define scope, discover the attack surface, enumerate services, validate weaknesses, demonstrate impact safely, and report actionable fixes. The value is in the evidence and reasoning, not in the number of tools executed.
-
-## Phase 9: Final evidence checklist
-
-A useful test record links each step to the question it answers:
-
-| Stage | Record |
-|---|---|
-| Scope | Authorised target, allowed techniques, testing window |
-| Reconnaissance | Public-source evidence and/or scan command |
-| Enumeration | Service, route, account, or configuration details |
-| Vulnerability analysis | Advisory, affected version, prerequisite checks |
-| Exploitation | Minimum proof, observed effect, resulting identity |
-| Post-exploitation | Permissions and impact needed to demonstrate the risk |
-| Cleanup | Temporary artifacts removed and test state restored where required |
-| Reporting | Evidence, root cause, impact, remediation, retest result |
-
-Do not force every test into a complete boot-to-root chain. Some rooms end after a discovery or single proof of concept, while others include an entire privilege escalation path. Follow the task's objective and stop when enough evidence has been collected.
-
-## Professional standard
-
-A penetration test is complete when the finding can be reproduced within scope, its impact is understood, sensitive evidence is handled safely, and the report gives the owner a realistic fix. Tool output without validation is a lead, not a conclusion.
+| Task | Question | Answer |
+|---|---|---|
+| **Task 1** | What is the first phase of the Hacker Methodology? | `Reconnaissance` |
+| **Task 2** | Who is the CEO of SpaceX? | `Elon Musk` |
+| **Task 2** | What does sublist3r list? | `subdomains` |
+| **Task 2** | Using Google to look for specific vulnerabilities | `Google Dorking` |
+| **Task 3** | What does enumeration help determine about the target? | `attack surface` |
+| **Task 3** | Company that developed Metasploit | `Rapid7` |
+| **Task 3** | Company that developed Burp Suite | `PortSwigger` |
+| **Task 4** | Primary exploitation tool pentesters use | `metasploit` |
+| **Task 5** | Target account on Windows besides Administrator | `system` |
+| **Task 5** | SSH artifact allowing login without password | `keys` |
+| **Task 7** | Full documentation of all findings within a formal document | `full formal report` |
+| **Task 7** | Critical item in report beyond name, description, and criticality | `Remediation Recommendation` |

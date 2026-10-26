@@ -58,7 +58,7 @@ Day 1 introduces foundational cybersecurity frameworks used by Security Operatio
 
 | Task | Question | Answer |
 |---|---|---|
-| **Task 1** | What's the flag that they left behind? | `THM{IT'S A Y3T1 CHR1$TMA$}` |
+| **Task 1** | What's the flag that they left behind? | `flag{hidden}` |
 
 ---
 
@@ -86,19 +86,7 @@ The output reveals suspicious GET requests originating from IP `10.10.249.191` r
 ```
 Searching for the platform flag format:
 ```bash
-grep -i "THM{" webserver.log
-```
-
-### 🏁 Questions & Answers
-
-| Task | Question | Answer |
-|---|---|---|
-| **Task 2** | Use `ls` to list the files. How many log files are present? | `2` |
-| **Task 2** | What is the name of the web server log file? | `webserver.log` |
-| **Task 2** | On what day was Santa's naughty and nice list stolen? | `Friday` |
-| **Task 2** | What is the IP address of the attacker? | `10.10.249.191` |
-| **Task 2** | What is the name of the important list that the attacker stole? | `santaslist.txt` |
-| **Task 2** | Look through the log files for the flag: | `THM{STOLENSANTASLIST}` |
+grep -i "flag{hidden}` |
 
 ---
 
@@ -189,7 +177,7 @@ Enter password `1q2w3e4r`. Upon establishing the graphical session, a flag is re
 | Task | Question | Answer |
 |---|---|---|
 | **Task 5** | What is the VNC password discovered by Hydra? | `1q2w3e4r` |
-| **Task 5** | What is the flag written on the target's screen? | `THM{I_SEE_YOUR_SCREEN}` |
+| **Task 5** | What is the flag written on the target's screen? | `flag{hidden}` |
 
 ---
 
@@ -308,7 +296,7 @@ Exploiting a web application vulnerability (Laravel CVE-2021-3129), discovering 
    # DB_USERNAME=root, DB_PASSWORD=p4$$w0rd
    ```
 7. Dumping the database shows Santa's credentials in table `users`.
-8. Scanning the internal Docker host network reveals the host running SSH and HTTP (`22,80`). Breaking out or accessing the host system yields the root flag: `THM{47C61A0FA8738BA77308A8A600F88E4B}`.
+8. Scanning the internal Docker host network reveals the host running SSH and HTTP (`22,80`). Breaking out or accessing the host system yields the root flag: `flag{hidden}`.
 
 ### 🏁 Questions & Answers
 
@@ -323,7 +311,7 @@ Exploiting a web application vulnerability (Laravel CVE-2021-3129), discovering 
 | **Task 9** | Database table containing user credentials? | `users` |
 | **Task 9** | What is Santa's password? | `p4$$w0rd` |
 | **Task 9** | What ports are open on the host machine? | `22,80` |
-| **Task 9** | What is the root flag? | `THM{47C61A0FA8738BA77308A8A600F88E4B}` |
+| **Task 9** | What is the root flag? | `flag{hidden}` |
 
 ---
 
@@ -339,15 +327,15 @@ Game hacking, memory scanning, and modifying runtime process variables in WebAss
 4. Modify memory values directly:
    - Freeze player health at `999`.
    - Update player score to surpass the Guard's threshold.
-5. Talking to the Guard with modified score unlocks the Guard's flag: `THM{5_star_fl4gzzz}`.
-6. Defeating the Yeti boss using infinite health reveals the Yeti's flag: `THM{yetiyetiyetiflagflagflag}`.
+5. Talking to the Guard with modified score unlocks the Guard's flag: `flag{hidden}`.
+6. Defeating the Yeti boss using infinite health reveals the Yeti's flag: `flag{hidden}`.
 
 ### 🏁 Questions & Answers
 
 | Task | Question | Answer |
 |---|---|---|
-| **Task 10** | What is the Guard's flag? | `THM{5_star_fl4gzzz}` |
-| **Task 10** | What is the Yeti's flag? | `THM{yetiyetiyetiflagflagflag}` |
+| **Task 10** | What is the Guard's flag? | `flag{hidden}` |
+| **Task 10** | What is the Yeti's flag? | `flag{hidden}` |
 
 ---
 
@@ -483,7 +471,7 @@ Input validation flaws, specifically **Unrestricted File Upload** vulnerabilitie
    ```text
    http://TARGET_IP/uploads/cmd.php?cmd=type C:\Users\HRElf\Documents\flag.txt
    ```
-   The flag is retrieved: `THM{Naughty.File.Uploads.Can.Get.You.RCE}`.
+   The flag is retrieved: `flag{hidden}`.
 
 ### 🏁 Questions & Answers
 
@@ -491,7 +479,7 @@ Input validation flaws, specifically **Unrestricted File Upload** vulnerabilitie
 |---|---|---|
 | **Task 15** | Name given to file uploads allowing actors to upload anything? | `Unrestricted` |
 | **Task 15** | What is the title of the web app developed by Santa's freelancer? | `SantaSideKick2` |
-| **Task 15** | What is the flag stored in the HR Elf's Documents directory? | `THM{Naughty.File.Uploads.Can.Get.You.RCE}` |
+| **Task 15** | What is the flag stored in the HR Elf's Documents directory? | `flag{hidden}` |
 
 ---
 
@@ -519,7 +507,7 @@ Analyzing PHP source code for SQL injection vulnerabilities and implementing rem
 | Task | Question | Answer |
 |---|---|---|
 | **Task 16** | Function used to enforce integer types in PHP? | `intval` |
-| **Task 16** | Code review completion flag | `THM{SQLI_PREVENTED_SUCCESS}` |
+| **Task 16** | Code review completion flag | `flag{hidden}` |
 
 ---
 
@@ -567,16 +555,16 @@ Writing and verifying **Sigma Rules**—a generic, open signature format for det
        TargetUserName|contains: 'BanditYeti'
      condition: selection
    ```
-3. Running the Sigma verification engine reveals the newly created account `BanditYetiMini` and returns the Challenge 1 flag: `THM{n0t_just_your_u$ser}`.
-4. In Challenge 2, writing a rule to detect unauthorized service installations yields `THM{wh@t_1s_Runn1ng_H3r3}`.
+3. Running the Sigma verification engine reveals the newly created account `BanditYetiMini` and returns the Challenge 1 flag: `flag{hidden}`.
+4. In Challenge 2, writing a rule to detect unauthorized service installations yields `flag{hidden}`.
 
 ### 🏁 Questions & Answers
 
 | Task | Question | Answer |
 |---|---|---|
-| **Task 18** | What is the Challenge #1 flag? | `THM{n0t_just_your_u$ser}` |
+| **Task 18** | What is the Challenge #1 flag? | `flag{hidden}` |
 | **Task 18** | From the Challenge 1 log, what user account was created? | `BanditYetiMini` |
-| **Task 18** | What is the Challenge #2 flag? | `THM{wh@t_1s_Runn1ng_H3r3}` |
+| **Task 18** | What is the Challenge #2 flag? | `flag{hidden}` |
 
 ---
 
@@ -618,13 +606,13 @@ IoT firmware extraction, file system carving with **Binwalk**, and cryptographic
    ```bash
    gpg --decrypt firmwarev2.2-encrypted.gpg
    ```
-4. Reading the decompressed firmware source code exposes the flag: `THM{WE_GOT_THE_FIRMWARE_CODE}`.
+4. Reading the decompressed firmware source code exposes the flag: `flag{hidden}`.
 
 ### 🏁 Questions & Answers
 
 | Task | Question | Answer |
 |---|---|---|
-| **Task 20** | Flag value after reversing `firmwarev2.2-encrypted.gpg`? | `THM{WE_GOT_THE_FIRMWARE_CODE}` |
+| **Task 20** | Flag value after reversing `firmwarev2.2-encrypted.gpg`? | `flag{hidden}` |
 
 ---
 
@@ -651,7 +639,7 @@ Internet of Things (IoT) communication with the **MQTT** protocol (Message Queui
 | Task | Question | Answer |
 |---|---|---|
 | **Task 21** | MQTT default port? | `1883` |
-| **Task 21** | IoT interaction flag | `THM{MQTT_MERRY_IOT}` |
+| **Task 21** | IoT interaction flag | `flag{hidden}` |
 
 ---
 
@@ -665,13 +653,13 @@ Hardening enterprise environments, disabling unneeded network services, configur
 2. Review the inventory of listening services and open firewall ports on McSkidy's workstation.
 3. Decommission legacy protocols (Telnet, unencrypted FTP, open SMB shares).
 4. Restrict management services to internal VPN subnets only.
-5. Successfully applying attack surface reduction rules yields the flag: `THM{4TT4CK SURF4C3 R3DUC3D}`.
+5. Successfully applying attack surface reduction rules yields the flag: `flag{hidden}`.
 
 ### 🏁 Questions & Answers
 
 | Task | Question | Answer |
 |---|---|---|
-| **Task 22** | Attack surface reduction flag? | `THM{4TT4CK SURF4C3 R3DUC3D}` |
+| **Task 22** | Attack surface reduction flag? | `flag{hidden}` |
 
 ---
 
@@ -681,7 +669,7 @@ Hardening enterprise environments, disabling unneeded network services, configur
 Implementing multi-layered defense architecture (Defense in Depth) so that failure of a single security control does not compromise the crown jewels.
 
 ### 🔍 Walkthrough & Methodology
-- **Case 1 (Single Layer):** Direct access to Santa's Vault protected only by a single weak password (`S3cr3tV@ultPW`). Bypassing it reveals `THM{EZ_fl@6!}`.
+- **Case 1 (Single Layer):** Direct access to Santa's Vault protected only by a single weak password (`S3cr3tV@ultPW`). Bypassing it reveals `flag{hidden}`.
 - **Case 2 (Multi-Layer Defense):** Access requires multiple controls:
   - Network segmentation
   - Host identity verification
@@ -694,7 +682,7 @@ Implementing multi-layered defense architecture (Defense in Depth) so that failu
 | Task | Question | Answer |
 |---|---|---|
 | **Task 23** | Case 1 password for Santa's Vault? | `S3cr3tV@ultPW` |
-| **Task 23** | Case 1 Flag? | `THM{EZ_fl@6!}` |
+| **Task 23** | Case 1 Flag? | `flag{hidden}` |
 | **Task 23** | Case 2 Santa's favourite thing? | `MilkAndCookies` |
 | **Task 23** | Case 2 password for Santa's Vault? | `3XtrR@_S3cr3tV@ultPW` |
 
@@ -709,4 +697,4 @@ Concluding the 24-day journey, submitting participant feedback, and collecting t
 
 | Task | Question | Answer |
 |---|---|---|
-| **Task 24** | 5-minute survey completion flag | `THM{AOC2022_COMPLETED_CONGRATS}` |
+| **Task 24** | 5-minute survey completion flag | `flag{hidden}` |

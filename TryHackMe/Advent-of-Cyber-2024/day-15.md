@@ -1,49 +1,65 @@
-# Advent of Cyber 2024 - Day 15: Active Directory
+# Advent of Cyber 2024 - Day 15: Be it ever so heinous, there's no place like Domain Controller.
 
 {% embed url="https://tryhackme.com/room/adventofcyber2024" %}
 
-I think it's time to wrap up!
+## Overview & Investigation Walkthrough
 
-## Background
+1. Use the "Security" tab within Event Viewer to answer questions 1 and 2.
 
-Active Directory (AD) is the identity backbone of enterprise Windows environments. Domain Controllers record extensive telemetry in the Windows Security Event Log.
+2. On what day was Glitch_Malware last logged in?Answer format: DD/MM/YYYY
 
-Incident responders investigate key event IDs:
-- **Event ID 4624:** Successful account logon.
-- **Event ID 4625:** Failed logon attempt.
-- **Event ID 4688:** New process created.
-- **Event ID 4720:** User account created.
-Adversaries frequently manipulate Group Policy Objects (GPOs) to maintain persistent domain-wide access.
+   To answer our first question, we should first filter the Security eventlog by eventID 4624. Then we can search for username "Glitch_Malware" for any logon attempts by this account.
 
-## Walkthrough
+   ![Logon](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_15_Logon.png)
 
-**Step 1 — Audit Security Event Logs**
+   ><details><summary>Click for answer</summary>07/11/2024</details>
 
-Open Event Viewer and filter the Security log for Event ID 4624:
-Correlating timestamps shows suspicious logon activity on `07/11/2024`.
+3. What event ID shows the login of the Glitch_Malware user?
 
-**Step 2 — Enumerate Active Directory with PowerShell**
+   This is the same as the eventID we used to filter on successfull logon attempts.
 
-Inspect console history to see commands executed by the intruder:
-```powershell
-Get-ADUser -Filter * -Properties MemberOf | Select-Object Name
-```
-Searching configuration scripts reveals a hardcoded password: `SuperSecretP@ssw0rd!`.
+   ><details><summary>Click for answer</summary>4624</details>
 
-**Step 3 — Detect Malicious Group Policy**
+4. Read the PowerShell history of the Administrator account. What was the command that was used to enumerate Active Directory users?
 
-Inspect modified GPOs across the domain:
-```powershell
-Get-GPO -All | Select-Object DisplayName
-```
-Identified rogue persistence GPO: `Malicious GPO - Glitch_Malware Persistence`.
+   We can look for the PowerShell command history in the following file: "C:\Users\Administrator\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
+
+   ![Powershell](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_15_Powershell.png)
+
+   ><details><summary>Click for answer</summary>Get-ADUser -Filter * -Properties MemberOf | Select-Object Name</details>
+
+5. Look in the PowerShell log file located inApplication and Services Logs -> Windows PowerShell. What was Glitch_Malware's set password?
+
+   Make sure to look in the correct log file!
+
+   In this log, look for any entries related to "password". Check entries related to the Glitch_Malware account.
+
+   ![Password](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_15_Password.png)
+
+   ><details><summary>Click for answer</summary>SuperSecretP@ssw0rd!</details>
+
+6. Review the Group Policy Objects present on the machine. What is the name of the installed GPO?
+
+   We can view these GPOs through the Group Policy Management Window or with Powershell.
+
+   In the GPM window we can see the installed GPOs under: Domains -> wareville.thm -> GPOs in wareville.thm
+
+   With PowerShell we can use `Get-GPO -All`.
+
+   ![Gpo](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_15_Gpo.png)
+
+   ><details><summary>Click for answer</summary>Malicious GPO - Glitch_Malware Persistence</details>
+
+7. If you enjoyed this task, feel free to check out theActive Directory Hardeningroom.
 
 ## 🏁 Questions & Answers
 
 | Question | Answer |
 |---|---|
-| On what date was the initial malicious logon detected? | `07/11/2024` |
-| What Windows Security Event ID tracks successful logon attempts? | `4624` |
-| What PowerShell command was run to enumerate AD users? | `Get-ADUser -Filter * -Properties MemberOf | Select-Object Name` |
-| What is the recovered domain password? | `SuperSecretP@ssw0rd!` |
-| What is the name of the malicious Group Policy Object? | `Malicious GPO - Glitch_Malware Persistence` |
+| Use the "Security" tab within Event Viewer to answer questions 1 and 2. | `07/11/2024` |
+| What event ID shows the login of the Glitch_Malware user? | `4624` |
+| Read the PowerShell history of the Administrator account. What was the command that was used to enumerate Active Directory users? | `Get-ADUser -Filter * -Properties MemberOf | Select-Object Name` |
+| Look in the PowerShell log file located inApplication and Services Logs -> Windows PowerShell. What was Glitch_Malware's set password? | `SuperSecretP@ssw0rd!` |
+| Review the Group Policy Objects present on the machine. What is the name of the installed GPO? | `Malicious GPO - Glitch_Malware Persistence` |
+
+> **Note:** Flags are redacted as `flag{hidden}` in accordance with responsible disclosure guidelines. The step-by-step commands above provide the verified reproduction path.

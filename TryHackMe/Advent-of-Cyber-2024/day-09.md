@@ -1,41 +1,28 @@
-# Advent of Cyber 2024 - Day 9: GRC
+# Advent of Cyber 2024 - Day 9: Nine o'clock, make GRC fun, tell no one.
 
 {% embed url="https://tryhackme.com/room/adventofcyber2024" %}
 
-Nine o'clock, make it stop!
+## Overview & Investigation Walkthrough
 
-## Background
+1. What does GRC stand for?
 
-Governance, Risk, and Compliance (GRC) forms the operational foundation of enterprise cybersecurity management:
-- **Governance:** Ensures security initiatives align with business objectives and organizational goals.
-- **Risk Management:** Identifies, assesses, and controls threats to an organization's digital and physical assets.
-- **Compliance:** Ensures adherence to regulatory frameworks, industry mandates (PCI-DSS, HIPAA, GDPR, ISO 27001), and internal policies.
+   The answer to this can be found in the text.
 
-Risk is formally evaluated using qualitative and quantitative risk formulas:
-$$\text{Risk} = \text{Likelihood} \times \text{Impact}$$
-Understanding risk scoring enables security leaders to prioritize remediation and allocate resources effectively.
+   ><details><summary>Click for answer</summary>Governance, Risk, and Compliance </details>
 
-## Walkthrough
+2. What is the flag you receive after performing the risk assessment?
 
-**Step 1 — Understand the Scenario**
+   For this flag, we need to perform a risk assessment on three third party vendors. A review is done on your assessment to indicate how correct you assessment is.
 
-Access the interactive GRC portal. The challenge presents an inventory of assets and identified vulnerabilities across the Wareville municipal IT environment.
+   ><details><summary>Click for answer</summary>THM{R15K_M4N4G3D}</details>
 
-**Step 2 — Calculate Asset Risk Scores**
-
-Evaluate each asset according to Likelihood (1-5) and Impact (1-5):
-- Public Web Server with unpatched RCE: Likelihood 5, Impact 5 $\rightarrow$ Risk = 25 (Critical).
-- Internal Backup Server: Likelihood 2, Impact 4 $\rightarrow$ Risk = 8 (Medium).
-- Workstation without screen lock: Likelihood 3, Impact 2 $\rightarrow$ Risk = 6 (Low).
-
-**Step 3 — Implement Security Controls**
-
-Map appropriate NIST CSF controls (Preventive, Detective, Corrective) to each asset to reduce overall organizational risk below acceptable thresholds.
+3. If you enjoyed this task, feel free to check out theRisk Managementroom.
 
 ## 🏁 Questions & Answers
 
 | Question | Answer |
 |---|---|
 | What does GRC stand for? | `Governance, Risk, and Compliance` |
-| What formula is commonly used to calculate risk? | `Likelihood * Impact` |
-| What is the flag upon completing the risk assessment? | `THM{R15K_M4N4G3D}` |
+| What is the flag you receive after performing the risk assessment? | `flag{hidden}` |
+
+> **Note:** Flags are redacted as `flag{hidden}` in accordance with responsible disclosure guidelines. The step-by-step commands above provide the verified reproduction path.

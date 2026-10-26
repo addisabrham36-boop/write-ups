@@ -29,7 +29,7 @@ Core OS security relies on least privilege, strong credential policies, and audi
    # Enter password: happyHack!NG
    ```
 5. Read the root flag from `/root/flag.txt`:
-   `THM{YouGotRoot}`
+   `flag{hidden}`
 
 ---
 
@@ -38,4 +38,4 @@ Core OS security relies on least privilege, strong credential policies, and audi
 | Task | Question | Answer |
 |---|---|---|
 | **Task 3** | Password discovered from command history | `happyHack!NG` |
-| **Task 3** | Content of root flag file `/root/flag.txt` | `THM{YouGotRoot}` |
+| **Task 3** | Content of root flag file `/root/flag.txt` | `flag{hidden}` |

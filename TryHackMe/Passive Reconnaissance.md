@@ -40,7 +40,7 @@ dig thmlabs.com TXT
 nslookup -type=TXT thmlabs.com
 ```
 
-**Flag in TXT record:** `THM{a5b83929888ed36acb0272971e438d78}`
+**Flag in TXT record:** `flag{hidden}`
 
 ---
 
@@ -70,6 +70,6 @@ Shodan indexes exposed devices. As of the room's data, the first country by expo
 | When was TryHackMe.com registered? | `20180705` |
 | What is the registrar of TryHackMe.com? | `namecheap.com` |
 | Name server company for TryHackMe.com? | `cloudflare.com` |
-| Flag in TXT records of `thmlabs.com` | `THM{a5b83929888ed36acb0272971e438d78}` |
+| Flag in TXT records of `thmlabs.com` | `flag{hidden}` |
 | Interesting subdomain found on DNSDumpster? | `remote` |
 | First country in exposed Shodan devices? | `US` |

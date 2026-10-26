@@ -24,7 +24,7 @@ In the interactive banking defense simulation:
 2. Verify the suspicious external IP address.
 3. Apply a perimeter firewall drop rule to isolate the attacker.
 4. The simulation completes and returns the victory flag:
-   `THM{THREAT-BLOCKED}`
+   `flag{hidden}`
 
 ---
 
@@ -36,4 +36,4 @@ In the interactive banking defense simulation:
 | **Task 2** | Team of cybersecurity professionals monitoring systems for malicious events | `Security Operations Centre` |
 | **Task 2** | What does DFIR stand for? | `Digital Forensics and Incident Response` |
 | **Task 2** | Kind of malware requiring money to regain file access | `Ransomware` |
-| **Task 3** | Flag obtained by blocking the active threat in the lab | `THM{THREAT-BLOCKED}` |
+| **Task 3** | Flag obtained by blocking the active threat in the lab | `flag{hidden}` |

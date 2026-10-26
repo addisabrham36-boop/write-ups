@@ -2,35 +2,35 @@
 
 {% embed url="https://tryhackme.com/room/adventofcyber4" %}
 
-Comprehensive day-by-day walkthrough collection for **TryHackMe Advent of Cyber 2022**. Each day is documented in its own dedicated write-up featuring challenge background, step-by-step methodologies, commands, and verified answers.
+Comprehensive, step-by-step reference walkthrough collection for **TryHackMe Advent of Cyber 2022 (AoC4)**. Each day contains challenge background, objective breakdowns, command explanations, terminal outputs, and verified question answers with responsible flag redaction.
 
 ---
 
 ## 📅 Daily Walkthroughs
 
-| Day | Challenge / Topic | Status |
-|:---:|---|:---:|
-| Day 1 | [Security Frameworks](./day-01.md) | Complete |
-| Day 2 | [Log Analysis](./day-02.md) | Complete |
-| Day 3 | [OSINT](./day-03.md) | Complete |
-| Day 4 | [Scanning](./day-04.md) | Complete |
-| Day 5 | [Brute-Forcing](./day-05.md) | Complete |
-| Day 6 | [Email Analysis](./day-06.md) | Complete |
-| Day 7 | [CyberChef](./day-07.md) | Complete |
-| Day 8 | [Smart Contracts](./day-08.md) | Complete |
-| Day 9 | [Pivoting & Docker](./day-09.md) | Complete |
-| Day 10 | [Memory Manipulation](./day-10.md) | Complete |
-| Day 11 | [Memory Forensics](./day-11.md) | Complete |
-| Day 12 | [Malware Analysis](./day-12.md) | Complete |
-| Day 13 | [Packet Analysis](./day-13.md) | Complete |
-| Day 14 | [Web Applications](./day-14.md) | Complete |
-| Day 15 | [Secure Coding](./day-15.md) | Complete |
-| Day 16 | [Secure Coding](./day-16.md) | Complete |
-| Day 17 | [Secure Coding](./day-17.md) | Complete |
-| Day 18 | [Threat Detection](./day-18.md) | Complete |
-| Day 19 | [Hardware Hacking](./day-19.md) | Complete |
-| Day 20 | [Firmware Analysis](./day-20.md) | Complete |
-| Day 21 | [IoT & MQTT](./day-21.md) | Complete |
-| Day 22 | [Attack Surface Reduction](./day-22.md) | Complete |
-| Day 23 | [Defense in Depth](./day-23.md) | Complete |
-| Day 24 | [Event Conclusion & Survey](./day-24.md) | Complete |
+| Day | Challenge Title | Objectives / Questions | Status |
+|:---:|---|:---:|:---:|
+| Day 1 | [Frameworks: Someone's coming to town](./day-01.md) | 2 Questions | Complete |
+| Day 2 | [Log Analysis: Santa's Naughty & Nice Log](./day-02.md) | 6 Questions | Complete |
+| Day 3 | [OSINT: Nothing escapes detective McRed](./day-03.md) | 5 Questions | Complete |
+| Day 4 | [Scanning: Scanning through the snow](./day-04.md) | 4 Questions | Complete |
+| Day 5 | [Brute-Forcing: He knows when you're awake](./day-05.md) | 2 Questions | Complete |
+| Day 6 | [Email-Analysis: It's beginning to look a lot like phishing](./day-06.md) | 10 Questions | Complete |
+| Day 7 | [CyberChef: Maldocs roasting on an open fire](./day-07.md) | 5 Questions | Complete |
+| Day 8 | [Smart-Contracts: Last Christmas I gave you my ETH](./day-08.md) | 2 Questions | Complete |
+| Day 9 | [Pivoting: Dock the halls](./day-09.md) | 10 Questions | Complete |
+| Day 10 | [Hack-a-game: You're a mean one, Mr. Yeti](./day-10.md) | 2 Questions | Complete |
+| Day 11 | [Memory-Forensics: Not all gifts are nice](./day-11.md) | 4 Questions | Complete |
+| Day 12 | [Malware-Analysis: Forensic McBlue to the REVscue!](./day-12.md) | 9 Questions | Complete |
+| Day 13 | [Packet-Analysis: Simply having a wonderful pcap time](./day-13.md) | 10 Questions | Complete |
+| Day 14 | [Web-Applications: I'm dreaming of secure web apps](./day-14.md) | 2 Questions | Complete |
+| Day 15 | [Secure-Coding: Santa is looking for a Sidekick](./day-15.md) | 6 Questions | Complete |
+| Day 16 | [Secure-Coding: SQLi’s the king, the carolers sing](./day-16.md) | 4 Questions | Complete |
+| Day 17 | [Secure-Coding: Filtering for Order Amidst Chaos](./day-17.md) | 9 Questions | Complete |
+| Day 18 | [Sigma: Lumberjack Lenny Learns New Rules](./day-18.md) | 6 Questions | Complete |
+| Day 19 | [Hardware-Hacking: Wiggles go brrr](./day-19.md) | 9 Questions | Complete |
+| Day 20 | [Firmware: Binwalkin’ around the Christmas tree](./day-20.md) | 3 Questions | Complete |
+| Day 21 | [MQTT: Have yourself a merry little webcam](./day-21.md) | 4 Questions | Complete |
+| Day 22 | [Attack-Surface-Reduction: Threats are failing all around me](./day-22.md) | 1 Questions | Complete |
+| Day 23 | [Defense in Depth: Mission ELFPossible](./day-23.md) | 4 Questions | Complete |
+| Day 24 | [Conclusion: The Final Celebration](./day-24.md) | 1 Questions | Complete |

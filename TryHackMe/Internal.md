@@ -150,10 +150,10 @@ Password: `bubb13guM!@#123`
 aubreanna@internal:~$ whoami
 aubreanna
 aubreanna@internal:~$ cat /home/aubreanna/user.txt
-THM{int3rna1_fl4g_1}
+flag{hidden}
 ```
 
-**User Flag:** `THM{int3rna1_fl4g_1}`
+**User Flag:** `flag{hidden}`
 
 ---
 
@@ -236,10 +236,10 @@ p.destroy();s.close();
 root@internal:~# whoami
 root
 root@internal:~# cat /root/root.txt
-THM{d0ck3r_d3str0y3r}
+flag{hidden}
 ```
 
-**Root Flag:** `THM{d0ck3r_d3str0y3r}`
+**Root Flag:** `flag{hidden}`
 
 ---
 
@@ -247,7 +247,7 @@ THM{d0ck3r_d3str0y3r}
 
 | Task / Question | Answer |
 | :--- | :--- |
-| **User Flag** | `THM{int3rna1_fl4g_1}` |
-| **Root Flag** | `THM{d0ck3r_d3str0y3r}` |
+| **User Flag** | `flag{hidden}` |
+| **Root Flag** | `flag{hidden}` |
 
 ***

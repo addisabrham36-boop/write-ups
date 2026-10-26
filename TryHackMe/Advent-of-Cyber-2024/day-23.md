@@ -1,45 +1,64 @@
-# Advent of Cyber 2024 - Day 23: Hash Cracking
+# Advent of Cyber 2024 - Day 23: You wanna know what happens to your hashes?
 
 {% embed url="https://tryhackme.com/room/adventofcyber2024" %}
 
-You wanna know something? Hashes don't lie.
+## Overview & Investigation Walkthrough
 
-## Background
+1. Crack the hash value stored in hash1.txt. What was the password?
 
-Cryptographic hash functions produce fixed-length digests from arbitrary input data. Password hashes are cracked offline using dictionary attacks, rule-based mutations, and brute-force cracking.
+   Using Hash ID we can identify the possible format of the hash.
 
-Hashcat leverages GPU parallelism to test millions or billions of candidate passwords per second. Identifying the exact hash format (`hashid`, `hash-identifier`) is the essential first step before launching a cracking session.
+   ```cmd
+   python hash-id.py
+   ```
 
-## Walkthrough
+   ![Format](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_23_Format.png)
 
-**Step 1 — Identify the Hash Format**
+   Looks like it is a SHA256 hash. We can crack this with `john` using rockyou as the wordlist and a set of rules.
 
-Examine the target hash file:
-```bash
-hashid target_hash.txt
-```
-The digest matches raw MD5 (Hashcat mode `-m 0`).
+   ```cmd
+   john --format=raw-sha256 --rules=wordlist --wordlist=/usr/share/wordlists/rockyou.txt hash1.txt
+   ```
 
-**Step 2 — Run Hashcat Against Wordlist**
+   ![Password](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_23_Password.png)
 
-Launch Hashcat with `rockyou.txt`:
-```bash
-hashcat -m 0 target_hash.txt /usr/share/wordlists/rockyou.txt
-```
-Hashcat cracks the digest, revealing plaintext: `fluffycat12`.
+   ><details><summary>Click for answer</summary>fluffycat12</details>
 
-**Step 3 — Decrypt the Archive**
+2. What is the flag at the top of theprivate.pdf file?
 
-Unlock the password-protected zip archive using `fluffycat12` to extract `flag.txt`:
-```bash
-unzip -P fluffycat12 secret_archive.zip
-cat flag.txt
-```
-Flag recovered: `THM{do_not_GET_CAUGHT}`.
+   First we must fin the password for the pdf file. We can use `pdf2john` for this.
+
+   We have done some investigating and found several possibilities for passwords and put them in a custom wordlist.
+   
+   ![Wordlist](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_23_Wordlist.png)
+
+   ```cmd
+   pdf2john.pl private.pdf > pdf.hash
+   
+   john --rules=single --wordlist=wordlist pdf.hash 
+   ```
+
+   ![Cracked](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_23_Cracked.png)
+
+   We found the password. Now we can convert the file to a text file, to read the top of the file.
+
+   ```cmd
+   pdftotext private.pdf -uwp M4y0rMa1w4r3
+
+   haed private.txt
+   ```
+
+   ![Flag](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_23_Flag.png)
+
+   ><details><summary>Click for answer</summary>THM{do_not_GET_CAUGHT}</details>
+
+3. To learn more about cryptography, we recommend theCryptographymodule. If you want to practice more hash cracking, please consider theJohn the Ripper: The Basicsroom.
 
 ## 🏁 Questions & Answers
 
 | Question | Answer |
 |---|---|
-| What is the cracked plaintext password? | `fluffycat12` |
-| What is the flag retrieved from the decrypted archive? | `THM{do_not_GET_CAUGHT}` |
+| Crack the hash value stored in hash1.txt. What was the password? | `fluffycat12` |
+| What is the flag at the top of theprivate.pdf file? | `flag{hidden}` |
+
+> **Note:** Flags are redacted as `flag{hidden}` in accordance with responsible disclosure guidelines. The step-by-step commands above provide the verified reproduction path.

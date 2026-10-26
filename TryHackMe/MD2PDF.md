@@ -62,6 +62,6 @@ Or just read it in your PDF viewer — the flag is visible in the rendered conte
 
 | Question | Answer |
 |---|---|
-| What is the flag? | Found inside the PDF rendered from `http://127.0.0.1:5000/admin` — format `THM{...}` |
+| What is the flag? | Found inside the PDF rendered from `http://127.0.0.1:5000/admin` — format `flag{hidden}` |
 
 > The flag is dynamically generated per instance on TryHackMe. Use the SSRF payload `<iframe src="http://127.0.0.1:5000/admin">` to retrieve it from your own machine instance.

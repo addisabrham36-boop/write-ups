@@ -67,7 +67,7 @@ grep "THM" access.log
 
 ### Output:
 ```text
-THM{ACCESS}
+flag{hidden}
 ```
 
 ---
@@ -104,7 +104,7 @@ jobs
 | **Which directory contains a file?** | `folder4` |
 | **What is the contents of this file?** | `Hello World` |
 | **Use the cd command to navigate to this file and find out the new current working directory. What is the path?** | `/home/tryhackme/folder4` |
-| **Use grep on "access.log" to find the flag that has a prefix of "THM". What is the flag?** | `THM{ACCESS}` |
+| **Use grep on "access.log" to find the flag that has a prefix of "THM". What is the flag?** | `flag{hidden}` |
 | **If we wanted to run a command in the background, what operator would we want to use?** | `&` |
 | **If I wanted to replace the contents of a file named "passwords" with the word "password123", what would my command be?** | `echo password123 > passwords` |
 | **Now if I wanted to add "tryhackme" to this file named "passwords" but also keep "passwords123", what would my command be?** | `echo tryhackme >> passwords` |

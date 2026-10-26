@@ -49,7 +49,7 @@ Testing the built-in antivirus (Windows Defender) using an EICAR standard anti-m
 |---|---|---|
 | **Task 2** | Installed RAM in Device specifications | `4 GB` |
 | **Task 2** | Version of Windows Server 2019 Datacenter installed | `1809` |
-| **Task 2** | Flag found in `Welcome.txt` | Dynamically generated instance flag (`THM{...}`) |
-| **Task 3** | Flag received after running `TryHatMeWelcome` installer | Dynamically generated instance flag (`THM{...}`) |
+| **Task 2** | Flag found in `Welcome.txt` | Dynamically generated instance flag (`flag{hidden}`) |
+| **Task 3** | Flag received after running `TryHatMeWelcome` installer | Dynamically generated instance flag (`flag{hidden}`) |
 | **Task 3** | Country or region in Time & Language settings | `United States` |
 | **Task 3** | File name shown in Windows Security affected items | `EICAR.txt` |

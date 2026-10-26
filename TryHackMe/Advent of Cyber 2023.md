@@ -159,7 +159,7 @@ Target-specific wordlist creation using **CeWL** (Custom Word List generator) to
 | Task | Question | Answer |
 |---|---|---|
 | **Task 4** | Tool used to spider web text into custom wordlists? | `cewl` |
-| **Task 4** | Portal access flag | `THM{CUSTOM_WORDLISTS_WIN}` |
+| **Task 4** | Portal access flag | `flag{hidden}` |
 
 ---
 
@@ -178,7 +178,7 @@ Investigating legacy MS-DOS environments, inspecting corrupted backup archives, 
 3. The executable used to process this backup is identified as `backupmaster3000`.
 4. Inspecting `AC2023.BAK` with a hex editor reveals the first two bytes are corrupted (`XX XX`).
 5. Real AC-format backups require magic bytes corresponding to ASCII characters `A` and `C` in hexadecimal: `41 43`.
-6. Patch the first two bytes to `41 43`, save the file, and rerun `backupmaster3000 AC2023.BAK` to restore the archive and reveal: `THM{0LD_5CH00L_C00L_d00D}`.
+6. Patch the first two bytes to `41 43`, save the file, and rerun `backupmaster3000 AC2023.BAK` to restore the archive and reveal: `flag{hidden}`.
 
 ### 🏁 Questions & Answers
 
@@ -187,7 +187,7 @@ Investigating legacy MS-DOS environments, inspecting corrupted backup archives, 
 | **Task 5** | How large (in bytes) is the AC2023.BAK file? | `12704` |
 | **Task 5** | What is the name of the backup program? | `backupmaster3000` |
 | **Task 5** | Correct bytes in the backup's file signature to restore it? | `41 43` |
-| **Task 5** | Flag received after restoring the backup? | `THM{0LD_5CH00L_C00L_d00D}` |
+| **Task 5** | Flag received after restoring the backup? | `flag{hidden}` |
 
 ---
 
@@ -210,7 +210,7 @@ Introduction to memory layouts, stack buffers, endianness (Little Endian vs. Big
 | Task | Question | Answer |
 |---|---|---|
 | **Task 6** | Coins value after converting in-memory bytes to decimal? | `1397772111` |
-| **Task 6** | Game completion flag | `THM{MEM_CORRUPTION_GAME}` |
+| **Task 6** | Game completion flag | `flag{hidden}` |
 
 ---
 
@@ -228,13 +228,13 @@ cut -d ' ' -f 1 access.log | sort | uniq -c | sort -nr
 # Extract requested domains and status codes
 awk '{print $7, $9}' access.log | grep -E "\.ru|\.xyz|\.cc"
 ```
-Following the timeline of compromised internal endpoints exposes the investigator reward flag: `THM{a_gift_for_you_awesome_analyst!}`.
+Following the timeline of compromised internal endpoints exposes the investigator reward flag: `flag{hidden}`.
 
 ### 🏁 Questions & Answers
 
 | Task | Question | Answer |
 |---|---|---|
-| **Task 7** | Flag found at the end of the log analysis? | `THM{a_gift_for_you_awesome_analyst!}` |
+| **Task 7** | Flag found at the end of the log analysis? | `flag{hidden}` |
 
 ---
 
@@ -249,7 +249,7 @@ Dead-box disk forensics using **AccessData FTK Imager** to recover deleted files
 3. Expand deleted directories (marked with red cross icons):
    - In folder `DO NOT OPEN`, inspect deleted text notes: C2 domain is revealed as `mcgreedysecretc2.thm`.
    - Deleted archive contains `JuicyTomaTOY.exe`.
-   - Viewing deleted image `portrait.png` in the FTK hex viewer reveals plaintext strings: `THM{byt3-L3vel_@n4Lys15}`.
+   - Viewing deleted image `portrait.png` in the FTK hex viewer reveals plaintext strings: `flag{hidden}`.
 
 ### 🏁 Questions & Answers
 
@@ -257,7 +257,7 @@ Dead-box disk forensics using **AccessData FTK Imager** to recover deleted files
 |---|---|---|
 | **Task 8** | What is the malware C2 server? | `mcgreedysecretc2.thm` |
 | **Task 8** | What is the file inside the deleted zip archive? | `JuicyTomaTOY.exe` |
-| **Task 8** | Flag hidden in one of the deleted PNG files? | `THM{byt3-L3vel_@n4Lys15}` |
+| **Task 8** | Flag hidden in one of the deleted PNG files? | `flag{hidden}` |
 | **Task 8** | SHA1 hash of the forensic image? | `39f2dea6ffb43bf80d80f19d122076b3682773c2` |
 
 ---
@@ -318,7 +318,7 @@ Exploiting stacked queries in Microsoft SQL Server (MSSQL) to achieve Remote Cod
 | Task | Question | Answer |
 |---|---|---|
 | **Task 10** | Stored procedure used to execute commands in MSSQL? | `xp_cmdshell` |
-| **Task 10** | MSSQL command execution flag | `THM{STACKED_QUERIES_RCE}` |
+| **Task 10** | MSSQL command execution flag | `flag{hidden}` |
 
 ---
 
@@ -348,7 +348,7 @@ Active Directory security, Access Control Lists (ACLs), and abusing `GenericWrit
 | Task | Question | Answer |
 |---|---|---|
 | **Task 11** | AD attribute used for Shadow Credentials? | `msDS-KeyCredentialLink` |
-| **Task 11** | AD domain compromise flag | `THM{SHADOW_CREDENTIALS_DOMINANCE}` |
+| **Task 11** | AD domain compromise flag | `flag{hidden}` |
 
 ---
 
@@ -390,7 +390,7 @@ Applying the **Diamond Model of Intrusion Analysis**, threat hunting, and deploy
    ```bash
    sudo ufw deny from 10.10.100.5 to any
    ```
-4. Inspecting honeypot interaction logs reveals adversary attempts and unlocks flag: `THM{P0T$_W@11S_4_S@N7@}`.
+4. Inspecting honeypot interaction logs reveals adversary attempts and unlocks flag: `flag{hidden}`.
 
 ### 🏁 Questions & Answers
 
@@ -400,7 +400,7 @@ Applying the **Diamond Model of Intrusion Analysis**, threat hunting, and deploy
 | **Task 13** | Defence capability used to actively search for malicious activity? | `Threat Hunting` |
 | **Task 13** | Main two infrastructure focuses? | `Honeypot and Firewall` |
 | **Task 13** | Firewall command used to block traffic? | `deny` |
-| **Task 13** | Flag in the honeypot story? | `THM{P0T$_W@11S_4_S@N7@}` |
+| **Task 13** | Flag in the honeypot story? | `flag{hidden}` |
 
 ---
 
@@ -461,7 +461,7 @@ Automating CAPTCHA breaking using Convolutional Neural Networks (CNNs) and Optic
 1. Convolutional Neural Networks automate **Feature Extraction**.
 2. **Convolution** extracts mathematical feature maps; **Pooling** reduces spatial dimensionality.
 3. The model architecture demonstrated is **Attention OCR**.
-4. Run the trained solver against the HQ Admin login portal. The automated script bypasses the CAPTCHA protection, enters password `ReallyNotGonnaGuessThis`, and logs in to reveal: `THM{Captcha.Can't.Hold.Me.Back}`.
+4. Run the trained solver against the HQ Admin login portal. The automated script bypasses the CAPTCHA protection, enters password `ReallyNotGonnaGuessThis`, and logs in to reveal: `flag{hidden}`.
 
 ### 🏁 Questions & Answers
 
@@ -472,7 +472,7 @@ Automating CAPTCHA breaking using Convolutional Neural Networks (CNNs) and Optic
 | **Task 16** | Name of process used to reduce features down? | `Pooling` |
 | **Task 16** | Off-the-shelf CNN used for CAPTCHA OCR? | `Attention OCR` |
 | **Task 16** | Password set on HQ Admin portal? | `ReallyNotGonnaGuessThis` |
-| **Task 16** | Flag received after authenticating? | `THM{Captcha.Can't.Hold.Me.Back}` |
+| **Task 16** | Flag received after authenticating? | `flag{hidden}` |
 
 ---
 
@@ -493,7 +493,7 @@ Querying flows identifies suspicious periodic C2 beaconing on high ephemeral por
 
 | Task | Question | Answer |
 |---|---|---|
-| **Task 17** | SiLK traffic analysis completion flag | `THM{SILK_NETFLOW_ANALYST}` |
+| **Task 17** | SiLK traffic analysis completion flag | `flag{hidden}` |
 
 ---
 
@@ -619,7 +619,7 @@ Server-Side Request Forgery (SSRF) exploitation to access internal metadata serv
    http://127.0.0.1:8000/api/status
    ```
 3. C2 panel reveals version `1.1` and default credentials (`admin`).
-4. Logging into the panel gives: `THM{SSRF_L0OTED_SUCC3SS}`.
+4. Logging into the panel gives: `flag{hidden}`.
 
 ### 🏁 Questions & Answers
 
@@ -628,7 +628,7 @@ Server-Side Request Forgery (SSRF) exploitation to access internal metadata serv
 | **Task 22** | Is SSRF restricted to external resources only? (yea/nay) | `nay` |
 | **Task 22** | What is the C2 version? | `1.1` |
 | **Task 22** | Username for accessing the C2 panel? | `admin` |
-| **Task 22** | Flag after accessing C2 panel? | `THM{SSRF_L0OTED_SUCC3SS}` |
+| **Task 22** | Flag after accessing C2 panel? | `flag{hidden}` |
 
 ---
 
@@ -666,7 +666,7 @@ Digital forensics on an Android mobile device image using **Autopsy**.
 1. Load the mobile physical image into Autopsy.
 2. Ingest modules: Android Analyzer, Picture Gallery, Communications.
 3. Review extracted artifacts:
-   - Image Gallery: Inspecting holiday photos reveals a flag overlay: `THM{DIGITAL_FORENSICS}`.
+   - Image Gallery: Inspecting holiday photos reveals a flag overlay: `flag{hidden}`.
    - Contact List: Detective Frost-eau is saved under contact alias: `Detective Carrot-Nose`.
    - SMS / Messaging Database: Message conversation with Van Sprinkles exposes password: `chee7AQu`.
 
@@ -674,6 +674,6 @@ Digital forensics on an Android mobile device image using **Autopsy**.
 
 | Task | Question | Answer |
 |---|---|---|
-| **Task 24** | Flag hidden inside one of the photos? | `THM{DIGITAL_FORENSICS}` |
+| **Task 24** | Flag hidden inside one of the photos? | `flag{hidden}` |
 | **Task 24** | Name Tracy used to save Detective Frost-eau's phone number? | `Detective Carrot-Nose` |
 | **Task 24** | Password inside SMS exchanged with Van Sprinkles? | `chee7AQu` |

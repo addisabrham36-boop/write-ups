@@ -38,4 +38,4 @@ echo "VEhNe...==" | base64 -d
 |---|---|---|
 | **Task 1** | Target hotel name analyzed | `Byte Lotus Hotel` |
 | **Task 1** | Primary platform where the staff footprint was uncovered | `Instagram` |
-| **Task 1** | Flag format | Retrieved via Base64 decoding from the target profile bio (`THM{...}`) |
+| **Task 1** | Flag format | Retrieved via Base64 decoding from the target profile bio (`flag{hidden}`) |

@@ -36,7 +36,7 @@ A robust enterprise prompt contains four primary components:
 ## 4. Practical Challenge
 
 Bypassing the simulated conversational guardrail via contextual persona framing yields the room flag:
-`THM{Pr0mpt_3ng1neer}`
+`flag{hidden}`
 
 ---
 
@@ -58,4 +58,4 @@ Bypassing the simulated conversational guardrail via contextual persona framing 
 | **Task 5** | Prompting technique providing no examples | `Zero-shot` |
 | **Task 5** | Standardized prompt structures saved for recurring tasks | `Prompt templates` |
 | **Task 5** | Phrase triggering Zero-shot Chain-of-Thought | `Let's think step by step` |
-| **Task 6** | Flag from practical prompt challenge | `THM{Pr0mpt_3ng1neer}` |
+| **Task 6** | Flag from practical prompt challenge | `flag{hidden}` |

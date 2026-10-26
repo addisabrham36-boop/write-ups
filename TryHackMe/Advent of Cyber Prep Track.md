@@ -10,16 +10,16 @@ Welcome to the complete walkthrough and reference guide for TryHackMe's **Advent
 
 | # | Challenge Name | Domain / Focus | Key Command / Technique | Flag / Status |
 |---|---|---|---|---|
-| **1** | Password Pandemonium | Identity & Access | Password entropy & breach policy validation | `THM{P4ssw0rd_P4nd3m0n1um_S0lv3d}` |
-| **2** | The Suspicious Chocolate.exe | Malware Triage | Antivirus detection report analysis | `THM{Ch0c0l4t3_Tr14g3_C0mpl3t3}` |
-| **3** | Welcome to the AttackBox! | Linux Essentials | `pwd`, `ls -la`, `cd`, `cat` | `THM{StrongStart}` |
-| **4** | The CMD Conundrum | Windows CLI | `dir /a`, `type` hidden file streams | `THM{H1dd3n_CMD_F1l3s_F0und}` |
-| **5** | Linux Lore | Linux File Systems | Dotfile discovery (`ls -la`), `cat .secret_message` | `THM{L1nux_D0tf1l3s_M4st3r}` |
-| **6** | The Leak in the List | OSINT & Breach Intel | HaveIBeenPwned-style account breach triage | `THM{Br34ch_Ch3ck_C0nf1rm3d}` |
-| **7** | WiFi Woes in Wareville | Wireless & Network | Replacing default administrative credentials | `THM{R0ut3r_H4rd3n1ng_D0n3}` |
-| **8** | The App Trap | Identity & Permissions | OAuth scope auditing & revoking unneeded tokens | `THM{0Auth_P3rm1ss10ns_R3v0k3d}` |
-| **9** | The Chatbot Confession | AI & LLM Security | Spotting confidential system prompt disclosure | `THM{A1_D4t4_L34k_Pr3v3nt3d}` |
-| **10** | The Bunny's Browser Trail | Log Analysis | Anomaly detection in HTTP User-Agent strings | `THM{Bunnys_Tr41l_D1sc0v3r3d}` |
+| **1** | Password Pandemonium | Identity & Access | Password entropy & breach policy validation | `flag{hidden}` |
+| **2** | The Suspicious Chocolate.exe | Malware Triage | Antivirus detection report analysis | `flag{hidden}` |
+| **3** | Welcome to the AttackBox! | Linux Essentials | `pwd`, `ls -la`, `cd`, `cat` | `flag{hidden}` |
+| **4** | The CMD Conundrum | Windows CLI | `dir /a`, `type` hidden file streams | `flag{hidden}` |
+| **5** | Linux Lore | Linux File Systems | Dotfile discovery (`ls -la`), `cat .secret_message` | `flag{hidden}` |
+| **6** | The Leak in the List | OSINT & Breach Intel | HaveIBeenPwned-style account breach triage | `flag{hidden}` |
+| **7** | WiFi Woes in Wareville | Wireless & Network | Replacing default administrative credentials | `flag{hidden}` |
+| **8** | The App Trap | Identity & Permissions | OAuth scope auditing & revoking unneeded tokens | `flag{hidden}` |
+| **9** | The Chatbot Confession | AI & LLM Security | Spotting confidential system prompt disclosure | `flag{hidden}` |
+| **10** | The Bunny's Browser Trail | Log Analysis | Anomaly detection in HTTP User-Agent strings | `flag{hidden}` |
 
 ---
 
@@ -47,7 +47,7 @@ Create a secure credential that complies with enterprise password policies (leng
 
 | Question | Answer |
 |---|---|
-| What's the flag? | `THM{P4ssw0rd_P4nd3m0n1um_S0lv3d}` |
+| What's the flag? | `flag{hidden}` |
 
 ---
 
@@ -70,7 +70,7 @@ Interpret multi-engine antivirus scan results (VirusTotal style) for a suspiciou
 
 | Question | Answer |
 |---|---|
-| What's the flag? | `THM{Ch0c0l4t3_Tr14g3_C0mpl3t3}` |
+| What's the flag? | `flag{hidden}` |
 
 ---
 
@@ -95,13 +95,13 @@ Familiarize with the browser-based Linux terminal, navigate directory paths, and
    ```bash
    cat welcome.txt
    ```
-   The terminal displays `THM{StrongStart}`.
+   The terminal displays `flag{hidden}`.
 
 ### 🏁 Questions & Answers
 
 | Question | Answer |
 |---|---|
-| What's the flag? | `THM{StrongStart}` |
+| What's the flag? | `flag{hidden}` |
 
 ---
 
@@ -132,7 +132,7 @@ Navigate Windows Command Prompt (cmd.exe) and reveal hidden files using director
 
 | Question | Answer |
 |---|---|
-| What's the flag? | `THM{H1dd3n_CMD_F1l3s_F0und}` |
+| What's the flag? | `flag{hidden}` |
 
 ---
 
@@ -161,7 +161,7 @@ Locate hidden dotfiles in a Linux user's home directory.
 
 | Question | Answer |
 |---|---|
-| What's the flag? | `THM{L1nux_D0tf1l3s_M4st3r}` |
+| What's the flag? | `flag{hidden}` |
 
 ---
 
@@ -181,7 +181,7 @@ Investigate compromised credentials in public breach archives and determine acco
 
 | Question | Answer |
 |---|---|
-| What's the flag? | `THM{Br34ch_Ch3ck_C0nf1rm3d}` |
+| What's the flag? | `flag{hidden}` |
 
 ---
 
@@ -203,7 +203,7 @@ Harden an enterprise wireless router by replacing insecure factory default crede
 
 | Question | Answer |
 |---|---|
-| What's the flag? | `THM{R0ut3r_H4rd3n1ng_D0n3}` |
+| What's the flag? | `flag{hidden}` |
 
 ---
 
@@ -226,7 +226,7 @@ Audit OAuth 2.0 third-party application permissions and revoke excessive privile
 
 | Question | Answer |
 |---|---|
-| What's the flag? | `THM{0Auth_P3rm1ss10ns_R3v0k3d}` |
+| What's the flag? | `flag{hidden}` |
 
 ---
 
@@ -248,7 +248,7 @@ Detect conversational AI data leakage where a chatbot inadvertently reveals inte
 
 | Question | Answer |
 |---|---|
-| What's the flag? | `THM{A1_D4t4_L34k_Pr3v3nt3d}` |
+| What's the flag? | `flag{hidden}` |
 
 ---
 
@@ -271,4 +271,4 @@ Parse web server access logs to identify anomalous client User-Agents and automa
 
 | Question | Answer |
 |---|---|
-| What's the flag? | `THM{Bunnys_Tr41l_D1sc0v3r3d}` |
+| What's the flag? | `flag{hidden}` |

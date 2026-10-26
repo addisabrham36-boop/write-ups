@@ -1,63 +1,98 @@
-# Advent of Cyber 2024 - Day 4: Atomic Red Team
+# Advent of Cyber 2024 - Day 4: I’m all atomic inside!
 
 {% embed url="https://tryhackme.com/room/adventofcyber2024" %}
 
-I'm all atomic inside — let's simulate adversary TTPs and validate our detection coverage against MITRE ATT&CK.
+## Overview & Investigation Walkthrough
 
-## Background
+1. What was the flag found in the .txt file that is found in the same directory as the PhishingAttachment.xslm artefact?
 
-Atomic Red Team is an open-source library of small, focused test cases (called "atomics") each mapped to a specific MITRE ATT&CK technique. The idea is simple: instead of waiting for a real attacker to test your defences, you simulate their exact behaviours yourself in a controlled way and verify whether your SIEM/EDR detects them.
+   Let's first clear the operational log for sysmon at `Applications and Services => Microsoft => Windows => Sysmon => Operational`.
+   
+   ![Clear](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_4_Clear.png)
 
-Each atomic is identified by a technique ID from ATT&CK (e.g., `T1566.001` for Spearphishing via Attachment). The PowerShell module `Invoke-AtomicTest` is the primary runner. It can show details about a test before running it, execute the simulation, and clean up afterwards — all from a single command.
+   Now we can run the phishing test using:
 
-By running these simulations and checking whether alerts fire, defenders can measure detection gaps. If `T1566.001` runs silently with no alert, your phishing attachment detection is broken and needs tuning. This "purple team" approach — combining red team simulation with blue team validation — dramatically improves detection posture without waiting for a real breach.
+   ```powershell
+   Invoke-AtomicTest -AtomicTechnique T1566.001 -TestNumbers 1
+   ```
 
-## Walkthrough
+   ![Phishing](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_4_Phishing.png)
 
-**Step 1 — Explore available atomics for a technique**
+   Refreshing the event viewer, we can see new events created by the test. One of these is related to the creation of the xlsm file. 
+   
+   ![Target](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_4_Target.png)
 
-Let's look at what test cases are available for spearphishing via attachment (`T1566.001`):
+   We can navigate to this path to find the .txt file.
 
-```powershell
-Invoke-AtomicTest T1566.001 -ShowDetails
-```
+   ![Flag 1](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_4_Flag_1.png)
 
-This lists all available tests, their descriptions, required dependencies, and the commands they'll run. Review these before executing.
+   ><details><summary>Click for answer</summary>THM{GlitchTestingForSpearphishing}</details>
 
-**Step 2 — Run the phishing simulation**
+2. What ATT&CK technique ID would be our point of interest?
 
-```powershell
-Invoke-AtomicTest T1566.001
-```
+   On the MITRE Attack Framework webpage, we can search for any techniques involving "Command and Scripting Interpreter".
 
-This simulates a spearphishing attachment being opened. Watch your SIEM/EDR for alerts — did it fire?
+   ![Mitre](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_4_Mitre.png)
 
-**Step 3 — Clean up after the test**
+   ><details><summary>Click for answer</summary>T1059</details>
 
-```powershell
-Invoke-AtomicTest T1566.001 -Cleanup
-```
+3. What ATT&CK subtechnique ID focuses on the Windows Command Shell?
 
-Always clean up after atomics to restore the system to a known-good state.
+   On this technique page, we can find a subtechnique covering Windows Command Shell.
 
-**Step 4 — Verify detection**
+   ><details><summary>Click for answer</summary>T1059.003</details>
 
-Check Elastic/Kibana or your SIEM for alerts generated during the test. If nothing fired, that's a detection gap worth investigating.
+4. What is the name of the Atomic Test to be simulated?
 
-**Step 5 — Explore other techniques as needed**
+   We can find out which tests are performed within this technique using:
 
-The same pattern applies to any ATT&CK technique ID. Browse the full list at [github.com/redcanaryco/atomic-red-team](https://github.com/redcanaryco/atomic-red-team).
+   ```powershell
+   Invoke-AtomicTest -AtomicTechnique T1059.003 -ShowDetailsBrief
+   ```
 
-```powershell
-# Example: test credential dumping
-Invoke-AtomicTest T1003.001 -ShowDetails
+   ![Brief](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_4_Brief.png)
 
-# Example: test scheduled task persistence
-Invoke-AtomicTest T1053.005
-```
+   Since we are looking to conduct a test related to ransomware, our test of interest will be number 4.
+
+   ><details><summary>Click for answer</summary>Simulate BlackByte Ransomware Print Bombing</details>
+
+5. What is the name of the file used in the test?
+
+   We can get more details on this test by using the following command:
+
+   ```powershell
+   Invoke-AtomicTest -AtomicTechnique T1059.003 -TestNumbers 4 -ShowDetails
+   ```
+
+   ![Details](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_4_Details.png)
+
+   Looking at the commands being executed we can find which file is used in this test.
+
+   ><details><summary>Click for answer</summary>Wareville_Ransomware.txt</details>
+
+6. What is the flag found from this Atomic Test?
+
+   We can either read the file we found earlier using `type C:\Tools\AtomicRedTeam\atomics\T1059.003\src\Wareville_Ransomware.txt` or we can run the test to see the results.
+
+   ![Test Output](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_4_Test_Output.png)
+
+   We can save the resulting PDF and open it to find our flag.
+
+   ![Flag 2](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_4_Flag_2.png)
+
+   ><details><summary>Click for answer</summary>THM{R2xpdGNoIGlzIG5vdCB0aGUgZW5lbXk=}</details>
+
+7. Learn more about theAtomic Red Teamvia the linkedroom.
 
 ## 🏁 Questions & Answers
 
 | Question | Answer |
 |---|---|
-| What command runs the spearphishing via attachment simulation? | `Invoke-AtomicTest T1566.001` |
+| What was the flag found in the .txt file that is found in the same directory as the PhishingAttachment.xslm artefact? | `flag{hidden}` |
+| What ATT&CK technique ID would be our point of interest? | `T1059` |
+| What ATT&CK subtechnique ID focuses on the Windows Command Shell? | `T1059.003` |
+| What is the name of the Atomic Test to be simulated? | `Simulate BlackByte Ransomware Print Bombing` |
+| What is the name of the file used in the test? | `Wareville_Ransomware.txt` |
+| What is the flag found from this Atomic Test? | `flag{hidden}` |
+
+> **Note:** Flags are redacted as `flag{hidden}` in accordance with responsible disclosure guidelines. The step-by-step commands above provide the verified reproduction path.

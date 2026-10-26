@@ -1,73 +1,63 @@
-# Advent of Cyber 2024 - Day 2: Log Analysis
+# Advent of Cyber 2024 - Day 2: One man's false positive is another man's potpourri.
 
 {% embed url="https://tryhackme.com/room/adventofcyber2024" %}
 
-One man's false positive is another man's indicator of compromise — Windows Event Logs tell the full story when you know what to look for.
+## Overview & Investigation Walkthrough
 
-## Background
+1. What is the name of the account causing all the failed login attempts?
 
-Windows Event Logs capture every significant activity on a system: logons, process creation, service installs, policy changes, and more. Each event is tagged with an Event ID that gives us a quick shorthand for what happened. Event ID `4624` means a successful logon occurred — this is one of the most important IDs to hunt for during incident response.
+   Filtering on the date from November 29th 0.00 to December 1st 9.30, we see one username responsible for many failed login attempts.
 
-Elastic/Kibana is a popular SIEM stack for centralising and searching these logs at scale. It ingests Windows Security logs (and many other sources) and lets analysts write powerful queries, build dashboards, and pivot across thousands of events in seconds. Without a SIEM, manually digging through `.evtx` files would be painfully slow.
+   ![Failed Attempts](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_2_Failed_Attempts.png)
 
-The key workflow here is: filter by time window → narrow by Event ID → identify unusual accounts or source IPs → correlate timestamps → reconstruct the attacker's actions. Let's do exactly that.
+   ><details><summary>Click for answer</summary>service_admin</details>
 
-## Walkthrough
+2. How many failed logon attempts were observed?
 
-**Step 1 — Open Elastic/Kibana and set the time range**
+   To view how many failed attempts have been made, we should filter on `event.outcome` and `event.category`.
 
-Log into the Kibana instance provided in the room. Navigate to **Discover** and set the time range to cover **December 1, 2024**.
+   ![Number](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_2_Number.png)
 
-**Step 2 — Filter for successful logon events**
+   ><details><summary>Click for answer</summary>6791</details>
 
-Use a KQL filter to target Event ID 4624 (successful logon) in the Windows Security logs:
+3. What is the IP address of Glitch?
 
-```kql
-event.code: "4624"
-```
+   Filtering of the user name and `event.category` = "authentication", and filtering the previously found IP we get the ip of the Glitch.
 
-Scroll through the results. We're looking for logon events from unexpected accounts or IP addresses outside business hours.
+   ![Ip](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_2_Ip.png)
 
-**Step 3 — Identify the compromised account and source IP**
+   ><details><summary>Click for answer</summary>10.0.255.1</details>
 
-The compromised account that stands out is `service_admin`. The source IP making the logon is:
+4. When did Glitch successfully logon to ADM-01? Format: MMM D, YYYY HH:MM:SS.SSS
 
-```
-10.0.255.1
-```
+   Now we can also filter furthe on hostname `ADM-01` and output `success`, the see when the successfull attempt by this IP address was made.
 
-**Step 4 — Note the suspicious logon timestamp**
+   ![Success](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_2_Success.png)
 
-The first suspicious logon timestamp for this account is:
+   ><details><summary>Click for answer</summary>Dec 1, 2024 08:54:39.000</details>
 
-```
-Dec 1, 2024 08:54:39.000
-```
+5. What is the decoded command executed by Glitch to fix the systems of Wareville?
 
-**Step 5 — Find the PowerShell command executed**
+   We can filter out any entries with a blank command value.
 
-Pivot to process creation events (Event ID 4688) or look at Sysmon logs for PowerShell activity correlated to this account:
+   ![Command](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_2_Command.png)
 
-```kql
-event.code: "4688" and user.name: "service_admin"
-```
+   Here we see the powershell command with a base64 encoded payload. We can decode this using Cyberchef. Make sure to also decode the text using `UTF-16LE (1200)` encoding.
 
-The malicious PowerShell command executed was:
+   ![Decoded](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_2_Decoded.png)
 
-```powershell
-Install-WindowsUpdate -AcceptAll -AutoReboot
-```
+   ><details><summary>Click for answer</summary>Install-WindowsUpdate -AcceptAll -AutoReboot</details>
 
-**Step 6 — Identify the unusual port**
-
-Review network connection events or firewall logs. The unusual port observed during this incident is `6791`.
+6. If you enjoyed this task, feel free to check out theInvestigating with ELK 101room.
 
 ## 🏁 Questions & Answers
 
 | Question | Answer |
 |---|---|
-| What is the compromised account name? | `service_admin` |
-| What is the unusual port observed? | `6791` |
-| What is the attacker's source IP address? | `10.0.255.1` |
-| What is the timestamp of the first suspicious logon? | `Dec 1, 2024 08:54:39.000` |
-| What PowerShell command was run? | `Install-WindowsUpdate -AcceptAll -AutoReboot` |
+| What is the name of the account causing all the failed login attempts? | `service_admin` |
+| How many failed logon attempts were observed? | `6791` |
+| What is the IP address of Glitch? | `10.0.255.1` |
+| When did Glitch successfully logon to ADM-01? Format: MMM D, YYYY HH:MM:SS.SSS | `Dec 1, 2024 08:54:39.000` |
+| What is the decoded command executed by Glitch to fix the systems of Wareville? | `Install-WindowsUpdate -AcceptAll -AutoReboot` |
+
+> **Note:** Flags are redacted as `flag{hidden}` in accordance with responsible disclosure guidelines. The step-by-step commands above provide the verified reproduction path.

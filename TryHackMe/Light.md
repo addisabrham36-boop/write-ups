@@ -89,7 +89,7 @@ We retrieve both flags from the database.
 | Question | Answer |
 |---|---|
 | What is the admin's password? | *(retrieved via SQLi from the users table)* |
-| What is the flag? | `THM{flag_from_db}` |
+| What is the flag? | `flag{hidden}` |
 
 > **Note:** Flags are redacted in this public write-up. Solve the room to get them — the SQLi technique above gives you everything you need.
 

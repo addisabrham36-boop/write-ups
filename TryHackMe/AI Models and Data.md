@@ -28,7 +28,7 @@ A foundational exploration of machine learning data pipelines, data provenance, 
 ## 3. Practical Exercise
 
 Completing the training optimization lab produces the flag:
-`THM{A_m0del_Stud3nt}`
+`flag{hidden}`
 
 ---
 
@@ -47,4 +47,4 @@ Completing the training optimization lab produces the flag:
 | **Task 4** | Model already trained on a large general dataset | `Pre-trained Model` |
 | **Task 5** | Documentation describing what a model is and its limitations | `Model Card` |
 | **Task 5** | Billions of floating-point numbers in a model | `Weights` |
-| **Task 6** | Practical completion flag | `THM{A_m0del_Stud3nt}` |
+| **Task 6** | Practical completion flag | `flag{hidden}` |

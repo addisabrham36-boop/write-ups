@@ -58,7 +58,7 @@ Using the interactive DNS simulator provided in the room:
 1. Query `shop.website.thm` with type **CNAME**:
    Returns `shops.myshopify.com`.
 2. Query `website.thm` with type **TXT**:
-   Returns the room flag `THM{7012BBA60997F35A9516C2E16D2944FF}`.
+   Returns the room flag `flag{hidden}`.
 3. Query `website.thm` with type **MX**:
    Returns mail server with priority `30`.
 4. Query `www.website.thm` with type **A**:
@@ -81,6 +81,6 @@ Using the interactive DNS simulator provided in the room:
 | **Task 4** | What type of DNS Server is usually provided by your ISP? | `recursive` |
 | **Task 4** | What type of server holds all the records for a domain? | `authoritative` |
 | **Task 5** | What is the CNAME of `shop.website.thm`? | `shops.myshopify.com` |
-| **Task 5** | What is the value of the TXT record of `website.thm`? | `THM{7012BBA60997F35A9516C2E16D2944FF}` |
+| **Task 5** | What is the value of the TXT record of `website.thm`? | `flag{hidden}` |
 | **Task 5** | What is the numerical priority value for the MX record? | `30` |
 | **Task 5** | What is the IP address for the A record of `www.website.thm`? | `10.10.10.10` |

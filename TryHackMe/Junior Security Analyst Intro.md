@@ -25,7 +25,7 @@ In a Security Operations Center (SOC), a Junior Security Analyst operates primar
 4. Following the organizational escalation procedure, escalate the ticket to the senior security lead:
    **Will Griffin**
 5. Add a firewall drop rule for `221.181.185.159`. Once enforced, the malicious connection drops and logs the response flag:
-   `THM{UNTIL-WE-MEET-AGAIN}`
+   `flag{hidden}`
 
 ---
 
@@ -36,4 +36,4 @@ In a Security Operations Center (SOC), a Junior Security Analyst operates primar
 | **Task 1** | What will be your role as a Junior Security Analyst? | `Triage Specialist` |
 | **Task 3** | Malicious IP address found in alerts | `221.181.185.159` |
 | **Task 3** | Person to whom the event was escalated | `Will Griffin` |
-| **Task 3** | Message left by the attacker after blocking the IP | `THM{UNTIL-WE-MEET-AGAIN}` |
+| **Task 3** | Message left by the attacker after blocking the IP | `flag{hidden}` |

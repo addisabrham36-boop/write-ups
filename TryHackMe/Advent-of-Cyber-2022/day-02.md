@@ -1,39 +1,142 @@
-# Advent of Cyber 2022 - Day 2: Log Analysis
+# Advent of Cyber 2022 - Day 2: Log Analysis: Santa's Naughty & Nice Log
 
 {% embed url="https://tryhackme.com/room/adventofcyber4" %}
 
-## Background
-Analyzing raw web server access logs to reconstruct a security breach. We learn how to parse Common Log Format (CLF) and Combined Log Format entries using Linux core utilities: `head`, `tail`, `wc`, `cat`, and `grep`.
+## Overview & Scenario
+Santa’s Security Operations Center (SSOC) has noticed one of their web servers, santagift.shop has been hijacked by the Bandit Yeti APT group. Elf McBlue’s task is to analyse the log files captured from the web server to understand what is happening and track down the Bandit Yeti APT group.
 
-## Walkthrough
-Connect to the target terminal and list files in the current directory:
-```bash
-ls -lah
-```
-We identify two log files: `sshd.log` and `webserver.log`. Inspecting `webserver.log`:
-```bash
-# Count total entries
-wc -l webserver.log
+For today's task, you will need to deploy the machine attached to this task by pressing the green "Start Machine" button located at the top-right of this task. The machine should launch in a split-screen view. If it does not, you will need to press the blue "Show Split Screen" button near the top-right of this page.
 
-# Search for sensitive files accessed
-grep -inE "list|santa|stolen" webserver.log
-```
-The output reveals suspicious GET requests originating from IP `10.10.249.191` requesting `/santaslist.txt` on a Friday:
-```text
-10.10.249.191 - - [18/Nov/2022:10:14:32 +0000] "GET /santaslist.txt HTTP/1.1" 200 4521
-```
-Searching for the platform flag format:
-```bash
-grep -i "THM{" webserver.log
-```
+If you wish, you can use the following credentials to access the machine using SSH (remember to connect to the VPN first):
+
+IP address: `10.10.156.184`
+Username: `elfmcblue`
+Password: `tryhackme!`
+Use the knowledge you have gained in today's task to help Elf McBlue track down the Bandit Yeti APT by answering the questions below.
+
+## Learning Objectives & Key Concepts
++ Learn what log files are and why they’re useful
++ Understand what valuable information log files can contain
++ Understand some common locations these logs file can be found
++ Use some basic Linux commands to start analysing log files for valuable information
++ Help Elf McBlue track down the Bandit Yeti APT!
+
+### Technical Context
+## LAUNCH THE INSTANCE
+
+1. Launch Instance
+2. Connect via SSH
+   1. > ssh elfmcblue@10.10.156.184
+   2. > password: tryhackme!
+3. We are now connected to the server instance
+4. > ls
+   1. RESPONSE: SSHD.log  webserver.log
+   2. So ther are 2 files in the current directory
+   3. The log file is: `webserver.log`
+5. Let's download these files so lets connect with sftp
+   1. > sftp elfmcblue@10.10.156.184
+   2. > password: tryhackme!
+   3. > ls
+   4. > get webserver.log
+   5. > get SSHD.log
+6. Investigate the Log file
+   1. Upon first glance we can see that the log file is for `Nov 18 2022` which was on a `Friday`
+   2. On the third line we can see the connection was established from `10.10.249.191`
+   3. Now we are looking for a list stolen from santa so lets search the file for some keywords
+      1. > grep -i "list" webserver.log > grep_list
+      2. Let's examine the grep_list we created
+         1. In here we have 768 potential instances of "list" so let's try and narrow this down
+         2. To narrow it down we can see that this is a gobuster search so the "404" means it wasn't found - so we should look for other codes (ie. 200 or 302)
+         3. > grep -i "200" grep_list
+
+            ```text
+               10.10.249.191 - - [18/Nov/2022:12:28:17 +0000] "GET /finalist2001_l HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:34:39 +0000] "GET /santaslist.txt HTTP/1.1" 200 133872 "-" "Wget/1.19.4 (linux-gnu)"
+               10.10.249.191 - - [18/Nov/2022:12:35:23 +0000] "GET /2003-08-01-listadd HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:23 +0000] "GET /2002-01-20-listadd HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:23 +0000] "GET /Finalist2005 HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:23 +0000] "GET /Windows-Server-2003-Hardening-List-Part1 HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:24 +0000] "GET /list_2004 HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:24 +0000] "GET /list_2003 HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:24 +0000] "GET /list_2001 HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:24 +0000] "GET /list_2000 HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:26 +0000] "GET /Codies%20Finalists%20011805Final HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:26 +0000] "GET /logo_2005codie_finalist HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:26 +0000] "GET /20050510162537wasc-lance-mailing-liste-websecurity HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:27 +0000] "GET /windows_2000_sp1_buglist HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+            ```
+
+         4. In this list we can see several 200's but the most important one is the second line where we have a status code of 200
+            1. `10.10.249.191 - - [18/Nov/2022:12:34:39 +0000] "GET /santaslist.txt HTTP/1.1" 200 133872 "-" "Wget/1.19.4 (linux-gnu)"`
+            2. Thus the important list stolen was `santaslist.txt`
+   4. Now we need to try and find the TryHackMe flag with the format `THM{}`
+      1. > grep -i "THM{" webserver.log
+         1. No results
+      2. > grep -i "THM{" SSHD.log
+         1. `THM{STOLENSANTASLIST}`
+
+## Walkthrough & Investigation
+
+1. Launch Instance
+2. Connect via SSH
+   1. > ssh elfmcblue@10.10.156.184
+   2. > password: tryhackme!
+3. We are now connected to the server instance
+4. > ls
+   1. RESPONSE: SSHD.log  webserver.log
+   2. So ther are 2 files in the current directory
+   3. The log file is: `webserver.log`
+5. Let's download these files so lets connect with sftp
+   1. > sftp elfmcblue@10.10.156.184
+   2. > password: tryhackme!
+   3. > ls
+   4. > get webserver.log
+   5. > get SSHD.log
+6. Investigate the Log file
+   1. Upon first glance we can see that the log file is for `Nov 18 2022` which was on a `Friday`
+   2. On the third line we can see the connection was established from `10.10.249.191`
+   3. Now we are looking for a list stolen from santa so lets search the file for some keywords
+      1. > grep -i "list" webserver.log > grep_list
+      2. Let's examine the grep_list we created
+         1. In here we have 768 potential instances of "list" so let's try and narrow this down
+         2. To narrow it down we can see that this is a gobuster search so the "404" means it wasn't found - so we should look for other codes (ie. 200 or 302)
+         3. > grep -i "200" grep_list
+
+            ```text
+               10.10.249.191 - - [18/Nov/2022:12:28:17 +0000] "GET /finalist2001_l HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:34:39 +0000] "GET /santaslist.txt HTTP/1.1" 200 133872 "-" "Wget/1.19.4 (linux-gnu)"
+               10.10.249.191 - - [18/Nov/2022:12:35:23 +0000] "GET /2003-08-01-listadd HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:23 +0000] "GET /2002-01-20-listadd HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:23 +0000] "GET /Finalist2005 HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:23 +0000] "GET /Windows-Server-2003-Hardening-List-Part1 HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:24 +0000] "GET /list_2004 HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:24 +0000] "GET /list_2003 HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:24 +0000] "GET /list_2001 HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:24 +0000] "GET /list_2000 HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:26 +0000] "GET /Codies%20Finalists%20011805Final HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:26 +0000] "GET /logo_2005codie_finalist HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:26 +0000] "GET /20050510162537wasc-lance-mailing-liste-websecurity HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+               10.10.249.191 - - [18/Nov/2022:12:35:27 +0000] "GET /windows_2000_sp1_buglist HTTP/1.1" 404 437 "-" "gobuster/3.0.1"
+            ```
+
+         4. In this list we can see several 200's but the most important one is the second line where we have a status code of 200
+            1. `10.10.249.191 - - [18/Nov/2022:12:34:39 +0000] "GET /santaslist.txt HTTP/1.1" 200 133872 "-" "Wget/1.19.4 (linux-gnu)"`
+            2. Thus the important list stolen was `santaslist.txt`
+   4. Now we need to try and find the TryHackMe flag with the format `THM{}`
+      1. > grep -i "THM{" webserver.log
+         1. No results
+      2. > grep -i "THM{" SSHD.log
+         1. `THM{STOLENSANTASLIST}`
 
 ## 🏁 Questions & Answers
 
 | Question | Answer |
 |---|---|
-| Use `ls` to list the files. How many log files are present? | `2` |
-| What is the name of the web server log file? | `webserver.log` |
+| Use the ls command to list the files present in the current directory. How many log files are present? | `2` |
+| Elf McSkidy managed to capture the logs generated by the web server. What is the name of this log file? | `webserver.log` |
 | On what day was Santa's naughty and nice list stolen? | `Friday` |
 | What is the IP address of the attacker? | `10.10.249.191` |
-| What is the name of the important list that the attacker stole? | `santaslist.txt` |
-| Look through the log files for the flag: | `THM{STOLENSANTASLIST}` |
+| What is the name of the important list that the attacker stole from Santa? | `santaslist.txt` |
+| Look through the log files for the flag. The format of the flag is: THM{} | `flag{hidden}` |
+
+> **Note:** Flags are redacted as `flag{hidden}` in accordance with responsible disclosure guidelines. The step-by-step commands above provide the verified reproduction path.

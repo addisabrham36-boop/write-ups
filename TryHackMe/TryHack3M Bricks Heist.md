@@ -72,7 +72,7 @@ Look up `bc1qyk79fcp9hd5kreprce89tkh4wrtl8avt4l67qa` on a blockchain explorer (B
 
 | Question | Answer |
 |---|---|
-| Content of the hidden .txt file in the web folder | `THM{fl46_650c844110baced87e1606453b93f22a}` |
+| Content of the hidden .txt file in the web folder | `flag{hidden}` |
 | What is the suspicious process name? | `nm-inet-dialog` |
 | What is the service name affiliated with the suspicious process? | `ubuntu.service` |
 | What is the log file name of the miner instance? | `inet.conf` |

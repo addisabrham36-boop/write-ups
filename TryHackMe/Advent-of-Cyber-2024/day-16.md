@@ -1,46 +1,83 @@
-# Advent of Cyber 2024 - Day 16: Azure
+# Advent of Cyber 2024 - Day 16: The Wareville’s Key Vault grew three sizes that day.
 
 {% embed url="https://tryhackme.com/room/adventofcyber2024" %}
 
-The Wareville's Key Vault
+## Overview & Investigation Walkthrough
 
-## Background
+1. What is the password for backupware that was leaked?
 
-Microsoft Azure cloud infrastructure secures application secrets, encryption keys, and TLS certificates using Azure Key Vault. Access policies and Azure Role-Based Access Control (RBAC) dictate who can read or manage vault objects.
+   If we search for the existing users, we find the password in one of the fields in plaintext.
 
-When cloud credentials or Managed Identity tokens are exposed through application vulnerabilities (such as SSRF or XXE), attackers can authenticate via the Azure CLI (`az login`) or Azure REST APIs to enumerate vaults and extract credentials.
+   ```cmd
+   az ad member list --filter "startsWith('wvusr', displayName)"
+   ```
 
-## Walkthrough
+   ![Users](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_16_Users.png)
 
-**Step 1 — Authenticate with Disclosed Credentials**
+   ><details><summary>Click for answer</summary>R3c0v3r_s3cr3ts!</details>
 
-Authenticate to Azure using credentials recovered from earlier challenges:
-```bash
-az login --service-principal -u <client-id> -p <client-secret> --tenant <tenant-id>
-```
+2. What is the group ID of the Secret Recovery Group?
 
-**Step 2 — Enumerate Azure Key Vaults**
+   To find the group ID we must list the existing groups with:
 
-List accessible vaults across resource groups:
-```bash
-az keyvault list --query "[].{Name:name, ResourceGroup:resourceGroup}" -o table
-```
-Discovered vault: `aoc2024`.
+   ```cmd
+   az ad group list
+   ```
 
-**Step 3 — Retrieve Secret Values**
+   ![Groups](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_16_Groups.png)
 
-Query secrets stored within `aoc2024`:
-```bash
-az keyvault secret list --vault-name aoc2024 -o table
-az keyvault secret show --vault-name aoc2024 --name secret-password --query "value" -o tsv
-```
-The secret value is `WhereIsMyMind1999`. Correlating with Day 5 provides admin password `R3c0v3r_s3cr3ts!` and UUID `7d96660a-02e1-4112-9515-1762d0cb66b7`.
+   ><details><summary>Click for answer</summary>7d96660a-02e1-4112-9515-1762d0cb66b7</details>
+
+3. What is the name of the vault secret?
+
+   With the credentials we just found, we can switch to that user so we have access to the keyvault.
+
+   ```cmd
+   az account clear
+   az login -u <username> -p <password>
+   ```
+
+   ![Login](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_16_Login.png)
+
+   Now we can list the existing keyvaults.
+
+   ```cmd
+   az keyvault list
+   ```
+
+   ![Keyvaults](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_16_Keyvaults.png)
+
+   Now that we know the name we can look for existing secrets within the keyvault.
+
+   ```cmd
+   az keyvault secret list --vault-name warevillesecrets
+   ```
+
+   ![Secrets](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_16_Secrets.png)
+
+   ><details><summary>Click for answer</summary>aoc2024</details>
+
+4. What are the contents of the secret stored in the vault?
+
+   With the secret name, we can see its contents.
+
+   ```cmd
+   az keyvault secret show --vault-name warevillesecrets --name aoc2024
+   ```
+
+   ![Flag](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_16_Flag.png)
+
+   ><details><summary>Click for answer</summary>WhereIsMyMind1999</details>
+
+5. Liked today's task? Check theExploiting Active Directoryroom to practice user and group enumeration in a similar yet different environment!
 
 ## 🏁 Questions & Answers
 
 | Question | Answer |
 |---|---|
-| What is the name of the Azure Key Vault? | `aoc2024` |
-| What secret password was retrieved from the Key Vault? | `WhereIsMyMind1999` |
-| What was the admin password recovered during the earlier XXE stage? | `R3c0v3r_s3cr3ts!` |
-| What is the target secret UUID? | `7d96660a-02e1-4112-9515-1762d0cb66b7` |
+| What is the password for backupware that was leaked? | `R3c0v3r_s3cr3ts!` |
+| What is the group ID of the Secret Recovery Group? | `7d96660a-02e1-4112-9515-1762d0cb66b7` |
+| What is the name of the vault secret? | `aoc2024` |
+| What are the contents of the secret stored in the vault? | `WhereIsMyMind1999` |
+
+> **Note:** Flags are redacted as `flag{hidden}` in accordance with responsible disclosure guidelines. The step-by-step commands above provide the verified reproduction path.

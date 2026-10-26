@@ -20,7 +20,7 @@ The target environment hosts independent microservices on distinct local ports:
 
 ### AS02 — Security Misconfiguration (Port 5002)
 Triggering unhandled exceptions on `/api/user/<id>` returns internal environment variables leaking:
-`THM{V3RB0S3_3RR0R_L34K}`
+`flag{hidden}`
 
 ### AS06 — Insecure Design (Port 5005)
 The application assumes administrative or privileged capabilities are restricted exclusively to mobile clients, relying purely on the `User-Agent` HTTP header for authorization:
@@ -35,7 +35,7 @@ Bypassing the naive design restriction grants administrative access to the flag.
 
 | Task | Category | Answer / Finding |
 |---|---|---|
-| **Task 2** | AS02 - Security Misconfiguration | `THM{V3RB0S3_3RR0R_L34K}` |
+| **Task 2** | AS02 - Security Misconfiguration | `flag{hidden}` |
 | **Task 3** | AS03 - Supply Chain Failures | Outdated third-party utility dependency |
 | **Task 4** | AS04 - Cryptographic Failures | Decrypted using recovered weak cipher key |
 | **Task 5** | AS06 - Insecure Design | Bypassed mobile-only restriction via `User-Agent` spoofing |

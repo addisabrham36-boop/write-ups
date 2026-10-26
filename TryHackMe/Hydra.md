@@ -63,7 +63,7 @@ The web password for `molly` is **`sunshine`**!
 Logging into `http://<TARGET_IP>/login` with credentials `molly` : `sunshine` brings us to the user dashboard where Flag 1 is displayed:
 
 ```text
-THM{2673a7dd116de68e85c48ec0b1f2612e}
+flag{hidden}
 ```
 
 ---
@@ -96,7 +96,7 @@ Once logged in, we check the home directory:
 ```bash
 molly@hydra:~$ ls -la
 molly@hydra:~$ cat flag.txt
-THM{c8eeb0468febbadea859baeb33b2541b}
+flag{hidden}
 ```
 
 ---
@@ -106,8 +106,8 @@ THM{c8eeb0468febbadea859baeb33b2541b}
 | Task / Question | Answer |
 | :--- | :--- |
 | **What is molly's web password?** | `sunshine` |
-| **What is flag 1?** | `THM{2673a7dd116de68e85c48ec0b1f2612e}` |
+| **What is flag 1?** | `flag{hidden}` |
 | **What is molly's SSH password?** | `butterfly` |
-| **What is flag 2?** | `THM{c8eeb0468febbadea859baeb33b2541b}` |
+| **What is flag 2?** | `flag{hidden}` |
 
 ***

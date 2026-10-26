@@ -107,7 +107,7 @@ Defenders can use passive recon to inventory their external attack surface, iden
 | **Task 3** | When was the domain name tryhackme.com registered? | `20180705` |
 | **Task 3** | What is the registrar of tryhackme.com? | `NameCheap, Inc.` |
 | **Task 3** | Which company is tryhackme.com registered in? | `US` |
-| **Task 4** | What is the TXT record containing a flag value? | `THM{a5b83929833e81e3a74d727ff64fce93}` |
+| **Task 4** | What is the TXT record containing a flag value? | `flag{hidden}` |
 | **Task 5** | What is the current IP address of the target on DNSDumpster? | `217.160.0.152` |
 | **Task 6** | What is the link to the web site on Shodan? | `https://www.tryhackme.com` |
 

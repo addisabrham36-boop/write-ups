@@ -1,70 +1,71 @@
-# Advent of Cyber 2024 - Day 5: XXE
+# Advent of Cyber 2024 - Day 5: SOC-mas XX-what-ee?
 
 {% embed url="https://tryhackme.com/room/adventofcyber2024" %}
 
-SOC-mas XX-what-ee? — XML External Entity injection lets us read arbitrary server files by abusing insecure XML parsers.
+## Overview & Investigation Walkthrough
 
-## Background
+1. What is the flag discovered after navigating through the wishes?
 
-XML External Entity (XXE) injection is a class of vulnerability that affects applications parsing XML input. When an XML parser is configured to process external entity references (defined in a Document Type Definition, or DTD), an attacker can define an entity that points to a local file or a remote URL. The server dutifully fetches and inlines the referenced content into the XML response — handing the attacker the contents of sensitive files.
+   Lets begin by setting up the proxy in our browser for Burpsuite to intercept the requests. If we navigate the platform, we can see requests are being intercepted.
 
-XXE vulnerabilities exist wherever user-controlled XML is parsed: file upload features, API endpoints that accept `Content-Type: application/xml`, SOAP services, and anywhere XML-based import/export features exist. The fix is simple — disable external entity resolution in the parser — but many legacy configurations still leave it enabled.
+   ![Proxy](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_5_Proxy.png)
 
-The classic payload uses a `DOCTYPE` declaration to define an entity referencing `file:///etc/passwd` or other sensitive paths. When the XML is processed, the entity gets replaced with the file contents, which then appears in the server's response. From there, we pivot to higher-value targets like config files, SSH keys, or application secrets.
+   To modify the request, we should first make a request to add a product to our wishlist. This is then visible in the history list.
 
-## Walkthrough
+   ![Wishlist](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_5_Wishlist.png)
 
-**Step 1 — Identify the XML-processing endpoint**
+   Now we can send this request to Repeater so we can start exploiting the vulnerability.
 
-Browse the web application and locate a feature that accepts XML — typically a wishlist, product import, or file upload form. Intercept the request in Burp Suite.
+   ![Repeater](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_5_Repeater.png)
 
-**Step 2 — Intercept and inspect the request**
+   To use the vulnerability, we must add the following to the request.
 
-Enable Burp Proxy intercept, trigger the XML submission, and capture the raw request. Confirm the `Content-Type` is `application/xml` or that the body contains XML.
+   ```xml
+   <!--?xml version="1.0" ?-->
+   <!DOCTYPE foo [<!ENTITY payload SYSTEM "/var/www/html/wishes/wish_1.txt"> ]>
+   ```
 
-**Step 3 — Inject the XXE payload**
+   Remember to also add the payload within the product element, `&payload;`.
 
-Modify the XML body to include a malicious DTD entity definition:
+   ![Payloads](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_5_Payloads.png)
 
-```xml
-<?xml version="1.0"?>
-<!DOCTYPE foo [
-  <!ENTITY xxe SYSTEM "file:///etc/passwd">
-]>
-<wishlist><item>&xxe;</item></wishlist>
-```
+   ![Request 1](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_5_Request_1.png)
 
-Forward the modified request and observe the response — the server should return the contents of `/etc/passwd`.
+   As you can see we get the contents of wishlist number one.
+   
+   To find the wishlist containing the flag, we can continue modifying these requests until we fin the correct one or we can automate this using Intruder.
 
-**Step 4 — Pivot to higher-value files**
+   Lets send the request to Intruder and add a payload marker.
 
-Now that we've confirmed XXE works, read a more interesting file. Try the application's changelog or a credentials file:
+   ![Intruder](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_5_Intruder.png)
 
-```xml
-<?xml version="1.0"?>
-<!DOCTYPE foo [
-  <!ENTITY xxe SYSTEM "file:///var/www/html/CHANGELOG">
-]>
-<wishlist><item>&xxe;</item></wishlist>
-```
+   In the payloads section, we should add a number list with a start to finish of 1 and 21, with an increment of 1.
 
-The response contains the admin credentials:
+   Now we can start the attack and it will make all the requests for us. Looking through each one untill we find our flag.
 
-```
-Password: R3c0v3r_s3cr3ts!
-```
+   ![Flag 1](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_5_Flag_1.png)
 
-**Step 5 — Retrieve the secret UUID**
+   ><details><summary>Click for answer</summary>THM{Brut3f0rc1n6_mY_w4y}</details>
 
-Continue reading application-specific files to extract the secret UUID:
+2. What is the flag seen on the possible proof of sabotage?
 
-```
-7d96660a-02e1-4112-9515-1762d0cb66b7
-```
+   To fing our second flag we can navigate to the changelog file.
+
+   http://10.10.148.95/CHANGELOG
+
+   ![Flag 2](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_5_Flag_2.png)
+
+   ><details><summary>Click for answer</summary>THM{m4y0r_m4lw4r3_b4ckd00rs}</details>
+
+3. If you want to learn more about the XXE injection attack, check out theXXEroom!
+
+4. Following McSkidy's advice, Software recently hardened the server. It used to have many unneeded open ports, but not anymore. Not that this matters in any way.
 
 ## 🏁 Questions & Answers
 
 | Question | Answer |
 |---|---|
-| What is the admin password found via XXE? | `R3c0v3r_s3cr3ts!` |
-| What is the secret UUID? | `7d96660a-02e1-4112-9515-1762d0cb66b7` |
+| What is the flag discovered after navigating through the wishes? | `flag{hidden}` |
+| What is the flag seen on the possible proof of sabotage? | `flag{hidden}` |
+
+> **Note:** Flags are redacted as `flag{hidden}` in accordance with responsible disclosure guidelines. The step-by-step commands above provide the verified reproduction path.

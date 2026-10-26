@@ -31,7 +31,7 @@ Because error handling is not centrally sanitized and debug mode remains enabled
 1. The backend throws an unhandled casting exception.
 2. The complete stack trace and execution context are returned in the response.
 3. The environment variables embedded in the error disclose the hidden flag:
-   `THM{V3RB0S3_3RR0R_L34K}`
+   `flag{hidden}`
 
 ---
 
@@ -39,5 +39,5 @@ Because error handling is not centrally sanitized and debug mode remains enabled
 
 | Task | Question | Answer |
 |---|---|---|
-| **AS02** | Flag extracted from verbose error leak on port 5002 | `THM{V3RB0S3_3RR0R_L34K}` |
+| **AS02** | Flag extracted from verbose error leak on port 5002 | `flag{hidden}` |
 | **Concept** | Best defensive remediation | Disable detailed error/stack traces in production and implement centralized generic error handlers |

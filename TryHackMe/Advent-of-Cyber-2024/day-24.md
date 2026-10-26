@@ -1,40 +1,50 @@
-# Advent of Cyber 2024 - Day 24: MQTT
+# Advent of Cyber 2024 - Day 24: You can’t hurt SOC-mas, Mayor Malware!
 
 {% embed url="https://tryhackme.com/room/adventofcyber2024" %}
 
-You can't hurt SOC-mas!
+## Overview & Investigation Walkthrough
 
-## Background
+1. What is the flag?
 
-Message Queuing Telemetry Transport (MQTT) is an ISO standard publish-subscribe messaging protocol designed for resource-constrained IoT devices and low-bandwidth networks.
+   After starting the challenge.sh script, we can see various windows pop up. One of them is the interface for the lights, but nothing works sadly.
 
-MQTT relies on an intermediary broker listening on port 1883 (plain) or 8883 (TLS). Clients publish messages to topics and subscribe to topic hierarchies. Topics use `/` delimiters and wildcards (`#` for multi-level, `+` for single-level). Unauthenticated brokers allow adversaries to snoop on telemetry or publish unauthorized commands.
+   ![Light Interface](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_24_Light_Interface.png)
 
-## Walkthrough
+   Lets open the capture file in Wireshark and investigate. Since we are looking at packets related to MQTT we can add a filter on `mqtt`.
 
-**Step 1 — Subscribe to All MQTT Topics**
+   In several packets we can see a command beiing sent. However, it is encoded. 
 
-Connect to the broker and listen on all topics using `#`:
-```bash
-mosquitto_sub -h TARGET_IP -t "#" -v
-```
-Observe incoming messages on `/city/lights/status` and `/security/alarm`.
+   ![Message](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_24_Message.png)
 
-**Step 2 — Publish Override Command**
+   Lets try to decode this message to find the information we need. We can use CyberChef and decode from Bae64.
 
-Send a command message to restore the municipal lighting grid:
-```bash
-mosquitto_pub -h TARGET_IP -t "/city/lights/cmd" -m "ON"
-```
+   ![Base64](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_24_Base64.png)
 
-**Step 3 — Capture Final Event Flag**
+   Looks like this is related to the lights. If we use this as our message/topic together with the `on` command, we should be able to turn the lights back on.
 
-The broker broadcasts status confirmation containing the final Advent of Cyber flag: `THM{Ligh75on-day54ved}`.
+   ```cmd
+   mosquitto_pub -h localhost -t d2FyZXZpbGxl/Y2hyaXN0bWFzbGlnaHRz -m on
+   ```
+
+   ![Flag](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_24_Flag.png)
+
+   It worked! The lights are back on and we just got the flag for the final day in the advent of cyber!
+
+   ><details><summary>Click for answer</summary>THM{Ligh75on-day54ved}</details>
+
+2. If you enjoyed this task, feel free to check out theWiresharkmodule.
+
+### Thank you, and congratulations!
+
+1. What is the flag you get at the end of thesurvey?
+
+   ><details><summary>Click for answer</summary>THM{we_will_be_back_in_2025}</details>
 
 ## 🏁 Questions & Answers
 
 | Question | Answer |
 |---|---|
-| What default TCP port is used by unencrypted MQTT brokers? | `1883` |
-| What wildcard character subscribes to all topics in MQTT? | `#` |
-| What is the final flag retrieved after saving SOC-mas? | `THM{Ligh75on-day54ved}` |
+| What is the flag? | `flag{hidden}` |
+| If you enjoyed this task, feel free to check out theWiresharkmodule. | `flag{hidden}` |
+
+> **Note:** Flags are redacted as `flag{hidden}` in accordance with responsible disclosure guidelines. The step-by-step commands above provide the verified reproduction path.

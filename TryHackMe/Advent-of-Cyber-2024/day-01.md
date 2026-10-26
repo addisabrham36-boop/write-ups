@@ -1,49 +1,76 @@
-# Advent of Cyber 2024 - Day 1: OPSEC
+# Advent of Cyber 2024 - Day 1: Maybe SOC-mas music, he thought, doesn't come from a store?
 
 {% embed url="https://tryhackme.com/room/adventofcyber2024" %}
 
-OPSEC failures leave digital breadcrumbs — metadata, commit history, and embedded URLs can unmask even careful threat actors.
+## Overview & Investigation Walkthrough
 
-## Background
+1. Looks like the song.mp3 file is not what we expected! Run "exiftool song.mp3" in your terminal to find out the author of the song. Who is the author?Correct Answer
 
-Operational Security (OPSEC) is the process of protecting information that could be used against you. Threat actors often make mistakes that expose their identity — leaving metadata in files, committing code with personal emails, or embedding infrastructure URLs directly in their malware.
+   We can download any youtube video using its link on the website linked on the system. Either select mp3 or mp4.
 
-`exiftool` is a powerful utility for reading, writing, and editing metadata in a wide range of file types. Even a seemingly innocent MP3 downloaded from a sketchy converter site can carry embedded author info, GPS coordinates, or URL references back to C2 infrastructure.
+   ![Link](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_1_Link.png)
 
-GitHub commit history is another goldmine for investigators. Every commit carries an author name and email. Even if a threat actor later scrubs a repository, historical commits may remain indexed by search engines or cached by third-party services, exposing the operator's true identity.
+   ![Download](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_1_Download.png)
 
-## Walkthrough
+   Using `file` we can check out the files. We can see the second file `somg.mp3` is not what we would expect.
 
-**Step 1 — Investigate the suspicious YouTube-to-MP3 site**
+   ![Files](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_1_Files.png)
 
-Navigate to the site presented in the room and download the suspicious file linked there. Notice the site offers a file that's a bit too convenient — it contains embedded malware.
+   Using Exiftool we can find out the author of the song.
 
-**Step 2 — Extract metadata with exiftool**
+   ```cmd
+   exiftool song.mp3
+   ```
 
-```bash
-exiftool <downloaded-file>
-```
+   ![Artist](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_1_Artist.png)
 
-Among the output fields, look for a `URL` or custom metadata entry pointing back to attacker infrastructure:
+   ><details><summary>Click for answer</summary>Tyler Ramsbey</details>
 
-```
-URL : http://papash3ll.thm/data
-```
+2. The malicious PowerShell script sends stolen info to a C2 server. What is the URL of this C2 server?Correct AnswerHint
 
-That's the C2 URL embedded directly in the malware's metadata — a classic OPSEC failure.
+   Using exiftool on the other file we see there is a link to a powershell file on a Github page.
 
-**Step 3 — Hunt the author on GitHub**
+   ![Github Link](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_1_Github_Link.png)
 
-Search GitHub for the embedded domain or any other strings found in the file. We're looking for a repository tied to this malware. The profile that surfaces belongs to `Mayor Malware`.
+   Navigating to this link we see the malicious script. At the bottom we can find the address of the c2 server.
 
-**Step 4 — Count the commits**
+   ![Script](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_1_Script.png)
 
-Open the repository and check the commit history. There is exactly `1` commit, which also leaks the author's identity through the commit metadata.
+   ><details><summary>Click for answer</summary>http://papash3ll.thm/data</details>
+
+3. Who is M.M? Maybe his Github profile page would provide clues?Correct Answer
+
+   To find out more about M.M. we can go to the Github profile we can derive from the powershell script url. On this page we can open the M.M. repo.
+
+   ![Github Repo](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_1_Github_Repo.png)
+
+   ![Github Profile](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_1_Github_Profile.png)
+
+   Seems we have a name here!
+
+   ><details><summary>Click for answer</summary>Mayor Malware</details>
+
+4. What is the number of commits on the GitHub repo where the issue was raised?
+
+   Searching for issues on Github containing "Created by the one and only M.M." we can find another interesting clue.
+
+   ISSUES
+
+   ![Github Commits](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_1_Github_Commits.png)
+
+   ><details><summary>Click for answer</summary>6791</details>
+
+5. If you enjoyed this task, feel free to check out theOPSECroom!
+
+6. What's with all these GitHub repos? Could they hide something else?
 
 ## 🏁 Questions & Answers
 
 | Question | Answer |
 |---|---|
-| What is the C2 URL embedded in the malware metadata? | `http://papash3ll.thm/data` |
-| Who is the actor behind the malware? | `Mayor Malware` |
-| How many commits does the malicious repository have? | `1` |
+| Looks like the song.mp3 file is not what we expected! Run "exiftool song.mp3" in your terminal to find out the author of the song. Who is the author? | `Tyler Ramsbey` |
+| The malicious PowerShell script sends stolen info to a C2 server. What is the URL of this C2 server? | `http://papash3ll.thm/data` |
+| Who is M.M? Maybe his Github profile page would provide clues? | `Mayor Malware` |
+| What is the number of commits on the GitHub repo where the issue was raised? | `6791` |
+
+> **Note:** Flags are redacted as `flag{hidden}` in accordance with responsible disclosure guidelines. The step-by-step commands above provide the verified reproduction path.

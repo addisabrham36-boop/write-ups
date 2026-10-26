@@ -1,41 +1,47 @@
-# Advent of Cyber 2024 - Day 12: Race Conditions
+# Advent of Cyber 2024 - Day 12: If I can’t steal their money, I’ll steal their joy!
 
 {% embed url="https://tryhackme.com/room/adventofcyber2024" %}
 
-It's all about timing!
+## Overview & Investigation Walkthrough
 
-## Background
+1. What is the flag value after transferring over $2000 from Glitch's account?
 
-Race conditions occur when system behavior depends on the timing or sequence of uncontrollable events. In web applications, Time-of-Check to Time-of-Use (TOCTOU) flaws allow attackers to execute concurrent actions before the application updates its internal state.
+   First step is to open up our browser and Burpsuit. Then we can enable out Burpsuite proxy (Foxyproxy) to intercept the traffic in Burpsuite.
 
-HTTP/2 multiplexing allows sending multiple requests over a single TCP stream. Attackers exploit this via "Last-Byte Synchronization" (single-packet attack), ensuring concurrent requests arrive and process in the exact same millisecond window.
+   After login into the dashboard, we can see the requests in the history list.
 
-## Walkthrough
+   ![Login](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_12_Login.png)
 
-**Step 1 — Identify the Coupon Redemption Logic**
+   We can see that manually trying to transfer $2000,- doesn't work as it detect that we have insufficient funds. However, we can use race conditions with Burpsuite.
 
-Test the coupon redemption endpoint in Burp Suite:
-```http
-POST /api/redeem HTTP/2
-Host: wareville.thm
-Content-Type: application/json
+   ![Insufficient](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_12_Insufficient.png)
 
-{"coupon": "SANTA2024"}
-```
-Normal behavior allows redeeming the coupon once.
+   In Burpsuite, we can use the previously created transfer request and modify it after sending it to Repeater.
 
-**Step 2 — Prepare Parallel Requests in Burp Repeater**
+   ![Repeater](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_12_Repeater.png)
 
-Create a tab group with 20 copies of the redemption request. Configure the group to use **Send group in parallel (last-byte sync)**.
+   Duplicate these windows a couple of times using Crtl + R and group them together.
 
-**Step 3 — Execute the Race Condition Attack**
+   ![Group](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_12_Group.png)
 
-Transmit all 20 requests simultaneously. Because the database read occurs before the write locks commit, multiple redemptions succeed before the balance check trips. The application awards multiple items and prints the flag.
+   Now we can run all requests in parallel. In our browser session we can see more than our balance has been transferred.
+
+   ![Send](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_12_Send.png)
+
+   However, I did this with the tester account and should have done it with the glitch account. But the steps remain the same. Hold on while I do this again with the correct account.
+
+   ![Flag](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_12_Flag.png)
+
+   ><details><summary>Click for answer</summary>THM{WON_THE_RACE_007}</details>
+
+2. If you enjoyed this task, feel free to check out theRace Conditionsroom!
+
+3. Where balances shift and numbers soar, look for an entry - an open door!
 
 ## 🏁 Questions & Answers
 
 | Question | Answer |
 |---|---|
-| What HTTP protocol feature allows concurrent multiplexed streams? | `HTTP/2 Multiplexing` |
-| What class of flaw occurs due to Time-of-Check to Time-of-Use timing? | `Race Condition` |
-| What is the flag received after winning the race? | `THM{WON_THE_RACE_007}` |
+| What is the flag value after transferring over $2000 from Glitch's account? | `flag{hidden}` |
+
+> **Note:** Flags are redacted as `flag{hidden}` in accordance with responsible disclosure guidelines. The step-by-step commands above provide the verified reproduction path.

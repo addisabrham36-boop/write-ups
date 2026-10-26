@@ -28,7 +28,7 @@ When the template engine compiles the template, mathematical expressions like `{
    ```
    Or via simpler configuration / standard file read wrappers provided by the lab.
 4. The contents of `flag.txt` are rendered on the page:
-   `THM{SSTI_FLAG_OBTAINED}`
+   `flag{hidden}`
 
 ---
 
@@ -37,5 +37,5 @@ When the template engine compiles the template, mathematical expressions like `{
 | Task | Question | Answer |
 |---|---|---|
 | **A05** | Vulnerability type demonstrated | Server-Side Template Injection (SSTI) |
-| **A05** | Flag obtained by reading `flag.txt` | `THM{SSTI_FLAG_OBTAINED}` |
+| **A05** | Flag obtained by reading `flag.txt` | `flag{hidden}` |
 | **Remediation** | Recommended defense | Never concatenate user input directly into `render_template_string()`; use standard parameterized template rendering |

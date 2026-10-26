@@ -35,7 +35,7 @@ Comparing the standard SANS 6-step lifecycle to the NIST SP 800-61 framework:
 ## 4. Practical Timeline Exercise
 
 Completing the log timeline reconstruction simulation provides the verification flag:
-`THM{DFIR_REPORT_DONE}`
+`flag{hidden}`
 
 ---
 
@@ -45,7 +45,7 @@ Completing the log timeline reconstruction simulation provides the verification 
 |---|---|---|
 | **Task 2** | What does DFIR stand for? | `Digital Forensics and Incident Response` |
 | **Task 2** | DFIR requires expertise in Digital Forensics and what other field? | `Incident Response` |
-| **Task 3** | Flag obtained from timeline creation exercise | `THM{DFIR_REPORT_DONE}` |
+| **Task 3** | Flag obtained from timeline creation exercise | `flag{hidden}` |
 | **Task 5** | Stage where disrupted services are brought back online | `Recovery` |
 | **Task 5** | Stage where threat is evicted after forensic analysis | `Eradication` |
 | **Task 5** | NIST equivalent of SANS "Lessons learned" | `Post-incident Activity` |

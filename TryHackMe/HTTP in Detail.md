@@ -11,7 +11,7 @@ A foundational room on the HyperText Transfer Protocol (HTTP), covering requests
 - **HTTP:** HyperText Transfer Protocol.
 - **HTTPS:** HyperText Transfer Protocol Secure. The **S** stands for **Secure**, indicating encryption via TLS/SSL.
 - Looking at the mock browser in the task preview, clicking the broken certificate icon reveals the flag:
-  `THM{INVALID_HTTP_CERT}`
+  `flag{hidden}`
 
 ---
 
@@ -62,7 +62,7 @@ Host: website.thm
 ```
 
 The response returns the practical flag:
-`THM{YOU'RE_IN_THE_ROOM}`
+`flag{hidden}`
 
 ---
 
@@ -72,7 +72,7 @@ The response returns the practical flag:
 |---|---|---|
 | **Task 1** | What does HTTP stand for? | `HyperText Transfer Protocol` |
 | **Task 1** | What does the S in HTTPS stand for? | `Secure` |
-| **Task 1** | Flag from clicking the certificate issue | `THM{INVALID_HTTP_CERT}` |
+| **Task 1** | Flag from clicking the certificate issue | `flag{hidden}` |
 | **Task 2** | What HTTP protocol version is used in the example? | `HTTP/1.1` |
 | **Task 2** | Response header telling how much data to expect | `Content-Length` |
 | **Task 3** | Method used to create a new user account | `POST` |
@@ -87,4 +87,4 @@ The response returns the practical flag:
 | **Task 5** | Header telling the browser what data type is returned | `Content-Type` |
 | **Task 5** | Header telling the server which website is requested | `Host` |
 | **Task 6** | Header used to save cookies to your computer | `Set-Cookie` |
-| **Task 7** | Flag from GET request to `/room` | `THM{YOU'RE_IN_THE_ROOM}` |
+| **Task 7** | Flag from GET request to `/room` | `flag{hidden}` |

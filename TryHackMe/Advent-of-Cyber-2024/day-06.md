@@ -1,83 +1,46 @@
-# Advent of Cyber 2024 - Day 6: Malware Static Analysis
+# Advent of Cyber 2024 - Day 6: If I can't find a nice malware to use, I'm not going.
 
 {% embed url="https://tryhackme.com/room/adventofcyber2024" %}
 
-If I can't find a nice malware to use, I'll make my own — but first let's tear apart someone else's with static analysis.
+## Overview & Investigation Walkthrough
 
-## Background
+1. What is the flag displayed in the popup window after the EDR detects the malware?
 
-Static malware analysis examines a binary without executing it. This is safer than dynamic analysis (running the sample) and often reveals a surprising amount of useful intelligence: file hashes for threat intel lookups, imported API functions that hint at capabilities, embedded strings pointing to C2 infrastructure, and PE header metadata showing compilation timestamps and target architecture.
+   First we must start the EDR. We can do this with the following command:
 
-PEStudio is a popular Windows tool for static PE analysis. It parses the Portable Executable format to surface imports (DLL functions the malware uses), exports, strings, indicators (blacklisted functions, suspicious entropy), and VirusTotal results. Looking at imports like `VirtualAlloc`, `CreateRemoteThread`, and `WriteProcessMemory` immediately signals process injection capabilities.
+   ```powershell
+   .\JingleBells.ps1
+   ```
 
-YARA rules are pattern-matching signatures for malware. A YARA rule defines strings (text or hex byte sequences) and a condition combining them. Security teams write YARA rules to hunt for known malware families across file systems, memory dumps, and network captures. Understanding the binary deeply enough to write a YARA rule for it is the goal of solid static analysis.
+   No events have been found yet. So now we can run the malware now.
 
-## Walkthrough
+   After executing the malware, a pop-up window appears with the flag. The event is also displayed in the powershell terminal.
 
-**Step 1 — Hash the sample**
+   ![Flag 1](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_6_Flag_1.png)
 
-Before anything else, get the SHA256 hash for threat intelligence lookups:
+   ><details><summary>Click for answer</summary>THM{GlitchWasHere}</details>
 
-```bash
-sha256sum malware_sample
-```
+2. What is the flag found in the malstrings.txt document after running floss.exe, and opening the file in a text editor?
 
-Or in PowerShell:
+   To analyze the file we use Floss with the following command:
 
-```powershell
-Get-FileHash malware_sample -Algorithm SHA256
-```
+   ```powershell
+   .\FLOSS\floss.exe .\Malware\MerryChristmas.exe | Out-File malwarestrings.txt
+   ```
 
-Result:
+   Now we can open the resulting text file and look for the flag.
 
-```
-F29C270068F865EF4A747E2683BFA07667BF64E768B38FBB9A2750A3D879CA33
-```
+   ![Flag 2](https://raw.githubusercontent.com/Kevinovitz/TryHackMe_Writeups/main/adventofcyber2024/Advent_of_Cyber_2024_Day_6_Flag_2.png)
 
-**Step 2 — Load in PEStudio**
+   ><details><summary>Click for answer</summary>THM{HiddenClue}</details>
 
-Open the sample in PEStudio. Review:
-- **Indicators tab** — flagged suspicious characteristics
-- **Imports tab** — DLL functions imported (look for injection-related APIs)
-- **Strings tab** — embedded text, URLs, registry keys, commands
-
-**Step 3 — Review suspicious imports**
-
-Key imports to flag:
-
-| Import | Significance |
-|---|---|
-| `VirtualAlloc` | Allocate executable memory (shellcode staging) |
-| `CreateRemoteThread` | Inject code into another process |
-| `WriteProcessMemory` | Write shellcode into a target process |
-
-**Step 4 — Write a YARA rule**
-
-Create a detection rule based on distinctive strings or byte patterns found in the binary:
-
-```yara
-rule MayorMalware_Day6 {
-    meta:
-        description = "Detects AoC 2024 Day 6 malware sample"
-        sha256 = "F29C270068F865EF4A747E2683BFA07667BF64E768B38FBB9A2750A3D879CA33"
-    strings:
-        $s1 = "VirtualAlloc" ascii
-        $s2 = "CreateRemoteThread" ascii
-    condition:
-        all of them
-}
-```
-
-**Step 5 — Scan with YARA**
-
-```bash
-yara rule.yar malware_sample
-```
-
-A match confirms our rule works.
+3. If you want to more about sandboxes, have a look at the roomFlareVM: Arsenal of Tools.
 
 ## 🏁 Questions & Answers
 
 | Question | Answer |
 |---|---|
-| What is the SHA256 hash of the malware sample? | `F29C270068F865EF4A747E2683BFA07667BF64E768B38FBB9A2750A3D879CA33` |
+| What is the flag displayed in the popup window after the EDR detects the malware? | `flag{hidden}` |
+| What is the flag found in the malstrings.txt document after running floss.exe, and opening the file in a text editor? | `flag{hidden}` |
+
+> **Note:** Flags are redacted as `flag{hidden}` in accordance with responsible disclosure guidelines. The step-by-step commands above provide the verified reproduction path.

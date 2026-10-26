@@ -24,7 +24,7 @@ A **Network** is a collection of two or more computing devices connected togethe
 - **IP (Internet Protocol):** Logical address assigned to a device on a network (IPv4 consists of **4 sections** called **octets**, each ranging 0-255).
 - **MAC (Media Access Control):** Physical hardware identifier burned into the Network Interface Card (NIC).
 - **Interactive Lab:** Spoofing the network interface MAC address to access a restricted portal yields:
-  `THM{YOU_GOT_ON_TRYHACKME}`
+  `flag{hidden}`
 
 ---
 
@@ -33,7 +33,7 @@ A **Network** is a collection of two or more computing devices connected togethe
 The `ping` utility tests reachability between hosts using **ICMP** (Internet Control Message Protocol).
 - Syntax: `ping 10.10.10.10`
 - Pinging `8.8.8.8` in the simulation completes the test and returns:
-  `THM{I_PINGED_THE_SERVER}`
+  `flag{hidden}`
 
 ---
 
@@ -47,7 +47,7 @@ The `ping` utility tests reachability between hosts using **ICMP** (Internet Con
 | **Task 3** | What is each section of an IP address called? | `Octet` |
 | **Task 3** | How many sections (digits) does an IP address have? | `4` |
 | **Task 3** | What does MAC stand for? | `Media Access Control` |
-| **Task 3** | Flag from spoofing MAC address in interactive lab | `THM{YOU_GOT_ON_TRYHACKME}` |
+| **Task 3** | Flag from spoofing MAC address in interactive lab | `flag{hidden}` |
 | **Task 4** | What protocol does ping use? | `ICMP` |
 | **Task 4** | What is the syntax to ping 10.10.10.10? | `ping 10.10.10.10` |
-| **Task 4** | Flag received when you ping 8.8.8.8 | `THM{I_PINGED_THE_SERVER}` |
+| **Task 4** | Flag received when you ping 8.8.8.8 | `flag{hidden}` |

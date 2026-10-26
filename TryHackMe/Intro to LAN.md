@@ -14,7 +14,7 @@ A **Local Area Network (LAN)** connects devices within a limited physical geogra
 - **Bus Topology:** Cost-efficient to set up; single cable backbone.
 - **Star Topology:** Most common in modern networks; devices connect to a central switch. More expensive to set up and maintain due to required cabling and switching hardware.
 - **Interactive Lab:** Completing the topology simulation reveals the flag:
-  `THM{TOPOLOGY_FLAWS}`
+  `flag{hidden}`
 
 ---
 
@@ -56,7 +56,7 @@ DHCP automatically assigns IP addresses, subnet masks, gateways, and DNS servers
 | **Task 1** | Device used to centrally connect multiple devices on local network | `Switch` |
 | **Task 1** | Topology cost-efficient to set up | `Bus Topology` |
 | **Task 1** | Topology expensive to set up and maintain | `Star Topology` |
-| **Task 1** | Flag given at the end of the topology lab | `THM{TOPOLOGY_FLAWS}` |
+| **Task 1** | Flag given at the end of the topology lab | `flag{hidden}` |
 | **Task 2** | Technical term for dividing a network into smaller pieces | `Subnetting` |
 | **Task 2** | How many bits are in a subnet mask? | `32` |
 | **Task 2** | Range of an octet section in a subnet mask | `0-255` |

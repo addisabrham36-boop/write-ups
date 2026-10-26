@@ -27,7 +27,7 @@ Understanding the organization of defensive security operations: the CISO role, 
 ## 3. Practical Scenario Challenge
 
 Completing the organizational team alignment simulation returns the completion flag:
-`THM{trysecureme_is_secured!}`
+`flag{hidden}`
 
 ---
 
@@ -41,4 +41,4 @@ Completing the organizational team alignment simulation returns the completion f
 | **Task 3** | Department that handles active or urgent cyber incidents | `CIRT` |
 | **Task 4** | Name for a cybersecurity company providing outsourced SOC services | `MSSP` |
 | **Task 4** | Role that naturally continues your SOC L1 analyst journey | `SOC L2 analyst` |
-| **Task 5** | Flag claimed after completing the final challenge | `THM{trysecureme_is_secured!}` |
+| **Task 5** | Flag claimed after completing the final challenge | `flag{hidden}` |

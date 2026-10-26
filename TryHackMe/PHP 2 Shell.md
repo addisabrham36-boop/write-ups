@@ -65,4 +65,4 @@ Disabling `session.upload_progress` in `php.ini` is a partial workaround but doe
 | CVE for RCE via use-after-free | `CVE-2026-109619` |
 | What PHP feature is abused? | `session.upload_progress` |
 | Minimum patched PHP versions | `8.5.12, 8.4.27, 8.3.36, 8.2.35` |
-| Flag | Retrieved from the target after running the exploit (format `THM{...}`) |
+| Flag | Retrieved from the target after running the exploit (format `flag{hidden}`) |

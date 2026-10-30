@@ -163,13 +163,13 @@ How To Prevent It
 lets do the challenge then first do not forget to start the lab machine and the use the built in attacker machine or use linux with a try hack me open vpn, i am using a linux so after that we need to navigate to
 
 ```text
-10.80.179.108 this ip on port 5002 using a browser or terminal 
+10.80.179.108 this ip on port 5002 using a browser or terminal
 ```
 
 in this case i am using the terminal
 
 ```text
-curl <ip_addr> 
+curl <ip_addr>
 ```
 
 ```text

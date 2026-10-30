@@ -193,7 +193,7 @@ there is the file so lets open it and copy the flag
 Flag2? This flag can be found at the location where passwords are stored within Windows.
 ```
 
-i got the hint so let go there : so passwordsare stored within windows inside this path `C:\Windows\System32\config`
+i got the hint so let go there : so passwords are stored within windows inside this path `C:\Windows\System32\config`
 
 my jop it to navigate there and copy the flag:
 
@@ -215,6 +215,14 @@ and i am done , but if doing all this inside terminal is hard we can do it in be
 to do that i install a tool called `freerdp` after installing it .
 
 ❯ `xfreerdp3 /u:Jon /p:'alqfna22' /v:10.80.130.156` i use this command to connect to the server so the command will automatically open GUI version of itself to access the server:
+
+> **Technical Note — Discovering RDP (`ms-wbt-server` / Port 3389):**
+> 
+> In the initial Nmap recon scan, **Port 3389** appeared as `open` under the service name `ms-wbt-server` (Microsoft Windows Based Terminal Server). 
+> 
+> $$\text{Port 3389} \longrightarrow \text{ms-wbt-server} \longrightarrow \text{RDP (Remote Desktop Protocol)}$$
+> 
+> Once Hashcat revealed Jon's plaintext password (`alqfna22`), targeting the open Port 3389 with `xfreerdp3` allowed us to transition from a CLI session to an interactive GUI desktop environment.
 
 ![Connecting to target via RDP using xfreerdp](../images/blue/0fc065ea-6f4c-41b1-b11e-96d3b0241c89.png)
 

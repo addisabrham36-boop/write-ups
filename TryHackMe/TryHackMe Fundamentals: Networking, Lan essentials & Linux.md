@@ -1,8 +1,8 @@
 # TryHackMe Fundamentals: Networking, Lan essentials & Linux
 
-> **Author:** Abrham Addis  
-> **Topic:** Linux Fundamentals, Networking Architecture, LAN Essentials & Network Recon  
-> **Course:** INSA Cyber Security & CTC Fundamentals  
+> **Author:** Abrham Addis
+> **Topic:** Linux Fundamentals, Networking Architecture, LAN Essentials & Network Recon
+> **Course:** INSA Cyber Security & CTC Fundamentals
 
 ---
 

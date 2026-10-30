@@ -18,7 +18,13 @@ we can see there are multiple ports open and some services under them .(lets do 
 #for this question i need to do some research so follow up:
 so first i need to check the devices so when i did that i found there was a problem for microsoft-ds currently running on port 445 on the server so lets dig in ,in that case i can nmap to see if microsoft-ds is vulnerable or not an also can find what is the machine vulnerable for.... after all that i found that the device got a problem called ms17-010.
 ```
-
+> **Technical Note — Understanding `microsoft-ds` & Port 445:**
+> 
+> In networking, well-known port numbers act like standardized service extensions. Whenever an analyst sees **Port 445** mapped to `microsoft-ds` in an Nmap scan, it immediately indicates the **SMB (Server Message Block)** protocol:
+> 
+> $$\text{Port 445} \longrightarrow \text{microsoft-ds} \longrightarrow \text{SMB over TCP}$$
+> 
+> Historically, Microsoft ran legacy SMB over a **NetBIOS** wrapper on **Port 139**. Beginning with Windows 2000, Microsoft updated the architecture to run SMB natively over raw TCP via **Port 445** and registered this direct transport implementation under the official service name `microsoft-ds`.
 ![Nmap script vulnerability scan output](../images/blue/4a626378-599e-45a0-9d7b-65c5f1ef30ba.png)
 
 *   in this room i have to find out how to use that vulnerablity to my advantage so it can help for the next room(gain access).

@@ -1,4 +1,4 @@
-# Tryhackme  : python playground walkthrough 
+# Tryhackme  : python playground walkthrough
 
 as always lets start by doing recon and this ctf specially is a hard rated ctf so i am expecting a lot of works to do so stay with me :
 
@@ -6,7 +6,7 @@ as always lets start by doing recon and this ctf specially is a hard rated ctf s
 
 in this case i prefer zenmap instead of nmap if u do not know about zenmap its the same thing as nmap but with the graphical interface
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/9305dfc4-55e7-4e3c-bdd9-f175bd90feb9.png align="center")
+![Screenshot](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/9305dfc4-55e7-4e3c-bdd9-f175bd90feb9.png)
 
 based on the zenmap lets check the website and see what we can find
 
@@ -31,7 +31,7 @@ checking the website there is not much info except bragging about their website 
 
 i have checked all of them except the admin page so lets do that:
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/6068a8e7-4721-4eb5-a596-6cd57137a42d.png align="center")
+![Screenshot](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/6068a8e7-4721-4eb5-a596-6cd57137a42d.png)
 
 so in the admin page there is a login form so i was thinking using a username connor and brute force it but i checked the source code and got something.
 
@@ -45,7 +45,7 @@ window.location = 'super-secret-admin-testing-panel.html'
 
 and i run this code and get to the python playground means its python execution interface :
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/cefc727c-ce0e-4a37-baa3-a8175ddd35d8.png align="center")
+![Screenshot](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/cefc727c-ce0e-4a37-baa3-a8175ddd35d8.png)
 
 there are security filters : using ( import , os ,socket ) is blocked but every thing is good to go : to by pass import ,Calling `__import__('subprocess')` as an attribute chain, without the literal blacklisted call pattern, gets through:
 
@@ -103,19 +103,19 @@ Here are the key indicators you check to confirm it:
 ### 1\. Check the Hostname vs. Environment Artifacts
 
 *   **Container Hostnames:** Containers often have random, generic, or service-themed hostnames (like `playgroundweb`) that don't match standard naming conventions or what you'd expect on a full Linux server.
-    
+
 *   **Lack of Tools:** Basic system administration tools you'd expect to find on a full server (like `docker`, systemd utilities, or specific network interfaces) might be missing or restricted.
-    
+
 
 ### 2\. Check the Process List (`ps -ef` or `top`)
 
 *   Inside a container, you will usually see very few running processes. Often, the main application process (like a Node.js script, Python app, or Apache) is running as PID 1, completely isolated from the host's actual operating system processes.
-    
+
 
 ### 3\. Check for Container Indicators in Filesystem (`/proc/1/cgroup`)
 
 *   The definitive way to check if you are inside a Docker container is to inspect the control groups of the init process:
-    
+
 
 ```bash
 cat /proc/1/cgroup
@@ -123,17 +123,17 @@ cat /proc/1/cgroup
 ```
 
 *   If you see strings like `docker`, `kubepods`, or `lxc` in the output, it confirms you are running inside a container.
-    
+
 
 ### 4\. Inspect Mount Points (`mount` or `findmnt`)
 
 *   Running `mount` inside a container will often show a minimal set of mounts, typically an `overlay` or `aufs` root filesystem, along with any specific volumes the creator mapped in (such as our shared `/mnt/log` mount).
-    
+
 
 ### 5\. Compare Users and System Files
 
 *   As we saw earlier, checking `/etc/passwd` shows system service users, but key user accounts (like `connor`) might be completely absent from the container's files because they only exist on the host machine.
-    
+
 
 so connor has limited privilage but the container is running as root and there is a bridge to escalate privilage on connor :
 

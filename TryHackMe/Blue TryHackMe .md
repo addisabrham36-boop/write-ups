@@ -230,4 +230,25 @@ to do that i install a tool called `freerdp` after installing it .
 
 ![Viewing Jon desktop and completed flags](../images/blue/d7e1c4a0-3689-4207-90a5-d014e1cfce8c.png)
 
+## Appendix: Real-World Malware Mechanics of EternalBlue (MS17-010)
+
+To understand why the EternalBlue exploit is so dangerous, we can look at how threat actors weaponized this exact vulnerability to create automated, self-propagating global malware outbreaks.
+
+### 1. Zero-Click Propagation (No Phishing Required)
+Standard trojans and malware depend on social engineering—requiring a human victim to click a malicious link or open an email attachment. In contrast, an EternalBlue-powered network worm operates completely **zero-click**:
+
+1. The worm automatically scans local subnets (e.g., `192.168.1.0/24`) or random public IP ranges listening on **TCP Port 445** (`microsoft-ds`).
+2. When it identifies an active SMBv1 port, it transmits the specialized memory-corruption exploit payload.
+3. It triggers the kernel buffer overflow in the Windows `srv.sys` driver, executing code and installing the malware on the new victim machine in a fraction of a second—without any human interaction.
+
+### 2. Lateral Movement & Credential Harvesting
+Advanced worms like NotPetya did not rely on EternalBlue alone. Once they successfully compromised an initial host on an enterprise network:
+* They used built-in memory inspection tools (such as *Mimikatz*) to extract cached domain credentials, plaintext passwords, and NTLM hashes from memory.
+* If a neighboring computer happened to be patched against EternalBlue, the malware would pivot and use the harvested credentials to execute payloads remotely via **PsExec** or **WMI**—effectively using EternalBlue as the initial wedge to compromise an entire corporate domain.
+
+### 3. Famous Real-World Malware Built on EternalBlue
+* **WannaCry (May 2017):** Infected over 200,000 machines across 150 countries in a matter of hours. It paralyzed the UK National Health Service (NHS), forcing hospitals to divert emergency ambulances and crippling global factories.
+* **NotPetya (June 2017):** Masqueraded as ransomware but functioned as destructive **wiper malware**. It crippled global shipping giant Maersk, multinational pharmaceutical companies, and financial infrastructure, causing over $\$10$ billion in global economic damages.
+* **Retadup & TrickBot:** Utilized EternalBlue as a propagation module to stealthily spread cryptocurrency miners and banking trojans across corporate networks.
+
 ***Thank you for reading!***

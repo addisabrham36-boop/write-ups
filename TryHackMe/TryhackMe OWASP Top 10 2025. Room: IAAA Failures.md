@@ -32,9 +32,9 @@ GET /account/profile?user_id=42     → change to 43GET /files/download?name=rep
 
 when we go to the problem given the site shows the account of the user but if we change the users id on the searchbar to id= to an number b/n 1–9 we can see another users info .
 
-![image](./TryhackMe OWASP Top 10 2025. Room_ IAAA Failures _ by Abrhamaddis _ Aug, 2026 _ Medium_files/1_s-jvh4hR_W5mjTn8Eh14Cw.png)
+![Application login interface showing registration form](../images/iaaa-failures/1_s-jvh4hR_W5mjTn8Eh14Cw.png)
 
-![image](./TryhackMe OWASP Top 10 2025. Room_ IAAA Failures _ by Abrhamaddis _ Aug, 2026 _ Medium_files/1_Q4NINNPbTl9YRFugxJVuTg.png)
+![Testing registration with admin credentials](../images/iaaa-failures/1_Q4NINNPbTl9YRFugxJVuTg.png)
 
 simply as u see we can see anothers user account but we didn’t get access to more roles but can view the data of another users, this type of privilege escalation is calledHORIZONTALprivilege escalation.
 
@@ -73,11 +73,11 @@ Authentication Failures happen when an application can’t reliably verify or bi
 
 on the problem i am asked to try to break in simply by changing admin to aDmiN and register as a user and to check if i can access the system as an admin or login as an admin.
 
-![image](./TryhackMe OWASP Top 10 2025. Room_ IAAA Failures _ by Abrhamaddis _ Aug, 2026 _ Medium_files/1_GKtuwe4uJbnoBCjskb2a8g.png)
+![Admin dashboard accessible after authentication bypass](../images/iaaa-failures/1_GKtuwe4uJbnoBCjskb2a8g.png)
 
-![image](./TryhackMe OWASP Top 10 2025. Room_ IAAA Failures _ by Abrhamaddis _ Aug, 2026 _ Medium_files/1_TZjMJPIqbGj0CGSVYevH6Q.png)
+![Modifying user parameters in browser developer tools](../images/iaaa-failures/1_TZjMJPIqbGj0CGSVYevH6Q.png)
 
-![image](./TryhackMe OWASP Top 10 2025. Room_ IAAA Failures _ by Abrhamaddis _ Aug, 2026 _ Medium_files/1_86I3ChI-7N7sR7oTHkjzfA.png)
+![Session token and user role elevated to administrator](../images/iaaa-failures/1_86I3ChI-7N7sR7oTHkjzfA.png)
 
 so as displayed above i am abel to gain access on the admins account and we got the flag in this case we can send money or do what ever we want so this privilege is calledVertical privilege escalation.
 
@@ -111,11 +111,11 @@ Fix checklist:
 
 how to do the questions
 
-![image](./TryhackMe OWASP Top 10 2025. Room_ IAAA Failures _ by Abrhamaddis _ Aug, 2026 _ Medium_files/1_nh1EGs0qCTCdUMDdsS2mPA.png)
+![System audit logs showing administrative actions](../images/iaaa-failures/1_nh1EGs0qCTCdUMDdsS2mPA.png)
 
 ok on the site we got a dashboard with the log of users and we can see there is 7 suspicious activity and it got breached 2 times so we need to check how and who did it , as we scroll down we can see some failed access to login but it is normal to loose the password and they did not gain access also so its okay but we got down we can see an Unauthorized login attept from the same ip with in a minute and after 5 try it got in so we have to look how he do it right . so it looks like a brute-force-attack because we can see a login attept fast and many and the only way is to do it with brute-force and after he logged it he used GET so he stole a file under /supersecretadminstuff. at last we have his ip so our work is done here .
 
-![image](./TryhackMe OWASP Top 10 2025. Room_ IAAA Failures _ by Abrhamaddis _ Aug, 2026 _ Medium_files/1_CCkPdomJXb3h4L8XKhTmrw.png)
+![Completed tasks and flag retrieved from IAAA challenge](../images/iaaa-failures/1_CCkPdomJXb3h4L8XKhTmrw.png)
 
 ```text
 ip = 203.0.113.45/supersecretadminstuff
@@ -163,13 +163,13 @@ How To Prevent It
 lets do the challenge then first do not forget to start the lab machine and the use the built in attacker machine or use linux with a try hack me open vpn, i am using a linux so after that we need to navigate to
 
 ```text
-10.80.179.108 this ip on port 5002 using a browser or terminal 
+10.80.179.108 this ip on port 5002 using a browser or terminal
 ```
 
 in this case i am using the terminal
 
 ```text
-curl <ip_addr> 
+curl <ip_addr>
 ```
 
 ```text

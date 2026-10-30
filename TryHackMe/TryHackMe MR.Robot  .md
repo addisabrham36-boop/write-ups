@@ -10,11 +10,11 @@ as always i will start by doing recon using nmap and after that i will continue 
 nmap -T4 -A -v <target_ip>
 ```
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/dd7dbdda-3ceb-40d8-95da-e39428ce8ef6.png align="center")
+![Nmap scan showing ports 80 and 443 open](../images/mr-robot/dd7dbdda-3ceb-40d8-95da-e39428ce8ef6.png)
 
 so i got 3 open ports and 1 filtered port so in this case my option is to navigate to the website and continue my recon
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/9c28479d-1661-40c1-99ce-14b41139e5ec.png align="center")
+![Accessing robots.txt to discover key-1-of-3.txt and fsocity.dic](../images/mr-robot/9c28479d-1661-40c1-99ce-14b41139e5ec.png)
 
 i got into the website and the awebsite got the look from the movie mr robot it self and the commads just open parts of the movie except the join one , it asks for email and print we will be in touch so i still need more info so i have to continue recon:
 
@@ -22,7 +22,7 @@ i got into the website and the awebsite got the look from the movie mr robot it 
 
 *   inthis case i got nothing till no so i have to do gobuster and see if there is an unknown directory or a hidden directory that can be still accessed :
     
-    ![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/f5d5362f-195a-4ce5-8afe-1a4a7c620216.png align="center")
+    ![First key retrieved from key-1-of-3.txt](../images/mr-robot/f5d5362f-195a-4ce5-8afe-1a4a7c620216.png)
     
 
 from the scan we can see there are ways to get in like robots.txt and wp-login are open so i will try robots.txt for the wp-login i have to try brute force to get access to the word press:
@@ -34,22 +34,22 @@ from the scan we can see there are ways to get in like robots.txt and wp-login a
 
 but in this case wwe can see it so lets check what is under robots.txt
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/1f800947-2eaa-4dc0-a6d0-f2c1830a487d.png align="center")
+![WordPress login page discovered](../images/mr-robot/1f800947-2eaa-4dc0-a6d0-f2c1830a487d.png)
 
 i found 2 files one is a dictionary and the other is the first key.
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/96bf799b-b380-4a75-beae-e4e6740c0204.png align="center")
+![Username enumeration confirming user elliot](../images/mr-robot/96bf799b-b380-4a75-beae-e4e6740c0204.png)
 
 *   the dictionary must be for the brute force attack for the wp-login page but before that i have to check every open directory if i can find something :
     
 
 i go through every one of those but nothing was there but when i got to the /license there is some txt:
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/0979d791-9766-4759-b900-537ac32ab807.png align="center")
+![Sorting and deduplicating fsocity.dic wordlist](../images/mr-robot/0979d791-9766-4759-b900-537ac32ab807.png)
 
 and when i scroll down there are another 2 txts so one of them looks like base 64 so lets check that:
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/6f12c28e-0c1f-46cd-b7de-830aadc95582.png align="center")
+![Brute-forcing WordPress login with Hydra](../images/mr-robot/6f12c28e-0c1f-46cd-b7de-830aadc95582.png)
 
 ```shell
 ❯ echo "ZWxsaW90OkVSMjgtMDY1Mgo=" | base64 -d
@@ -58,7 +58,7 @@ elliot:ER28-0652
 
 its on the form of user name and password so lets try that inside the word press login page:
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/29789a72-f77c-44bb-97c7-41f630437d4b.png align="center")
+![WordPress admin dashboard accessed](../images/mr-robot/29789a72-f77c-44bb-97c7-41f630437d4b.png)
 
 ```shell
 username = elliot 
@@ -67,7 +67,7 @@ password = ER28-0652
 
 and that is the password i got it with out doing no brute force :
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/844d70ad-12c0-4551-b57c-a5420dc0f2da.png align="center")
+![Editing 404.php template to insert PHP reverse shell](../images/mr-robot/844d70ad-12c0-4551-b57c-a5420dc0f2da.png)
 
 so i logged as an adminstrator inside wp press so we can add plugins and upload files so we can use that to overwrite the existed php file to a php reverse shell
 
@@ -78,15 +78,15 @@ so i logged as an adminstrator inside wp press so we can add plugins and upload 
 
 so lets do that :
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/8f2e86c6-3f75-4b16-aaac-16d3f378e6d7.png align="center")
+![Setting up Netcat listener on port 4444](../images/mr-robot/8f2e86c6-3f75-4b16-aaac-16d3f378e6d7.png)
 
 we can download a php reverse shell from git hub and change the existed one and press upload file :
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/77e364cc-bc95-4b82-b3a5-0c73297f56d4.png align="center")
+![Reverse shell caught as daemon user](../images/mr-robot/77e364cc-bc95-4b82-b3a5-0c73297f56d4.png)
 
 after that i will use netcat to listen to incoming connection through the given port (4444).
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/2825d2d4-53da-44d5-8d3b-cd4936b69174.png align="center")
+![Finding password hash in /home/robot](../images/mr-robot/2825d2d4-53da-44d5-8d3b-cd4936b69174.png)
 
 while doing that we cave to activate the template to be excute so that we can get the reverse shell (trigger the shell)
 
@@ -94,7 +94,7 @@ while doing that we cave to activate the template to be excute so that we can ge
 curl http://10.80.186.236/wp-content/themes/twentyfifteen/404.php
 ```
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/5ab55983-0526-4032-8889-95ee7223f737.png align="center")
+![Cracking MD5 hash with John the Ripper to obtain robot password](../images/mr-robot/5ab55983-0526-4032-8889-95ee7223f737.png)
 
 and i got reverse shell access from here i have to check every thing :
 
@@ -217,7 +217,7 @@ cat /home/robot/key-2-of-3.txt
 
 from this on i will check GTFObins and see what can i find
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/4d3fcfa0-405e-4dd1-be78-407ec059424d.png align="center")
+![Root privilege escalation via SUID nmap interactive mode](../images/mr-robot/4d3fcfa0-405e-4dd1-be78-407ec059424d.png)
 
 *   **Type:** Local privilege escalation via misconfiguration (not a CVE — GTFOBins-documented technique)
     

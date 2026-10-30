@@ -82,7 +82,7 @@ solution:
 *   In Burp's browser, log in to the application using the credentials `wiener:peter` and update your email address. or just login using the browser .
     
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/769576fe-41ff-449f-af77-e22538f22507.png align="center")
+![Lab 1 - Finding API documentation in browser developer tools](../images/api-test/769576fe-41ff-449f-af77-e22538f22507.png)
 
 *   In **Proxy > HTTP history**, right-click the `PATCH /api/user/wiener` request and select **Send to Repeater**.
     
@@ -100,13 +100,13 @@ solution:
 *   To delete Carlos and solve the lab, click on the `DELETE` row, enter `carlos`, then click **Send request**. on the pic i already deleted the user carlos thats why its unauthorized.
     
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/22fd8aaa-513c-4cd0-8982-6f133ca2b157.png align="center")
+![Lab 1 - Sending DELETE request to delete Carlos](../images/api-test/22fd8aaa-513c-4cd0-8982-6f133ca2b157.png)
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/f827bba8-f5cb-4884-93f4-2bc010fc45d8.png align="center")
+![Lab 1 - Lab solved confirmation](../images/api-test/f827bba8-f5cb-4884-93f4-2bc010fc45d8.png)
 
 or can do it on burp too
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/ea794108-e435-4021-a859-66908b001c99.png align="center")
+![Lab 1 - Deleting user via Burp Suite](../images/api-test/ea794108-e435-4021-a859-66908b001c99.png)
 
 ### **Identifying API endpoints:**
 
@@ -160,19 +160,19 @@ solution:
 *   In **Proxy > HTTP history**, notice the API request for the product. For example, `/api/products/3/price`.
     
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/def783f9-0eb2-451c-aa0b-c058addc1990.png align="center")
+![Lab 2 - Inspecting HTTP history for price change request](../images/api-test/def783f9-0eb2-451c-aa0b-c058addc1990.png)
 
 *   Right-click the API request and select **Send to Repeater**.
     
 *   In the **Repeater** tab, change the HTTP method for the API request from `GET` to `OPTIONS`, then send the request. Notice that the response specifies that the `GET` and `PATCH` methods are allowed.
     
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/48d6f5a6-b593-4b01-b052-f072f55f97a8.png align="center")
+![Lab 2 - Changing HTTP method in Repeater](../images/api-test/48d6f5a6-b593-4b01-b052-f072f55f97a8.png)
 
 *   Change the method for the API request from `GET` to `PATCH`, then send the request. Notice that you receive an `Unauthorized` message. This may indicate that you need to be authenticated to update the order.
     
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/c59ade4e-25fd-4b9e-b5c0-bcfc81ac74a2.png align="center")
+![Lab 2 - Changing method to PATCH and modifying price](../images/api-test/c59ade4e-25fd-4b9e-b5c0-bcfc81ac74a2.png)
 
 *   In Burp's browser, log in to the application using the credentials `wiener:peter`.
     
@@ -284,7 +284,7 @@ solution:
 1.  In Burp's browser, log in to the application using the credentials `wiener:peter`.
     
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/8582f8f5-a7d1-4de0-bf30-cdd43795e0df.png align="center")
+![Lab 3 - Viewing cart and checkout request in HTTP history](../images/api-test/8582f8f5-a7d1-4de0-bf30-cdd43795e0df.png)
 
 1.  Click on the **Lightweight "l33t" Leather Jacket** product and add it to your basket.
     
@@ -293,12 +293,12 @@ solution:
 3.  In **Proxy > HTTP history**, notice both the `GET` and `POST` API requests for `/api/checkout`.
     
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/7e0253b7-1ec3-4ae5-b3da-b6b264c06267.png align="center")
+![Lab 3 - Finding discount percentage in GET response](../images/api-test/7e0253b7-1ec3-4ae5-b3da-b6b264c06267.png)
 
 1.  Notice that the response to the `GET` request contains the same JSON structure as the `POST` request. Observe that the JSON structure in the `GET` response includes a `chosen_discount` parameter, which is not present in the `POST` request.
     
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/2266f23f-9bb1-4fbc-883d-0f80e46b9fac.png align="center")
+![Lab 3 - Checkout API response showing applied discount](../images/api-test/2266f23f-9bb1-4fbc-883d-0f80e46b9fac.png)
 
 1.  Right-click the `POST /api/checkout` request and select **Send to Repeater**.
     
@@ -324,17 +324,17 @@ solution:
 2.  Change the `chosen_discount` value to the string `"x"`, then send the request. Observe that this results in an error message as the parameter value isn't a number. This may indicate that the user input is being processed.
     
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/8af0cde5-4ade-4944-acd3-15dc79f51dc2.png align="center")
+![Lab 3 - Error response with invalid discount format](../images/api-test/8af0cde5-4ade-4944-acd3-15dc79f51dc2.png)
 
 1.  Change the `chosen_discount` percentage to `100`, then send the request to solve the lab.
     
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/da6326ff-9b52-4086-b993-a6b4e28f6470.png align="center")
+![Lab 3 - Applying 100 percent discount to checkout](../images/api-test/da6326ff-9b52-4086-b993-a6b4e28f6470.png)
 
 so that how i did this labs
 
-![]( align="center")
+<!-- Image could not be recovered: empty reference in original writeup -->
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/ff694be0-a58d-4409-84e0-14ec3ec1613d.png align="center")
+![Lab 3 - Purchase completed and lab solved](../images/api-test/ff694be0-a58d-4409-84e0-14ec3ec1613d.png)
 
 ***Thank you for reading!***

@@ -6,7 +6,7 @@ as always lets start by doing recon and this ctf specially is a hard rated ctf s
 
 in this case i prefer zenmap instead of nmap if u do not know about zenmap its the same thing as nmap but with the graphical interface
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/9305dfc4-55e7-4e3c-bdd9-f175bd90feb9.png align="center")
+![Zenmap scan results showing web application on port 80](../images/python-playground/9305dfc4-55e7-4e3c-bdd9-f175bd90feb9.png)
 
 based on the zenmap lets check the website and see what we can find
 
@@ -31,7 +31,7 @@ checking the website there is not much info except bragging about their website 
 
 i have checked all of them except the admin page so lets do that:
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/6068a8e7-4721-4eb5-a596-6cd57137a42d.png align="center")
+![Admin login interface on Python Playground](../images/python-playground/6068a8e7-4721-4eb5-a596-6cd57137a42d.png)
 
 so in the admin page there is a login form so i was thinking using a username connor and brute force it but i checked the source code and got something.
 
@@ -45,7 +45,7 @@ window.location = 'super-secret-admin-testing-panel.html'
 
 and i run this code and get to the python playground means its python execution interface :
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/cefc727c-ce0e-4a37-baa3-a8175ddd35d8.png align="center")
+![Executing Python code in web evaluator to test execution](../images/python-playground/cefc727c-ce0e-4a37-baa3-a8175ddd35d8.png)
 
 there are security filters : using ( import , os ,socket ) is blocked but every thing is good to go : to by pass import ,Calling `__import__('subprocess')` as an attribute chain, without the literal blacklisted call pattern, gets through:
 

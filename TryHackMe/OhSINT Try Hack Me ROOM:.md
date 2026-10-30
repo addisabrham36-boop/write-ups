@@ -11,7 +11,7 @@ so if we know this much about osint lets start with the room
 *   so before we start the questions lets start with accessing the meta data of the picture
     
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/91afd2dc-a3be-417c-ab74-959a298d8023.jpg align="center")
+![WindowsXP challenge image downloaded from TryHackMe](../images/ohsint/91afd2dc-a3be-417c-ab74-959a298d8023.jpg)
 
 this is the given picture or shared by the user we are trying to find so to find the meta data we can use the attack box terminal
 
@@ -22,7 +22,7 @@ this is the given picture or shared by the user we are trying to find so to find
 exiftool /root/Rooms/OhSINT/WindowsXP.jpg
 ```
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/f716fc14-a9dd-4150-bf20-40922c0e470e.png align="center")
+![Exiftool output showing copyright and author OWoodflint](../images/ohsint/f716fc14-a9dd-4150-bf20-40922c0e470e.png)
 
 the out put for the command is this and this is also the meta data of the pic so we can continue :
 
@@ -31,15 +31,15 @@ the first question is : ***What is this user's avatar of?***
 *   the first step is to find who is the owner of this file and we can see a name under the copyright so lets get than name and start the search, we can easly start by searching the name\*\*(OWoodflint)\*\* on google
     
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/c032ccde-f3c7-4ca5-b0c7-c34616e67f34.png align="center")
+![Google search results for OWoodflint](../images/ohsint/c032ccde-f3c7-4ca5-b0c7-c34616e67f34.png)
 
 good we got 2 links connected to the name so lets explore them one by one
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/9a970693-c937-4c7e-a321-4602a3841b66.png align="center")
+![Social media and profile links found for OWoodflint](../images/ohsint/9a970693-c937-4c7e-a321-4602a3841b66.png)
 
 on the first link i find his x account and there is some infos but for now we can see that the avatar is a cat lets see the second one
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/23cad4f2-3428-4525-8bf0-a343f7a6202f.png align="center")
+![Twitter profile for Oliver Woodflint](../images/ohsint/23cad4f2-3428-4525-8bf0-a343f7a6202f.png)
 
 this one is his github account and the avatar is random so the answer for the first one will be ***"cat"***
 
@@ -59,11 +59,11 @@ Once you’re set, enter the BSSID you found into the **BSSID** search parameter
 
 Press enter or click to view image in full size
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/d653aca5-1bbe-4beb-8d94-0b5b65f7d23c.png align="center")
+![Wiggle Wi-Fi map search for BSSID](../images/ohsint/d653aca5-1bbe-4beb-8d94-0b5b65f7d23c.png)
 
 Simply follow the ring, zooming in step by step, until you reach street level, where the SSID ***"(UnileverWiFi)"*** will be visible uncovering the answer of the third question.
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/18b3a8f7-b1d1-4063-b8a0-acd7e579f7fa.png align="center")
+![Zooming in on location in London](../images/ohsint/18b3a8f7-b1d1-4063-b8a0-acd7e579f7fa.png)
 
 ***4th question :What is his personal email address?***
 
@@ -79,7 +79,7 @@ i find his email on github page the answer is **"GitHub"**
 
 in this we have to scan every thing we can find for that lets use the wordpress link he left on the github to see if we can find any thing
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/c35bdeab-63fe-4ba7-98c9-d9362bd7453b.png align="center")
+![GitHub profile of OWoodflint with email address](../images/ohsint/c35bdeab-63fe-4ba7-98c9-d9362bd7453b.png)
 
 so he is in ***"new york"*** for holiday
 
@@ -88,7 +88,7 @@ so he is in ***"new york"*** for holiday
 *   in this case i can not find it by just scrolling around we have to dig dipper like i try every way to find the password by just scrolling through his social media account but there is nothing the only thing left is looking inside his wordpress source code so lets do that
     
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/e54e24a4-3441-43e6-bfff-306555d81277.png align="center")
+![Blog site source code revealing hidden flag and password](../images/ohsint/e54e24a4-3441-43e6-bfff-306555d81277.png)
 
 and after a lot of time scrolling through the source code i did find something that look suspicies and its not visible on the website it self its only on the source code so lets check that and yes it is the password ***"pennYDr0pper.!"***
 

@@ -13,7 +13,7 @@ in this room i will try to do my first black box ctf and show you the process in
 nmap -sV -T4 10.82.186.120
 ```
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/d3cd927e-f951-42b2-93c2-b021fe3839d5.png align="center")
+![Nmap scan showing open ports 22, 6048, and 8000](../images/airplane/d3cd927e-f951-42b2-93c2-b021fe3839d5.png)
 
 *   to be sure and not to misss an open port i did another advanced nmap scan :
     
@@ -22,7 +22,7 @@ nmap -sV -T4 10.82.186.120
 nmap -sV -sC -p- -T4 10.82.186.120
 ```
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/aea39458-94d0-48c0-bddd-ff26cf459030.png align="center")
+![Web application running on port 8000](../images/airplane/aea39458-94d0-48c0-bddd-ff26cf459030.png)
 
 open ports :
 
@@ -58,15 +58,15 @@ what is LFI?
 
 but first before taking the long way lets take a look the website and also lets use gobuster if i can find a hidden directory :
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/ee9c27aa-972d-41c9-b09a-79983da19ca4.png align="center")
+![Testing LFI on page parameter via Burp Suite](../images/airplane/ee9c27aa-972d-41c9-b09a-79983da19ca4.png)
 
 this is the website the ip get us :
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/26f3a0eb-c680-40ff-9083-232a7a553c54.png align="center")
+![Fuzzing process IDs in /proc to identify services](../images/airplane/26f3a0eb-c680-40ff-9083-232a7a553c54.png)
 
 there is one hidden directory called `airplane` so lets check that first
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/0af330f7-32c3-4694-873e-ae8160c48760.png align="center")
+![Finding gdbserver running on port 6048](../images/airplane/0af330f7-32c3-4694-873e-ae8160c48760.png)
 
 in this case there is nothing only a flothing note that says LETS FLY , so we have to go the long way and use LFI:
 
@@ -110,7 +110,7 @@ ffuf -w pids.txt -u "http://airplane.thm:8000/?page=../../../../proc/FUZZ/cmdlin
 
 in this case i get every on services
 
-![](https://cdn.hashnode.com/uploads/covers/6a77779d4416d3eea9accad0/5bc98084-813c-40d6-9a35-6b5ad0fbbd68.png align="center")
+![Reverse shell payload generated with msfvenom](../images/airplane/5bc98084-813c-40d6-9a35-6b5ad0fbbd68.png)
 
 there are a lot of like dosens of pids so i need to specify where the 6048 is running from so i will use another command:
 

@@ -1,0 +1,666 @@
+{
+  "total_images_referenced": 94,
+  "total_images_recovered": 93,
+  "total_images_unrecovered": 1,
+  "images": [
+    {
+      "room_folder": "airplane",
+      "filename": "0af330f7-32c3-4694-873e-ae8160c48760.png",
+      "local_path": "images/airplane/0af330f7-32c3-4694-873e-ae8160c48760.png",
+      "size_bytes": 172490,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "airplane",
+      "filename": "26f3a0eb-c680-40ff-9083-232a7a553c54.png",
+      "local_path": "images/airplane/26f3a0eb-c680-40ff-9083-232a7a553c54.png",
+      "size_bytes": 56157,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "airplane",
+      "filename": "5bc98084-813c-40d6-9a35-6b5ad0fbbd68.png",
+      "local_path": "images/airplane/5bc98084-813c-40d6-9a35-6b5ad0fbbd68.png",
+      "size_bytes": 198930,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "airplane",
+      "filename": "aea39458-94d0-48c0-bddd-ff26cf459030.png",
+      "local_path": "images/airplane/aea39458-94d0-48c0-bddd-ff26cf459030.png",
+      "size_bytes": 146513,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "airplane",
+      "filename": "d3cd927e-f951-42b2-93c2-b021fe3839d5.png",
+      "local_path": "images/airplane/d3cd927e-f951-42b2-93c2-b021fe3839d5.png",
+      "size_bytes": 338651,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "airplane",
+      "filename": "ee9c27aa-972d-41c9-b09a-79983da19ca4.png",
+      "local_path": "images/airplane/ee9c27aa-972d-41c9-b09a-79983da19ca4.png",
+      "size_bytes": 1124983,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "api-test",
+      "filename": "2266f23f-9bb1-4fbc-883d-0f80e46b9fac.png",
+      "local_path": "images/api-test/2266f23f-9bb1-4fbc-883d-0f80e46b9fac.png",
+      "size_bytes": 161427,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "api-test",
+      "filename": "22fd8aaa-513c-4cd0-8982-6f133ca2b157.png",
+      "local_path": "images/api-test/22fd8aaa-513c-4cd0-8982-6f133ca2b157.png",
+      "size_bytes": 139090,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "api-test",
+      "filename": "48d6f5a6-b593-4b01-b052-f072f55f97a8.png",
+      "local_path": "images/api-test/48d6f5a6-b593-4b01-b052-f072f55f97a8.png",
+      "size_bytes": 142321,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "api-test",
+      "filename": "769576fe-41ff-449f-af77-e22538f22507.png",
+      "local_path": "images/api-test/769576fe-41ff-449f-af77-e22538f22507.png",
+      "size_bytes": 8912,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "api-test",
+      "filename": "7e0253b7-1ec3-4ae5-b3da-b6b264c06267.png",
+      "local_path": "images/api-test/7e0253b7-1ec3-4ae5-b3da-b6b264c06267.png",
+      "size_bytes": 199571,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "api-test",
+      "filename": "8582f8f5-a7d1-4de0-bf30-cdd43795e0df.png",
+      "local_path": "images/api-test/8582f8f5-a7d1-4de0-bf30-cdd43795e0df.png",
+      "size_bytes": 8876,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "api-test",
+      "filename": "8af0cde5-4ade-4944-acd3-15dc79f51dc2.png",
+      "local_path": "images/api-test/8af0cde5-4ade-4944-acd3-15dc79f51dc2.png",
+      "size_bytes": 111837,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "api-test",
+      "filename": "c59ade4e-25fd-4b9e-b5c0-bcfc81ac74a2.png",
+      "local_path": "images/api-test/c59ade4e-25fd-4b9e-b5c0-bcfc81ac74a2.png",
+      "size_bytes": 145254,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "api-test",
+      "filename": "da6326ff-9b52-4086-b993-a6b4e28f6470.png",
+      "local_path": "images/api-test/da6326ff-9b52-4086-b993-a6b4e28f6470.png",
+      "size_bytes": 111955,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "api-test",
+      "filename": "def783f9-0eb2-451c-aa0b-c058addc1990.png",
+      "local_path": "images/api-test/def783f9-0eb2-451c-aa0b-c058addc1990.png",
+      "size_bytes": 152931,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "api-test",
+      "filename": "ea794108-e435-4021-a859-66908b001c99.png",
+      "local_path": "images/api-test/ea794108-e435-4021-a859-66908b001c99.png",
+      "size_bytes": 105505,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "api-test",
+      "filename": "f827bba8-f5cb-4884-93f4-2bc010fc45d8.png",
+      "local_path": "images/api-test/f827bba8-f5cb-4884-93f4-2bc010fc45d8.png",
+      "size_bytes": 67900,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "api-test",
+      "filename": "ff694be0-a58d-4409-84e0-14ec3ec1613d.png",
+      "local_path": "images/api-test/ff694be0-a58d-4409-84e0-14ec3ec1613d.png",
+      "size_bytes": 59964,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "01b42535-e17a-4070-baee-10f042a493dc.png",
+      "local_path": "images/blue/01b42535-e17a-4070-baee-10f042a493dc.png",
+      "size_bytes": 17807,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "0537962f-8ece-499b-82b2-1a4808ec2e19.png",
+      "local_path": "images/blue/0537962f-8ece-499b-82b2-1a4808ec2e19.png",
+      "size_bytes": 55036,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "0fc065ea-6f4c-41b1-b11e-96d3b0241c89.png",
+      "local_path": "images/blue/0fc065ea-6f4c-41b1-b11e-96d3b0241c89.png",
+      "size_bytes": 713583,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "223d43bc-1060-4a49-9ecb-ebd7e562aff6.png",
+      "local_path": "images/blue/223d43bc-1060-4a49-9ecb-ebd7e562aff6.png",
+      "size_bytes": 276124,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "2fa89bcb-3e39-4285-bba3-de84bbe13d13.png",
+      "local_path": "images/blue/2fa89bcb-3e39-4285-bba3-de84bbe13d13.png",
+      "size_bytes": 63558,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "4a626378-599e-45a0-9d7b-65c5f1ef30ba.png",
+      "local_path": "images/blue/4a626378-599e-45a0-9d7b-65c5f1ef30ba.png",
+      "size_bytes": 170827,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "5239ee26-d4df-44ed-8d60-ab860196c450.png",
+      "local_path": "images/blue/5239ee26-d4df-44ed-8d60-ab860196c450.png",
+      "size_bytes": 278252,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "56a27a44-691d-4c67-a821-b252473c7dc1.png",
+      "local_path": "images/blue/56a27a44-691d-4c67-a821-b252473c7dc1.png",
+      "size_bytes": 274081,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "575b6be3-343a-4c8c-9606-51c2c83b3d62.png",
+      "local_path": "images/blue/575b6be3-343a-4c8c-9606-51c2c83b3d62.png",
+      "size_bytes": 718442,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "5dde2a90-4389-42c1-992f-5d62106ce3ea.png",
+      "local_path": "images/blue/5dde2a90-4389-42c1-992f-5d62106ce3ea.png",
+      "size_bytes": 95302,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "765d2274-f505-46f6-8f37-6bba5b8f2645.png",
+      "local_path": "images/blue/765d2274-f505-46f6-8f37-6bba5b8f2645.png",
+      "size_bytes": 13897,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "7da6c23e-c270-4c6a-9844-62333147da87.png",
+      "local_path": "images/blue/7da6c23e-c270-4c6a-9844-62333147da87.png",
+      "size_bytes": 61488,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "89093021-e84f-4493-94ed-63d5536c0bc4.png",
+      "local_path": "images/blue/89093021-e84f-4493-94ed-63d5536c0bc4.png",
+      "size_bytes": 128492,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "9b1de10a-4960-4604-8b6c-a44a617614ff.png",
+      "local_path": "images/blue/9b1de10a-4960-4604-8b6c-a44a617614ff.png",
+      "size_bytes": 39050,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "9d7fe38c-cf55-4c71-8542-fd8b12c6f237.png",
+      "local_path": "images/blue/9d7fe38c-cf55-4c71-8542-fd8b12c6f237.png",
+      "size_bytes": 11382,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "a7449d34-1424-44bd-bcd3-0daaf0fc6bd3.png",
+      "local_path": "images/blue/a7449d34-1424-44bd-bcd3-0daaf0fc6bd3.png",
+      "size_bytes": 28722,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "a9fa1501-2f34-424f-93fb-f1b00f15a16e.png",
+      "local_path": "images/blue/a9fa1501-2f34-424f-93fb-f1b00f15a16e.png",
+      "size_bytes": 100270,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "c59954c2-96e2-4ac3-86a5-27d2337e43f3.png",
+      "local_path": "images/blue/c59954c2-96e2-4ac3-86a5-27d2337e43f3.png",
+      "size_bytes": 4547,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "d58a43f0-8cbc-4b73-a664-f675798d9a99.png",
+      "local_path": "images/blue/d58a43f0-8cbc-4b73-a664-f675798d9a99.png",
+      "size_bytes": 109118,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "d7e1c4a0-3689-4207-90a5-d014e1cfce8c.png",
+      "local_path": "images/blue/d7e1c4a0-3689-4207-90a5-d014e1cfce8c.png",
+      "size_bytes": 731449,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "dcb798f5-c038-4ab5-a1a7-6f9355be78f1.png",
+      "local_path": "images/blue/dcb798f5-c038-4ab5-a1a7-6f9355be78f1.png",
+      "size_bytes": 164668,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "blue",
+      "filename": "ee3a88ac-be0d-4bde-b086-8790e09118a5.png",
+      "local_path": "images/blue/ee3a88ac-be0d-4bde-b086-8790e09118a5.png",
+      "size_bytes": 142044,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "iaaa-failures",
+      "filename": "1_86I3ChI-7N7sR7oTHkjzfA.png",
+      "local_path": "images/iaaa-failures/1_86I3ChI-7N7sR7oTHkjzfA.png",
+      "size_bytes": 21163,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "iaaa-failures",
+      "filename": "1_CCkPdomJXb3h4L8XKhTmrw.png",
+      "local_path": "images/iaaa-failures/1_CCkPdomJXb3h4L8XKhTmrw.png",
+      "size_bytes": 190519,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "iaaa-failures",
+      "filename": "1_GKtuwe4uJbnoBCjskb2a8g.png",
+      "local_path": "images/iaaa-failures/1_GKtuwe4uJbnoBCjskb2a8g.png",
+      "size_bytes": 19010,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "iaaa-failures",
+      "filename": "1_Q4NINNPbTl9YRFugxJVuTg.png",
+      "local_path": "images/iaaa-failures/1_Q4NINNPbTl9YRFugxJVuTg.png",
+      "size_bytes": 48316,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "iaaa-failures",
+      "filename": "1_TZjMJPIqbGj0CGSVYevH6Q.png",
+      "local_path": "images/iaaa-failures/1_TZjMJPIqbGj0CGSVYevH6Q.png",
+      "size_bytes": 17947,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "iaaa-failures",
+      "filename": "1_nh1EGs0qCTCdUMDdsS2mPA.png",
+      "local_path": "images/iaaa-failures/1_nh1EGs0qCTCdUMDdsS2mPA.png",
+      "size_bytes": 139801,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "iaaa-failures",
+      "filename": "1_s-jvh4hR_W5mjTn8Eh14Cw.png",
+      "local_path": "images/iaaa-failures/1_s-jvh4hR_W5mjTn8Eh14Cw.png",
+      "size_bytes": 21836,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "mr-robot",
+      "filename": "0979d791-9766-4759-b900-537ac32ab807.png",
+      "local_path": "images/mr-robot/0979d791-9766-4759-b900-537ac32ab807.png",
+      "size_bytes": 10632,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "mr-robot",
+      "filename": "1f800947-2eaa-4dc0-a6d0-f2c1830a487d.png",
+      "local_path": "images/mr-robot/1f800947-2eaa-4dc0-a6d0-f2c1830a487d.png",
+      "size_bytes": 100704,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "mr-robot",
+      "filename": "2825d2d4-53da-44d5-8d3b-cd4936b69174.png",
+      "local_path": "images/mr-robot/2825d2d4-53da-44d5-8d3b-cd4936b69174.png",
+      "size_bytes": 445442,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "mr-robot",
+      "filename": "29789a72-f77c-44bb-97c7-41f630437d4b.png",
+      "local_path": "images/mr-robot/29789a72-f77c-44bb-97c7-41f630437d4b.png",
+      "size_bytes": 23856,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "mr-robot",
+      "filename": "4d3fcfa0-405e-4dd1-be78-407ec059424d.png",
+      "local_path": "images/mr-robot/4d3fcfa0-405e-4dd1-be78-407ec059424d.png",
+      "size_bytes": 243495,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "mr-robot",
+      "filename": "5ab55983-0526-4032-8889-95ee7223f737.png",
+      "local_path": "images/mr-robot/5ab55983-0526-4032-8889-95ee7223f737.png",
+      "size_bytes": 167166,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "mr-robot",
+      "filename": "6f12c28e-0c1f-46cd-b7de-830aadc95582.png",
+      "local_path": "images/mr-robot/6f12c28e-0c1f-46cd-b7de-830aadc95582.png",
+      "size_bytes": 115959,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "mr-robot",
+      "filename": "77e364cc-bc95-4b82-b3a5-0c73297f56d4.png",
+      "local_path": "images/mr-robot/77e364cc-bc95-4b82-b3a5-0c73297f56d4.png",
+      "size_bytes": 199636,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "mr-robot",
+      "filename": "844d70ad-12c0-4551-b57c-a5420dc0f2da.png",
+      "local_path": "images/mr-robot/844d70ad-12c0-4551-b57c-a5420dc0f2da.png",
+      "size_bytes": 137193,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "mr-robot",
+      "filename": "8f2e86c6-3f75-4b16-aaac-16d3f378e6d7.png",
+      "local_path": "images/mr-robot/8f2e86c6-3f75-4b16-aaac-16d3f378e6d7.png",
+      "size_bytes": 228265,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "mr-robot",
+      "filename": "96bf799b-b380-4a75-beae-e4e6740c0204.png",
+      "local_path": "images/mr-robot/96bf799b-b380-4a75-beae-e4e6740c0204.png",
+      "size_bytes": 14461,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "mr-robot",
+      "filename": "9c28479d-1661-40c1-99ce-14b41139e5ec.png",
+      "local_path": "images/mr-robot/9c28479d-1661-40c1-99ce-14b41139e5ec.png",
+      "size_bytes": 195554,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "mr-robot",
+      "filename": "dd7dbdda-3ceb-40d8-95da-e39428ce8ef6.png",
+      "local_path": "images/mr-robot/dd7dbdda-3ceb-40d8-95da-e39428ce8ef6.png",
+      "size_bytes": 165056,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "mr-robot",
+      "filename": "f5d5362f-195a-4ce5-8afe-1a4a7c620216.png",
+      "local_path": "images/mr-robot/f5d5362f-195a-4ce5-8afe-1a4a7c620216.png",
+      "size_bytes": 436846,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "ohsint",
+      "filename": "18b3a8f7-b1d1-4063-b8a0-acd7e579f7fa.png",
+      "local_path": "images/ohsint/18b3a8f7-b1d1-4063-b8a0-acd7e579f7fa.png",
+      "size_bytes": 184198,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "ohsint",
+      "filename": "23cad4f2-3428-4525-8bf0-a343f7a6202f.png",
+      "local_path": "images/ohsint/23cad4f2-3428-4525-8bf0-a343f7a6202f.png",
+      "size_bytes": 98586,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "ohsint",
+      "filename": "91afd2dc-a3be-417c-ab74-959a298d8023.jpg",
+      "local_path": "images/ohsint/91afd2dc-a3be-417c-ab74-959a298d8023.jpg",
+      "size_bytes": 230970,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "ohsint",
+      "filename": "9a970693-c937-4c7e-a321-4602a3841b66.png",
+      "local_path": "images/ohsint/9a970693-c937-4c7e-a321-4602a3841b66.png",
+      "size_bytes": 91340,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "ohsint",
+      "filename": "c032ccde-f3c7-4ca5-b0c7-c34616e67f34.png",
+      "local_path": "images/ohsint/c032ccde-f3c7-4ca5-b0c7-c34616e67f34.png",
+      "size_bytes": 89658,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "ohsint",
+      "filename": "c35bdeab-63fe-4ba7-98c9-d9362bd7453b.png",
+      "local_path": "images/ohsint/c35bdeab-63fe-4ba7-98c9-d9362bd7453b.png",
+      "size_bytes": 75363,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "ohsint",
+      "filename": "d653aca5-1bbe-4beb-8d94-0b5b65f7d23c.png",
+      "local_path": "images/ohsint/d653aca5-1bbe-4beb-8d94-0b5b65f7d23c.png",
+      "size_bytes": 463778,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "ohsint",
+      "filename": "e54e24a4-3441-43e6-bfff-306555d81277.png",
+      "local_path": "images/ohsint/e54e24a4-3441-43e6-bfff-306555d81277.png",
+      "size_bytes": 359408,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "ohsint",
+      "filename": "f716fc14-a9dd-4150-bf20-40922c0e470e.png",
+      "local_path": "images/ohsint/f716fc14-a9dd-4150-bf20-40922c0e470e.png",
+      "size_bytes": 177475,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "python-playground",
+      "filename": "6068a8e7-4721-4eb5-a596-6cd57137a42d.png",
+      "local_path": "images/python-playground/6068a8e7-4721-4eb5-a596-6cd57137a42d.png",
+      "size_bytes": 231825,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "python-playground",
+      "filename": "9305dfc4-55e7-4e3c-bdd9-f175bd90feb9.png",
+      "local_path": "images/python-playground/9305dfc4-55e7-4e3c-bdd9-f175bd90feb9.png",
+      "size_bytes": 385200,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "python-playground",
+      "filename": "cefc727c-ce0e-4a37-baa3-a8175ddd35d8.png",
+      "local_path": "images/python-playground/cefc727c-ce0e-4a37-baa3-a8175ddd35d8.png",
+      "size_bytes": 123536,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "064a6319-1a13-4070-aeb9-3dba634815bd.webp",
+      "local_path": "images/vulnversity/064a6319-1a13-4070-aeb9-3dba634815bd.webp",
+      "size_bytes": 24250,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "0cce82e7-424e-4037-90db-d55127e7a060.png",
+      "local_path": "images/vulnversity/0cce82e7-424e-4037-90db-d55127e7a060.png",
+      "size_bytes": 193255,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "16eb7982-47a8-4b88-a7b3-0bb0eb2bf89b.png",
+      "local_path": "images/vulnversity/16eb7982-47a8-4b88-a7b3-0bb0eb2bf89b.png",
+      "size_bytes": 57739,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "213c9677-c0c9-4975-84f5-5eedf97a60cb.png",
+      "local_path": "images/vulnversity/213c9677-c0c9-4975-84f5-5eedf97a60cb.png",
+      "size_bytes": 21774,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "2fca4934-625e-4867-86d1-34742f54b5fe.png",
+      "local_path": "images/vulnversity/2fca4934-625e-4867-86d1-34742f54b5fe.png",
+      "size_bytes": 452552,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "3f499baf-2612-44a7-a7dc-66034a0fa7a1.png",
+      "local_path": "images/vulnversity/3f499baf-2612-44a7-a7dc-66034a0fa7a1.png",
+      "size_bytes": 8525,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "5b5f57de-2eeb-43c3-b2de-926e177b34bd.png",
+      "local_path": "images/vulnversity/5b5f57de-2eeb-43c3-b2de-926e177b34bd.png",
+      "size_bytes": 60990,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "5e458dc4-afe1-430c-9f48-c1ce8ee91391.png",
+      "local_path": "images/vulnversity/5e458dc4-afe1-430c-9f48-c1ce8ee91391.png",
+      "size_bytes": 141442,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "6270f3ed-f555-4665-acab-814b6cb069a3.png",
+      "local_path": "images/vulnversity/6270f3ed-f555-4665-acab-814b6cb069a3.png",
+      "size_bytes": 3647,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "7ca92e57-12c3-458b-a58a-45e2d2a9fab2.png",
+      "local_path": "images/vulnversity/7ca92e57-12c3-458b-a58a-45e2d2a9fab2.png",
+      "size_bytes": 136952,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "838b01bd-e9f0-48c1-9187-2aff3ce831a9.png",
+      "local_path": "images/vulnversity/838b01bd-e9f0-48c1-9187-2aff3ce831a9.png",
+      "size_bytes": 142288,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "97141d29-eadf-4607-ae4c-5f26103aa176.png",
+      "local_path": "images/vulnversity/97141d29-eadf-4607-ae4c-5f26103aa176.png",
+      "size_bytes": 287652,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "97ff040a-e97d-41c3-b075-bb4244c61489.png",
+      "local_path": "images/vulnversity/97ff040a-e97d-41c3-b075-bb4244c61489.png",
+      "size_bytes": 983763,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "9dc590d7-81e0-47f7-87b8-5275670cb30a.png",
+      "local_path": "images/vulnversity/9dc590d7-81e0-47f7-87b8-5275670cb30a.png",
+      "size_bytes": 187366,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "ab659a30-dbfc-4b52-b41d-91c7cb46667a.png",
+      "local_path": "images/vulnversity/ab659a30-dbfc-4b52-b41d-91c7cb46667a.png",
+      "size_bytes": 133912,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "b51d6629-3191-490e-91d3-eb52653b7a0e.png",
+      "local_path": "images/vulnversity/b51d6629-3191-490e-91d3-eb52653b7a0e.png",
+      "size_bytes": 161250,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "d03b365b-7907-4eb2-8a51-7a490f4ee71c.png",
+      "local_path": "images/vulnversity/d03b365b-7907-4eb2-8a51-7a490f4ee71c.png",
+      "size_bytes": 384463,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "f27fd687-16cf-4db9-a825-7af00ebbf5fb.png",
+      "local_path": "images/vulnversity/f27fd687-16cf-4db9-a825-7af00ebbf5fb.png",
+      "size_bytes": 286011,
+      "status": "recovered"
+    },
+    {
+      "room_folder": "vulnversity",
+      "filename": "f6dc7718-2531-4a1f-bb01-420888895af6.png",
+      "local_path": "images/vulnversity/f6dc7718-2531-4a1f-bb01-420888895af6.png",
+      "size_bytes": 29665,
+      "status": "recovered"
+    }
+  ],
+  "unrecovered": [
+    {
+      "file": "PortSwigger-Web-Security/API Test.md",
+      "line": 336,
+      "original_tag": "![]( align=\"center\")",
+      "reason": "Empty image target with no URL or path in original author's write-up; commented out gracefully with HTML comment"
+    }
+  ]
+}
